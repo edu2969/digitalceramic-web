@@ -10,9 +10,8 @@ export default function Services() {
 
       <div className="grid md:grid-cols-4 gap-8 mt-12">
 
-
         {/* Servicio 1: Box de arriendo */}
-        <div className="border rounded-xl hover:shadow-lg transition">
+        <div className="border rounded-xl hover:shadow-lg transition hover:scale-105">
           <div className="w-full aspect-4/3 relative">
             <Image src="/serv_box.png" alt="servicio" fill style={{ objectFit: 'cover' }} className="rounded-lg rounded-b-none" />
           </div>
@@ -25,7 +24,7 @@ export default function Services() {
         </div>
 
         {/* Servicio 2: Escáner dental */}
-        <div className="border rounded-xl hover:shadow-lg transition">
+        <div className="border rounded-xl hover:shadow-lg transition hover:scale-105">
           <div className="w-full aspect-4/3 relative">
             <Image src="/serv_escaner.png" alt="servicio" fill style={{ objectFit: 'cover' }} className="rounded-lg rounded-b-none" />
           </div>
@@ -38,7 +37,7 @@ export default function Services() {
         </div>
 
         {/* Servicio 3: Diseño de piezas dentales */}
-        <div className="border rounded-xl hover:shadow-lg transition">
+        <div className="border rounded-xl hover:shadow-lg transition hover:scale-105">
           <div className="w-full aspect-4/3 relative">
             <Image src="/serv_diseno.png" alt="servicio" fill style={{ objectFit: 'cover' }} className="rounded-lg rounded-b-none" />
           </div>
@@ -51,7 +50,7 @@ export default function Services() {
         </div>
 
         {/* Servicio 4: Coronas dentales */}
-        <div className="border rounded-xl hover:shadow-lg transition">
+        <div className="border rounded-xl hover:shadow-lg transition hover:scale-105">
           <div className="w-full aspect-4/3 relative">
             <Image src="/serv_corona.png" alt="servicio" fill style={{ objectFit: 'cover' }} className="rounded-lg rounded-b-none" />
           </div>

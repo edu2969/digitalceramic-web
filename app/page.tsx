@@ -1,4 +1,5 @@
 import Hero from "@/app/components/Hero"
+import Support from "@/app/components/Support"
 import Services from "@/app/components/Services"
 import HowWorks from "@/app/components/HowWorks"
 import Hightlights from "@/app/components/Hightlights"
@@ -10,6 +11,9 @@ export default function Home() {
 
       {/* HERO */}
       <Hero />
+
+      {/* APOYO */}
+      <Support />
 
       {/* SERVICIOS */}
       <Services />
