@@ -1,9 +1,12 @@
 "use client"
 
 import { useEffect, useState } from "react";
+import { useRouter } from "next/navigation";
+import Link from "next/link";
 
 export default function Nav() {
     const [scrolled, setScrolled] = useState(false);
+    const router = useRouter();
 
     useEffect(() => {
         const onScroll = () => {
@@ -24,9 +27,9 @@ export default function Nav() {
                 </div>
                 <nav>
                     <ul className="flex gap-8 font-semibold text-[#1C4880] text-lg">
-                        <li><a href="#" className="hover:text-[#269FD0] transition">Inicio</a></li>
+                        <li><Link href="/" className="hover:text-[#269FD0] transition">Inicio</Link></li>
                         <li><a href="#quienes-somos" className="hover:text-[#269FD0] transition">Quiénes somos</a></li>
-                        <li><a href="#contacto" className="hover:text-[#269FD0] transition">Contacto</a></li>
+                        <li><Link href="/contact" className="hover:text-[#269FD0] transition">Contacto</Link></li>
                     </ul>
                 </nav>
             </div>

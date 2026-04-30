@@ -1,11 +1,15 @@
+"use client"
+
 import Hero from "@/app/components/Hero"
 import Support from "@/app/components/Support"
 import Services from "@/app/components/Services"
 import HowWorks from "@/app/components/HowWorks"
 import Hightlights from "@/app/components/Hightlights"
-import Footer from "@/app/components/Footer"
+import { useRouter } from "next/navigation"
 
 export default function Home() {
+  const router = useRouter();
+
   return (
     <main className="bg-white text-[#1C4880]">
 
@@ -33,13 +37,11 @@ export default function Home() {
           Agenda una llamada o solicita tu primera cotización sin compromiso.
         </p>
 
-        <button className="mt-6 bg-[#1C4880] text-white px-8 py-4 rounded-lg text-lg font-semibold hover:opacity-90">
+        <button className="mt-6 bg-[#1C4880] text-white px-8 py-4 rounded-lg text-lg font-semibold hover:opacity-90"
+        onClick={() => router.push('/contact')}>
           Solicitar cotización
         </button>
       </section>
-
-      {/* FOOTER */}
-      <Footer />
 
     </main>
   );
