@@ -20,7 +20,7 @@ export default function Hero() {
           className="z-0"
           priority
         />
-        <div className="absolute inset-0 bg-white/60 z-10" />
+        <div className="absolute inset-0 bg-white/20 z-10" />
       </div>
       <div className="relative z-20 ml-12 mx-auto text-left max-w-1/2">
         <Image src="/titulo.png" alt="title" width={400} height={120} />

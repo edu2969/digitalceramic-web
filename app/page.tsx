@@ -5,6 +5,7 @@ import Support from "@/app/components/Support"
 import Services from "@/app/components/Services"
 import HowWorks from "@/app/components/HowWorks"
 import Hightlights from "@/app/components/Hightlights"
+import Whatssap from "@/app/components/Whatssap"
 import { useRouter } from "next/navigation"
 
 export default function Home() {
@@ -42,6 +43,8 @@ export default function Home() {
           Solicitar cotización
         </button>
       </section>
+
+      <Whatssap />
 
     </main>
   );

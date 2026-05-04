@@ -15,10 +15,22 @@ export default function Contact() {
     setForm({ ...form, [e.target.name]: e.target.value });
   }
 
-  function handleSubmit(e) {
+  async function handleSubmit(e) {
     e.preventDefault();
-    // Aquí iría la lógica de envío (API, email, etc.)
-    setEnviado(true);
+    try {
+      const res = await fetch("/api/contact", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ ...form, para: "contacto@yopmail.com" }),
+      });
+      if (res.ok) {
+        setEnviado(true);
+      } else {
+        alert("Error al enviar el mensaje. Intenta nuevamente.");
+      }
+    } catch (err) {
+      alert("Error de conexión. Intenta nuevamente.");
+    }
   }
 
   return (
