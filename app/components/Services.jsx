@@ -1,7 +1,7 @@
 import Image from "next/image";
 
 export default function Services() {
-  return (<section className="bg-[#F7FBFF] py-16 px-6">
+  return (<section className="bg-[#F7FBFF] py-16 px-6" id="servicios">
     <div className="max-w-7xl mx-auto text-center">
       <h2 className="text-3xl font-bold">Nuestros servicios</h2>
       <p className="mt-2 text-gray-600">

@@ -8,7 +8,7 @@ export default function Hero() {
   return (
     <section
       className="relative py-16 md:py-24 mx-auto flex flex-col items-center justify-center overflow-hidden"
-      style={{ maxHeight: 400 }}
+      style={{ maxHeight: 600 }}
     >
       {/* Fondo corona */}
       <div className="pointer-events-none absolute inset-0 w-full h-full">
@@ -34,7 +34,15 @@ export default function Hero() {
           >
             Cotizar ahora
           </button>
-          <button className="border border-[#1C4880] px-6 py-3 rounded-lg font-semibold text-[#1C4880]">
+          <button 
+            className="border border-[#1C4880] px-6 py-3 rounded-lg font-semibold text-[#1C4880] hover:opacity-90"
+            onClick={() => {
+              const element = document.getElementById('servicios');
+              if (element) {
+                element.scrollIntoView({ behavior: 'smooth' });
+              }
+            }}
+          >
             Ver servicios
           </button>
         </div>
