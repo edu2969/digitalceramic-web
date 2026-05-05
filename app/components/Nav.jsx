@@ -11,7 +11,7 @@ export default function Nav() {
 
     useEffect(() => {
         const onScroll = () => {
-            setScrolled(window.scrollY > 10);
+            setScrolled(window.scrollY > 9);
         };
         window.addEventListener("scroll", onScroll);
         return () => window.removeEventListener("scroll", onScroll);
@@ -22,7 +22,7 @@ export default function Nav() {
     };
 
     return (
-        <header className="sticky top-0 z-50 bg-white/90 backdrop-blur border-b border-gray-100 transition-all duration-300">
+        <header className="fixed w-full top-0 z-50 bg-white/90 backdrop-blur border-b border-gray-100 transition-all duration-300">
             <div className={`max-w-7xl mx-auto flex items-center justify-between px-4 transition-all duration-300 ${scrolled ? "py-2" : "py-6"}`}>
                 <div className="flex items-center gap-3 transition-all duration-300">
                     <img src="/logo.png" alt="Logo" className={scrolled ? "h-10 w-auto transition-all duration-300" : "h-16 w-auto transition-all duration-300"} />
@@ -35,7 +35,7 @@ export default function Nav() {
                 <nav className="hidden md:block">
                     <ul className="flex gap-8 font-semibold text-[#1C4880] text-lg">
                         <li><Link href="/" className="hover:text-[#269FD0] transition">Inicio</Link></li>
-                        <li><a href="#quienes-somos" className="hover:text-[#269FD0] transition">Quiénes somos</a></li>
+                        <li><Link href="/quienes-somos" className="hover:text-[#269FD0] transition">Quiénes somos</Link></li>
                         <li><Link href="/contact" className="hover:text-[#269FD0] transition">Contacto</Link></li>
                     </ul>
                 </nav>
@@ -58,7 +58,7 @@ export default function Nav() {
                     <nav className="max-w-7xl mx-auto px-4 py-4">
                         <ul className="flex flex-col gap-4 font-semibold text-[#1C4880] text-base">
                             <li><Link href="/" className="hover:text-[#269FD0] transition block py-2" onClick={handleNavClick}>Inicio</Link></li>
-                            <li><a href="#quienes-somos" className="hover:text-[#269FD0] transition block py-2" onClick={handleNavClick}>Quiénes somos</a></li>
+                            <li><Link href="/quienes-somos" className="hover:text-[#269FD0] transition block py-2" onClick={handleNavClick}>Quiénes somos</Link></li>
                             <li><Link href="/contact" className="hover:text-[#269FD0] transition block py-2" onClick={handleNavClick}>Contacto</Link></li>
                         </ul>
                     </nav>
