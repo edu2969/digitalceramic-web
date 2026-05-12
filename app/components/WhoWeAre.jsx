@@ -37,7 +37,7 @@ export default function WhoWeAre() {
         <div className="space-y-6">
           <div className="rounded-4xl overflow-hidden shadow-2xl border border-[#E5F0FB]">
             <Image
-              src="/todo_servicios.png"
+              src="/todo_4_servicios.png"
               alt="Servicios digitales para odontólogos"
               width={1000}
               height={700}

@@ -1,4 +1,4 @@
-const VALID_3D_EXTENSIONS = ["stl", "obj", "step", "stp"]
+const VALID_3D_EXTENSIONS = ["stl", "obj", "step", "stp", "ply"]
 
 export default function Step4File({ uploadedFile, onFileUpload, fileError }) {
   return (
@@ -20,7 +20,7 @@ export default function Step4File({ uploadedFile, onFileUpload, fileError }) {
           <input
             type="file"
             onChange={onFileUpload}
-            accept=".stl,.obj,.step,.stp"
+            accept=".stl,.obj,.step,.stp,.ply"
             className="hidden"
           />
         </label>
@@ -28,7 +28,7 @@ export default function Step4File({ uploadedFile, onFileUpload, fileError }) {
 
       {fileError && (
         <div className="mt-4 p-4 bg-red-50 border border-red-200 rounded-lg flex gap-3">
-          <span className="w-5 h-5 text-red-600 flex-shrink-0 mt-0.5">!</span>
+          <span className="w-5 h-5 text-red-600 shrink-0 mt-0.5">!</span>
           <p className="text-red-700">{fileError}</p>
         </div>
       )}

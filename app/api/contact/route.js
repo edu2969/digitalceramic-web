@@ -41,10 +41,3 @@ export async function POST(req) {
     return NextResponse.json({ ok: false, error: err.message }, { status: 500 });
   }
 }
-
-// Faltaría para producción:
-// - Definir las variables de entorno SMTP_USER y SMTP_PASS con credenciales válidas
-// - Usar un proveedor SMTP confiable (Gmail, SendGrid, etc.)
-// - Manejar límites de envío y errores de spam
-// - Validar y sanitizar los datos recibidos
-// - (Opcional) Usar un servicio de email transaction como Resend, Mailgun, etc.

@@ -1,12 +1,13 @@
 "use client"
 
-import React, { useState } from "react"
+import { useState } from "react"
 import { MdCheckCircle, MdKeyboardArrowDown, MdKeyboardArrowUp } from "react-icons/md"
 import Step1PieceSelection from "@/app/components/upload-steps/Step1PieceSelection"
 import Step2Material from "@/app/components/upload-steps/Step2Material"
 import Step3Notes from "@/app/components/upload-steps/Step3Notes"
 import Step4File from "@/app/components/upload-steps/Step4File"
 import Step5Payment from "@/app/components/upload-steps/Step5Payment"
+import { useMutation } from "@tanstack/react-query"
 
 export default function UploadWizard() {
   const [currentStep, setCurrentStep] = useState(0)
@@ -16,15 +17,59 @@ export default function UploadWizard() {
   const [vitaPalette, setVitaPalette] = useState("A")
   const [selectedColors, setSelectedColors] = useState({})
   const [notes, setNotes] = useState("")
+  const [photos, setPhotos] = useState([])
   const [uploadedFile, setUploadedFile] = useState(null)
-  const [fileError, setFileError] = useState("")
+  const [fileError, setFileError] = useState("");
+
+  const mutation = useMutation({
+    mutationFn: async () => {
+      const formData = new FormData();
+      formData.append("piece", String(selectedPiece));
+      formData.append("shades", String(shades));
+      formData.append("vitaPalette", vitaPalette);
+      formData.append("notes", notes);
+
+      formData.append(
+        "selectedColors",
+        JSON.stringify(selectedColors)
+      );
+
+      // múltiples fotos
+      photos.forEach((photo) => {
+        formData.append("photos", photo);
+      });
+
+      // archivo 3D
+      formData.append(
+        "uploadedFile",
+        uploadedFile
+      );
+
+      const res = await fetch("/api/upload-case", {
+        method: "POST",
+        body: formData
+      });
+      if (!res.ok) {
+        throw new Error("Error fetching upload data");
+      }
+      return res.json();
+    },
+    onSuccess: (data) => {
+      console.log("Upload successful:", data);
+      onSuccess();
+    },
+    onError: (error) => {
+      console.error("Upload failed:", error);
+      alert("Error al enviar el caso. Intenta nuevamente.");
+    },
+  });
 
   const totalAmount = 79990
 
   const steps = [
     { id: 0, title: "Selección de pieza", completed: selectedPiece !== null },
     { id: 1, title: "Material", completed: Object.keys(selectedColors).length === shades },
-    { id: 2, title: "Notas", completed: true },
+    { id: 2, title: "Fotos y Notas", completed: photos.length > 0 },
     { id: 3, title: "Archivo", completed: uploadedFile !== null && !fileError },
     { id: 4, title: "Pago", completed: uploadedFile !== null && !fileError },
   ]
@@ -63,7 +108,7 @@ export default function UploadWizard() {
     setUploadedFile(file)
   }
 
-  const handleSubmit = () => {
+  const onSuccess = () => {
     setSuccessMessage(true)
     setTimeout(() => {
       setSuccessMessage(false)
@@ -73,9 +118,14 @@ export default function UploadWizard() {
       setVitaPalette("A")
       setSelectedColors({})
       setNotes("")
+      setPhotos([])
       setUploadedFile(null)
       setFileError("")
     }, 3000)
+  }
+
+  const handleSubmit = () => {
+    mutation.mutate();
   }
 
   return (
@@ -98,13 +148,12 @@ export default function UploadWizard() {
             <div key={step.id} className="border rounded-lg overflow-hidden">
               <button
                 onClick={() => setCurrentStep(step.id)}
-                className={`w-full px-6 py-4 flex items-center justify-between font-semibold text-lg transition-colors ${
-                  step.completed
-                    ? "bg-green-50 text-green-700"
-                    : currentStep === step.id
+                className={`w-full px-6 py-4 flex items-center justify-between font-semibold text-lg transition-colors ${step.completed
+                  ? "bg-green-50 text-green-700"
+                  : currentStep === step.id
                     ? "bg-[#1C4880] text-white"
                     : "bg-gray-100 text-gray-700 hover:bg-gray-200"
-                }`}
+                  }`}
               >
                 <div className="flex items-center gap-3">
                   {step.completed ? (
@@ -136,7 +185,14 @@ export default function UploadWizard() {
                       onColorChange={handleColorChange}
                     />
                   )}
-                  {step.id === 2 && <Step3Notes notes={notes} onNotesChange={setNotes} />}
+                  {step.id === 2 && (
+                    <Step3Notes
+                      notes={notes}
+                      onNotesChange={setNotes}
+                      photos={photos}
+                      onPhotosChange={setPhotos}
+                    />
+                  )}
                   {step.id === 3 && <Step4File uploadedFile={uploadedFile} onFileUpload={handleFileUpload} fileError={fileError} />}
                   {step.id === 4 && <Step5Payment total={totalAmount} onPay={handleSubmit} />}
 
@@ -153,11 +209,10 @@ export default function UploadWizard() {
                       <button
                         onClick={handleNextStep}
                         disabled={!step.completed}
-                        className={`flex-1 px-6 py-3 font-semibold rounded-lg transition ${
-                          step.completed
-                            ? "bg-[#1C4880] text-white hover:opacity-90"
-                            : "bg-gray-300 text-gray-500 cursor-not-allowed"
-                        }`}
+                        className={`flex-1 px-6 py-3 font-semibold rounded-lg transition ${step.completed
+                          ? "bg-[#1C4880] text-white hover:opacity-90"
+                          : "bg-gray-300 text-gray-500 cursor-not-allowed"
+                          }`}
                       >
                         Siguiente
                       </button>
@@ -169,6 +224,5 @@ export default function UploadWizard() {
           ))}
         </div>
       </div>
-    </div>
-  )
+    </div>)
 }

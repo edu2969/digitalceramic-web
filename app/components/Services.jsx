@@ -26,7 +26,7 @@ export default function Services() {
         {/* Servicio 2: Escáner dental */}
         <div className="border rounded-xl hover:shadow-lg transition hover:scale-105">
           <div className="w-full aspect-4/3 relative">
-            <Image src="/serv_escaner_dental.png" alt="servicio" fill style={{ objectFit: 'cover' }} className="rounded-lg rounded-b-none" />
+            <Image src="/serv_escaner_inal.png" alt="servicio" fill style={{ objectFit: 'cover' }} className="rounded-lg rounded-b-none" />
           </div>
           <div className="p-4">
             <h3 className="font-semibold text-xl">Escáner dental</h3>
