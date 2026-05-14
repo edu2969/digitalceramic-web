@@ -1,13 +1,20 @@
-import React, { useEffect, useMemo } from "react"
+"use client"
 
-export default function Step3Notes({ notes, onNotesChange, photos = [], onPhotosChange }) {
+import React, { useEffect, useMemo } from "react"
+import { useFormContext, useWatch } from "react-hook-form"
+import { UploadFormValues } from "@/app/components/upload-steps/types"
+
+export default function StepAditionalInformation() {
+  const { register, setValue, control } = useFormContext<UploadFormValues>()
+  const photos = useWatch({ control, name: "photos" }) ?? []
+
   const previews = useMemo(
     () =>
       photos.map((photo) => ({
         file: photo,
         url: URL.createObjectURL(photo),
       })),
-    [photos]
+    [photos],
   )
 
   useEffect(() => {
@@ -16,16 +23,23 @@ export default function Step3Notes({ notes, onNotesChange, photos = [], onPhotos
     }
   }, [previews])
 
-  const handlePhotoUpload = (event) => {
+  const handlePhotoUpload = (event: React.ChangeEvent<HTMLInputElement>) => {
     const files = Array.from(event.target.files || [])
     const imageFiles = files.filter((file) => file.type.startsWith("image/"))
     if (imageFiles.length) {
-      onPhotosChange((prev = []) => [...prev, ...imageFiles])
+      setValue("photos", [...photos, ...imageFiles], {
+        shouldDirty: true,
+        shouldValidate: true,
+      })
     }
   }
 
-  const handleRemovePhoto = (index) => {
-    onPhotosChange(photos.filter((_, i) => i !== index))
+  const handleRemovePhoto = (index: number) => {
+    setValue(
+      "photos",
+      photos.filter((_, i) => i !== index),
+      { shouldDirty: true, shouldValidate: true },
+    )
   }
 
   return (
@@ -37,7 +51,10 @@ export default function Step3Notes({ notes, onNotesChange, photos = [], onPhotos
       {photos.length > 0 && (
         <div className="grid grid-cols-2 sm:grid-cols-3 gap-3 mb-6">
           {previews.map((preview, index) => (
-            <div key={index} className="relative rounded-xl overflow-hidden border border-gray-200 bg-gray-50">
+            <div
+              key={index}
+              className="relative rounded-xl overflow-hidden border border-gray-200 bg-gray-50"
+            >
               <img
                 src={preview.url}
                 alt={`Foto ${index + 1}`}
@@ -75,11 +92,10 @@ export default function Step3Notes({ notes, onNotesChange, photos = [], onPhotos
       </div>
 
       <textarea
-        value={notes}
-        onChange={(e) => onNotesChange(e.target.value)}
         placeholder="Ingresa cualquier observación o nota importante sobre tu caso..."
         className="w-full px-4 py-3 border-2 border-gray-300 rounded-lg focus:border-[#1C4880] focus:outline-none resize-none"
         rows={6}
+        {...register("notes")}
       />
     </div>
   )

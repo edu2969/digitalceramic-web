@@ -1,0 +1,8 @@
+{
+  "permissions": {
+    "allow": [
+      "PowerShell(npx next lint --max-warnings=999 2>&1 | Select-Object -Last 60; Write-Host \"EXITCODE=$LASTEXITCODE\")",
+      "PowerShell(npx tsc --noEmit; Write-Host \"EXITCODE=$LASTEXITCODE\")"
+    ]
+  }
+}
