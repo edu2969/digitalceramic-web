@@ -2,18 +2,18 @@
 
 import { useState } from "react"
 import { MdCheckCircle, MdKeyboardArrowDown, MdKeyboardArrowUp } from "react-icons/md"
-import StepBasicInformation from "@/app/components/upload-steps/StepBasicInformation"
-import StepPieceSelection from "@/app/components/upload-steps/StepPieceSelection"
-import StepAditionalInformation from "@/app/components/upload-steps/StepAditionalInformation"
-import StepFiles from "@/app/components/upload-steps/StepFiles"
-import StepSend from "@/app/components/upload-steps/StepSend"
+import StepBasicInformation from "@/components/upload-steps/StepBasicInformation"
+import StepPieceSelection from "@/components/upload-steps/StepPieceSelection"
+import StepAditionalInformation from "@/components/upload-steps/StepAditionalInformation"
+import StepFiles from "@/components/upload-steps/StepFiles"
+import StepSend from "@/components/upload-steps/StepSend"
 import { useMutation } from "@tanstack/react-query"
 import { FormProvider, useForm, useWatch } from "react-hook-form"
 import {
   UploadFormValues,
   todayISO,
   minDeliveryDate,
-} from "@/app/components/upload-steps/types"
+} from "@/components/upload-steps/types"
 
 function defaultValues(): UploadFormValues {
   const reception = todayISO()

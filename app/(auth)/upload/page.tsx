@@ -1,5 +1,5 @@
-import UploadWizard from "@/app/components/Upload"
-import QueryProvider from "../providers/QueryProvider"
+import UploadWizard from "@/components/Upload"
+import QueryProvider from "../../(public)/providers/QueryProvider"
 
 export default function UploadPage() {
   return (

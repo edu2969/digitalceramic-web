@@ -1,11 +1,11 @@
 "use client"
 
-import Hero from "@/app/components/Hero"
-import Support from "@/app/components/Support"
-import Services from "@/app/components/Services"
-import HowWorks from "@/app/components/HowWorks"
-import Hightlights from "@/app/components/Hightlights"
-import Whatssap from "@/app/components/Whatssap"
+import Hero from "@/components/Hero"
+import Support from "@/components/Support"
+import Services from "@/components/Services"
+import HowWorks from "@/components/HowWorks"
+import Hightlights from "@/components/Hightlights"
+import Whatssap from "@/components/Whatssap"
 import { useRouter } from "next/navigation"
 
 export default function Home() {

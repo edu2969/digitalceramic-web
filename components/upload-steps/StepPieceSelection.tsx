@@ -17,7 +17,7 @@ import {
   getFdiForGridIndex,
   emptyPieceConfig,
   emptyColorSection,
-} from "@/app/components/upload-steps/types"
+} from "@/components/upload-steps/types"
 
 const SECTION_LABELS: Record<number, string[]> = {
   1: ["Color"],
@@ -292,14 +292,19 @@ function TiBaseTable({
   return (
     <div className="bg-gray-50 border border-gray-200 rounded-lg p-4">
       <p className="text-sm font-semibold text-gray-700 mb-3">
-        TiBase — selecciona altura gingival (columna), cementado (fila) y
-        plataforma (grupo)
+        TiBase — selecciona plataforma (fila), cementado (grupo) y altura gingival (columna)
+         
       </p>
       <div className="overflow-x-auto">
         <table className="border-collapse text-sm">
           <thead>
             <tr>
-              <th className="px-3 py-0 text-gray-500 text-lg leading-none">∅</th>
+              <th className="w-10" />
+
+              <th className="px-3 py-0 text-gray-500 text-lg leading-none">
+                ∅
+              </th>
+
               {TIBASE_GINGIVAL_HEIGHTS.map((gh) => (
                 <th
                   key={gh}
@@ -313,23 +318,39 @@ function TiBaseTable({
           <tbody>
             {TIBASE_PLATFORM_HEIGHTS.map((plat, gIdx) => (
               <Fragment key={`group-${plat}`}>
-                <tr>
-                  <td
-                    colSpan={TIBASE_GINGIVAL_HEIGHTS.length + 1}
-                    className={`px-3 py-0.5 text-xs font-bold uppercase tracking-wide leading-tight ${
-                      gIdx === 0 ? "bg-blue-50 text-[#1C4880]" : "bg-amber-50 text-amber-800"
-                    }`}
-                  >
-                    Plataforma {plat} mm
-                  </td>
-                </tr>
-                {TIBASE_DIAMETERS.map((dia) => (
+                {TIBASE_DIAMETERS.map((dia, diaIdx) => (
                   <tr key={`${plat}-${dia}`}>
-                    <th className="px-3 py-0 border border-gray-300 bg-gray-100 font-semibold text-gray-700 leading-none">
-                      {dia} mm
+                    {/* Plataforma vertical SOLO una vez cada 2 filas */}
+                    {diaIdx === 0 && (
+                      <td
+                        rowSpan={TIBASE_DIAMETERS.length}
+                        className={`
+                border border-gray-300
+                relative
+                min-w-10.5
+                ${gIdx === 0
+                            ? "bg-blue-50 text-[#1C4880]"
+                            : "bg-amber-50 text-amber-800"
+                          }
+              `}
+                      >
+                        <div className="absolute inset-0 flex items-center justify-center">
+                          <span className="-rotate-90 whitespace-nowrap text-xs font-bold tracking-wide">
+                            {plat} mm
+                          </span>
+                        </div>
+                      </td>
+                    )}
+
+                    {/* Cementado */}
+                    <th className="px-3 py-0 border border-gray-300 bg-gray-100 font-semibold text-gray-700 leading-none whitespace-nowrap">
+                      {dia}
                     </th>
+
+                    {/* Gingival */}
                     {TIBASE_GINGIVAL_HEIGHTS.map((gh) => {
                       const active = isActive(gh, dia, plat)
+
                       return (
                         <td
                           key={`${plat}-${dia}-${gh}`}
@@ -338,11 +359,10 @@ function TiBaseTable({
                           <button
                             type="button"
                             onClick={() => select(gh, dia, plat)}
-                            className={`w-full h-7 leading-none transition ${
-                              active
+                            className={`w-full h-7 leading-none transition ${active
                                 ? "bg-[#1C4880] text-white"
                                 : "hover:bg-blue-50"
-                            }`}
+                              }`}
                           >
                             {active ? "✓" : ""}
                           </button>
@@ -364,14 +384,14 @@ function TiBaseTable({
           <p className="text-base font-semibold flex flex-wrap gap-x-4 gap-y-1 mt-1">
             <span>
               Plataforma{" "}
-              <span className="font-bold">{current.platformHeight} mm</span>
+              <span className="font-bold">∅ {current.diameter}</span>
             </span>
             <span aria-hidden="true" className="opacity-60">
               ·
             </span>
             <span>
               Cementado{" "}
-              <span className="font-bold">{current.diameter} mm</span>
+              <span className="font-bold">{current.platformHeight} mm</span>
             </span>
             <span aria-hidden="true" className="opacity-60">
               ·

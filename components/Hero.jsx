@@ -23,7 +23,7 @@ export default function Hero() {
         <div className="absolute inset-0 bg-white/20 z-10" />
       </div>
       <div className="relative z-20 ml-12 mx-auto text-left max-w-1/2">
-        <Image src="/titulo.png" alt="title" width={400} height={120} />
+        <Image src="/titulo_full.png" alt="title" width={400} height={120} />
         <p className="mt-4 text-lg text-gray-600">
           Reduce costos, aumenta tu capacidad y recibe coronas listas para instalar con estándares internacionales.
         </p>

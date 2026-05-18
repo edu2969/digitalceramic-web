@@ -2,7 +2,7 @@
 
 import React, { useState } from "react"
 import { useFormContext, useWatch } from "react-hook-form"
-import { UploadFormValues } from "@/app/components/upload-steps/types"
+import { UploadFormValues } from "@/components/upload-steps/types"
 
 const VALID_3D_EXTENSIONS = ["stl", "obj", "step", "stp", "ply"]
 

@@ -1,5 +1,5 @@
-﻿import WhoWeAre from "@/app/components/WhoWeAre";
-import Whatssap from "@/app/components/Whatssap";
+﻿import WhoWeAre from "@/components/WhoWeAre";
+import Whatssap from "@/components/Whatssap";
 
 export default function QuienesSomosPage() {
   return (

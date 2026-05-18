@@ -4,7 +4,7 @@ import { useFormContext, useWatch } from "react-hook-form"
 import {
   UploadFormValues,
   minDeliveryDate,
-} from "@/app/components/upload-steps/types"
+} from "@/components/upload-steps/types"
 
 const inputClass =
   "w-full px-4 py-3 border-2 border-gray-300 rounded-lg focus:border-[#1C4880] focus:outline-none transition"

@@ -2,7 +2,7 @@
 
 import React, { useEffect, useMemo } from "react"
 import { useFormContext, useWatch } from "react-hook-form"
-import { UploadFormValues } from "@/app/components/upload-steps/types"
+import { UploadFormValues } from "@/components/upload-steps/types"
 
 export default function StepAditionalInformation() {
   const { register, setValue, control } = useFormContext<UploadFormValues>()
