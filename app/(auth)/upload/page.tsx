@@ -4,7 +4,7 @@ import QueryProvider from "../../(public)/providers/QueryProvider"
 export default function UploadPage() {
   return (
     <main className="bg-white text-[#1C4880]">
-      <QueryProvider>
+      <QueryProvider>        
         <UploadWizard />
       </QueryProvider>
     </main>

@@ -1,3 +1,5 @@
+import MenuBar from "@/components/MenuBar"
+
 export default function AuthLayout({
   children,
 }: {
@@ -5,7 +7,7 @@ export default function AuthLayout({
 }) {
   return (
     <main className="min-h-screen">
-      {children}
+      <MenuBar>{children}</MenuBar>
     </main>
   )
 }
