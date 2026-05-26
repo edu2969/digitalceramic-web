@@ -58,6 +58,7 @@ export type UploadFormValues = {
   fileSuperior: File | null
   fileInferior: File | null
   fileMordida: File | null
+  fileGingival: File | null
 }
 
 export const VITA_CLASSIC_CODES = [

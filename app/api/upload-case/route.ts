@@ -3,8 +3,11 @@ import { randomUUID } from "crypto";
 import nodemailer from "nodemailer";
 
 import { createClient } from "@supabase/supabase-js";
+import { createClient as createSessionClient } from "@/lib/supabase/server";
 
 export const runtime = "nodejs";
+
+const TRABAJO_MONTO_DEFAULT = 79990;
 
 const supabase = createClient(
   process.env.NEXT_PUBLIC_SUPABASE_URL!,
@@ -85,6 +88,18 @@ const PALETTE_LABELS: Record<string, string> = {
 
 export async function POST(req: Request) {
   try {
+    const sessionClient = await createSessionClient();
+    const {
+      data: { user },
+    } = await sessionClient.auth.getUser();
+
+    if (!user) {
+      return NextResponse.json(
+        { success: false, error: "No hay sesión activa" },
+        { status: 401 }
+      );
+    }
+
     const formData = await req.formData();
 
     const patientInfo: PatientInfo = JSON.parse(
@@ -99,6 +114,7 @@ export async function POST(req: Request) {
     const fileSuperior = formData.get("fileSuperior") as File | null;
     const fileInferior = formData.get("fileInferior") as File | null;
     const fileMordida = formData.get("fileMordida") as File | null;
+    const fileGingival = formData.get("fileGingival") as File | null;
 
     const orderId = randomUUID();
 
@@ -119,11 +135,68 @@ export async function POST(req: Request) {
       });
     };
 
-    const [upSuperior, upInferior, upMordida] = await Promise.all([
+    const [upSuperior, upInferior, upMordida, upGingival] = await Promise.all([
       upload3D(fileSuperior, "superior"),
       upload3D(fileInferior, "inferior"),
       upload3D(fileMordida, "mordida"),
+      upload3D(fileGingival, "gingival"),
     ]);
+
+    const edadParsed = Number(patientInfo.patientAge);
+
+    const { data: trabajo, error: trabajoError } = await supabase
+      .from("mood_trabajos")
+      .insert({
+        usuario_id: user.id,
+        paciente: patientInfo.patientName,
+        edad: Number.isFinite(edadParsed) ? edadParsed : null,
+        clinica: patientInfo.medicalCenter,
+        nombre_odontologo: patientInfo.dentistName,
+        fecha_envio: patientInfo.receptionDate,
+        fecha_entrega: patientInfo.deliveryDate,
+        monto: TRABAJO_MONTO_DEFAULT,
+        notas: notes,
+        url_superior: upSuperior?.url ?? null,
+        url_inferior: upInferior?.url ?? null,
+        url_mordida: upMordida?.url ?? null,
+        url_gingival: upGingival?.url ?? null,
+      })
+      .select("id")
+      .single();
+
+    if (trabajoError || !trabajo) throw trabajoError;
+
+    if (pieces.length > 0) {
+      const piezasRows = pieces.map((piece) => {
+        const visibleColors = piece.colors.slice(0, piece.colorSectionCount);
+        const firstColor = visibleColors[0];
+        const paleta = firstColor
+          ? firstColor.paletteType === "OTRO"
+            ? firstColor.customPalette
+            : firstColor.paletteType
+          : null;
+        const colores = visibleColors.map((c) => c.code).join(",");
+        const numeroParsed = Number(piece.pieceId);
+
+        return {
+          mood_trabajo_id: trabajo.id,
+          numero: Number.isFinite(numeroParsed) ? numeroParsed : null,
+          paleta,
+          colores,
+          tipo: piece.type,
+          tibase_cementado: piece.tiBase?.diameter ?? null,
+          tibase_plataforma: piece.tiBase?.platformHeight ?? null,
+          tibase_gingival: piece.tiBase?.gingivalHeight ?? null,
+          conexion: "NONE",
+        };
+      });
+
+      const { error: piezasError } = await supabase
+        .from("mood_piezas")
+        .insert(piezasRows);
+
+      if (piezasError) throw piezasError;
+    }
 
     const piecesHtml = pieces
       .map((piece) => {
@@ -198,6 +271,7 @@ export async function POST(req: Request) {
           ${fileHtml("Superior", upSuperior)}
           ${fileHtml("Inferior", upInferior)}
           ${fileHtml("Mordida", upMordida)}
+          ${fileHtml("Gingival", upGingival)}
         </ul>
       </div>
     `;

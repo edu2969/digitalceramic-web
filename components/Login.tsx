@@ -11,6 +11,7 @@ export default function Login() {
   const [email, setEmail] = useState("")
   const [password, setPassword] = useState("")
   const [loading, setLoading] = useState(false)
+  const [loginError, setLoginError] = useState<string | null>(null);
 
   const supabase = createClient()
 
@@ -27,7 +28,7 @@ export default function Login() {
     setLoading(false)
 
     if (error) {
-      alert(error.message)
+      setLoginError("Credenciales inválidas")
       return
     }
 
@@ -170,8 +171,8 @@ export default function Login() {
           </form>
 
           {/* Footer */}
-          <div className="mt-8 text-center text-sm text-gray-500">
-            Plataforma DigitalCeramic
+          <div className={`mt-8 text-center text-sm ${loginError ? 'text-red-400' : 'text-gray-500'}`}>
+            {loginError || "Plataforma DigitalCeramic"}
           </div>
         </div>
       </div>

@@ -1,5 +1,7 @@
 "use client"
 
+import { useRouter } from "next/navigation"
+import { useQuery } from "@tanstack/react-query"
 import {
   FiAlertTriangle,
   FiClock,
@@ -15,7 +17,6 @@ import {
 
 import {
   PiShieldWarning,
-  PiCrownSimple,
 } from "react-icons/pi"
 
 type PieceType =
@@ -38,236 +39,248 @@ interface WorkItem {
   types: PieceType[]
 }
 
-const works: WorkItem[] = [
-  {
-    id: 1,
-    patient: "María González",
-    clinic: "Clínica Las Condes",
-    createdAt: "12 May 2026",
-    dueDate: "18 May 2026",
-    pieces: 2,
-    urgent: true,
-    overdue: true,
-    overdueDays: 2,
-    types: ["Implante", "Corona"],
-  },
-  {
-    id: 2,
-    patient: "Carlos Rojas",
-    clinic: "Integra Dental",
-    createdAt: "10 May 2026",
-    dueDate: "20 May 2026",
-    pieces: 1,
-    urgent: false,
-    overdue: false,
-    types: ["Carilla"],
-  },
-  {
-    id: 3,
-    patient: "Fernanda Silva",
-    clinic: "Oral Studio",
-    createdAt: "11 May 2026",
-    dueDate: "17 May 2026",
-    pieces: 3,
-    urgent: true,
-    overdue: true,
-    overdueDays: 1,
-    types: ["Implante", "Onlay"],
-  },
-  {
-    id: 4,
-    patient: "José Martínez",
-    clinic: "Dental Prime",
-    createdAt: "09 May 2026",
-    dueDate: "22 May 2026",
-    pieces: 4,
-    urgent: false,
-    overdue: false,
-    types: ["Corona"],
-  },
-  {
-    id: 5,
-    patient: "Ana Torres",
-    clinic: "Vital Dent",
-    createdAt: "13 May 2026",
-    dueDate: "19 May 2026",
-    pieces: 2,
-    urgent: false,
-    overdue: false,
-    types: ["Inlay"],
-  },
-  {
-    id: 6,
-    patient: "Ricardo Díaz",
-    clinic: "OdontoLab",
-    createdAt: "08 May 2026",
-    dueDate: "15 May 2026",
-    pieces: 6,
-    urgent: true,
-    overdue: true,
-    overdueDays: 4,
-    types: ["Implante"],
-  },
-  {
-    id: 7,
-    patient: "Paula Herrera",
-    clinic: "Nova Dental",
-    createdAt: "14 May 2026",
-    dueDate: "24 May 2026",
-    pieces: 2,
-    urgent: false,
-    overdue: false,
-    types: ["Corona", "Carilla"],
-  },
-  {
-    id: 8,
-    patient: "Luis Soto",
-    clinic: "Dental Concept",
-    createdAt: "15 May 2026",
-    dueDate: "21 May 2026",
-    pieces: 1,
-    urgent: true,
-    overdue: false,
-    types: ["Onlay"],
-  },
-  {
-    id: 9,
-    patient: "Camila Fuentes",
-    clinic: "Oral Health",
-    createdAt: "12 May 2026",
-    dueDate: "18 May 2026",
-    pieces: 5,
-    urgent: false,
-    overdue: true,
-    overdueDays: 2,
-    types: ["Implante", "Corona"],
-  },
-  {
-    id: 10,
-    patient: "Diego Araya",
-    clinic: "Smile Clinic",
-    createdAt: "16 May 2026",
-    dueDate: "27 May 2026",
-    pieces: 2,
-    urgent: false,
-    overdue: false,
-    types: ["Carilla"],
-  },
-  {
-    id: 11,
-    patient: "Valentina Cruz",
-    clinic: "Integra Dental",
-    createdAt: "10 May 2026",
-    dueDate: "17 May 2026",
-    pieces: 3,
-    urgent: true,
-    overdue: true,
-    overdueDays: 1,
-    types: ["Inlay"],
-  },
-  {
-    id: 12,
-    patient: "Cristóbal Vega",
-    clinic: "Oral Studio",
-    createdAt: "11 May 2026",
-    dueDate: "25 May 2026",
-    pieces: 1,
-    urgent: false,
-    overdue: false,
-    types: ["Corona"],
-  },
-  {
-    id: 13,
-    patient: "Daniela Reyes",
-    clinic: "Dental Prime",
-    createdAt: "07 May 2026",
-    dueDate: "16 May 2026",
-    pieces: 4,
-    urgent: true,
-    overdue: true,
-    overdueDays: 3,
-    types: ["Implante", "Carilla"],
-  },
-  {
-    id: 14,
-    patient: "Felipe Navarro",
-    clinic: "Vital Dent",
-    createdAt: "14 May 2026",
-    dueDate: "28 May 2026",
-    pieces: 2,
-    urgent: false,
-    overdue: false,
-    types: ["Onlay"],
-  },
-  {
-    id: 15,
-    patient: "Javiera Mella",
-    clinic: "Nova Dental",
-    createdAt: "13 May 2026",
-    dueDate: "22 May 2026",
-    pieces: 1,
-    urgent: false,
-    overdue: false,
-    types: ["Corona"],
-  },
-  {
-    id: 16,
-    patient: "Tomás Paredes",
-    clinic: "Dental Concept",
-    createdAt: "09 May 2026",
-    dueDate: "18 May 2026",
-    pieces: 7,
-    urgent: true,
-    overdue: true,
-    overdueDays: 2,
-    types: ["Implante"],
-  },
-  {
-    id: 17,
-    patient: "Sofía Morales",
-    clinic: "Smile Clinic",
-    createdAt: "16 May 2026",
-    dueDate: "26 May 2026",
-    pieces: 2,
-    urgent: false,
-    overdue: false,
-    types: ["Carilla", "Inlay"],
-  },
-  {
-    id: 18,
-    patient: "Matías Campos",
-    clinic: "Oral Health",
-    createdAt: "15 May 2026",
-    dueDate: "20 May 2026",
-    pieces: 3,
-    urgent: true,
-    overdue: false,
-    types: ["Corona"],
-  },
-  {
-    id: 19,
-    patient: "Francisca León",
-    clinic: "OdontoLab",
-    createdAt: "08 May 2026",
-    dueDate: "14 May 2026",
-    pieces: 5,
-    urgent: true,
-    overdue: true,
-    overdueDays: 5,
-    types: ["Implante", "Onlay"],
-  },
-  {
-    id: 20,
-    patient: "Benjamín Salas",
-    clinic: "Clínica Las Condes",
-    createdAt: "17 May 2026",
-    dueDate: "30 May 2026",
-    pieces: 1,
-    urgent: false,
-    overdue: false,
-    types: ["Corona"],
-  },
-]
+interface DashboardStats {
+  enCola: number
+  vencidos: number
+  ultimoRetraso: number
+  delMes: number
+}
+
+interface DashboardResponse {
+  stats: DashboardStats
+  works: WorkItem[]
+}
+
+// const DUMMY_WORKS: WorkItem[] = [
+//   {
+//     id: 1,
+//     patient: "María González",
+//     clinic: "Clínica Las Condes",
+//     createdAt: "12 May 2026",
+//     dueDate: "18 May 2026",
+//     pieces: 2,
+//     urgent: true,
+//     overdue: true,
+//     overdueDays: 2,
+//     types: ["Implante", "Corona"],
+//   },
+//   {
+//     id: 2,
+//     patient: "Carlos Rojas",
+//     clinic: "Integra Dental",
+//     createdAt: "10 May 2026",
+//     dueDate: "20 May 2026",
+//     pieces: 1,
+//     urgent: false,
+//     overdue: false,
+//     types: ["Carilla"],
+//   },
+//   {
+//     id: 3,
+//     patient: "Fernanda Silva",
+//     clinic: "Oral Studio",
+//     createdAt: "11 May 2026",
+//     dueDate: "17 May 2026",
+//     pieces: 3,
+//     urgent: true,
+//     overdue: true,
+//     overdueDays: 1,
+//     types: ["Implante", "Onlay"],
+//   },
+//   {
+//     id: 4,
+//     patient: "José Martínez",
+//     clinic: "Dental Prime",
+//     createdAt: "09 May 2026",
+//     dueDate: "22 May 2026",
+//     pieces: 4,
+//     urgent: false,
+//     overdue: false,
+//     types: ["Corona"],
+//   },
+//   {
+//     id: 5,
+//     patient: "Ana Torres",
+//     clinic: "Vital Dent",
+//     createdAt: "13 May 2026",
+//     dueDate: "19 May 2026",
+//     pieces: 2,
+//     urgent: false,
+//     overdue: false,
+//     types: ["Inlay"],
+//   },
+//   {
+//     id: 6,
+//     patient: "Ricardo Díaz",
+//     clinic: "OdontoLab",
+//     createdAt: "08 May 2026",
+//     dueDate: "15 May 2026",
+//     pieces: 6,
+//     urgent: true,
+//     overdue: true,
+//     overdueDays: 4,
+//     types: ["Implante"],
+//   },
+//   {
+//     id: 7,
+//     patient: "Paula Herrera",
+//     clinic: "Nova Dental",
+//     createdAt: "14 May 2026",
+//     dueDate: "24 May 2026",
+//     pieces: 2,
+//     urgent: false,
+//     overdue: false,
+//     types: ["Corona", "Carilla"],
+//   },
+//   {
+//     id: 8,
+//     patient: "Luis Soto",
+//     clinic: "Dental Concept",
+//     createdAt: "15 May 2026",
+//     dueDate: "21 May 2026",
+//     pieces: 1,
+//     urgent: true,
+//     overdue: false,
+//     types: ["Onlay"],
+//   },
+//   {
+//     id: 9,
+//     patient: "Camila Fuentes",
+//     clinic: "Oral Health",
+//     createdAt: "12 May 2026",
+//     dueDate: "18 May 2026",
+//     pieces: 5,
+//     urgent: false,
+//     overdue: true,
+//     overdueDays: 2,
+//     types: ["Implante", "Corona"],
+//   },
+//   {
+//     id: 10,
+//     patient: "Diego Araya",
+//     clinic: "Smile Clinic",
+//     createdAt: "16 May 2026",
+//     dueDate: "27 May 2026",
+//     pieces: 2,
+//     urgent: false,
+//     overdue: false,
+//     types: ["Carilla"],
+//   },
+//   {
+//     id: 11,
+//     patient: "Valentina Cruz",
+//     clinic: "Integra Dental",
+//     createdAt: "10 May 2026",
+//     dueDate: "17 May 2026",
+//     pieces: 3,
+//     urgent: true,
+//     overdue: true,
+//     overdueDays: 1,
+//     types: ["Inlay"],
+//   },
+//   {
+//     id: 12,
+//     patient: "Cristóbal Vega",
+//     clinic: "Oral Studio",
+//     createdAt: "11 May 2026",
+//     dueDate: "25 May 2026",
+//     pieces: 1,
+//     urgent: false,
+//     overdue: false,
+//     types: ["Corona"],
+//   },
+//   {
+//     id: 13,
+//     patient: "Daniela Reyes",
+//     clinic: "Dental Prime",
+//     createdAt: "07 May 2026",
+//     dueDate: "16 May 2026",
+//     pieces: 4,
+//     urgent: true,
+//     overdue: true,
+//     overdueDays: 3,
+//     types: ["Implante", "Carilla"],
+//   },
+//   {
+//     id: 14,
+//     patient: "Felipe Navarro",
+//     clinic: "Vital Dent",
+//     createdAt: "14 May 2026",
+//     dueDate: "28 May 2026",
+//     pieces: 2,
+//     urgent: false,
+//     overdue: false,
+//     types: ["Onlay"],
+//   },
+//   {
+//     id: 15,
+//     patient: "Javiera Mella",
+//     clinic: "Nova Dental",
+//     createdAt: "13 May 2026",
+//     dueDate: "22 May 2026",
+//     pieces: 1,
+//     urgent: false,
+//     overdue: false,
+//     types: ["Corona"],
+//   },
+//   {
+//     id: 16,
+//     patient: "Tomás Paredes",
+//     clinic: "Dental Concept",
+//     createdAt: "09 May 2026",
+//     dueDate: "18 May 2026",
+//     pieces: 7,
+//     urgent: true,
+//     overdue: true,
+//     overdueDays: 2,
+//     types: ["Implante"],
+//   },
+//   {
+//     id: 17,
+//     patient: "Sofía Morales",
+//     clinic: "Smile Clinic",
+//     createdAt: "16 May 2026",
+//     dueDate: "26 May 2026",
+//     pieces: 2,
+//     urgent: false,
+//     overdue: false,
+//     types: ["Carilla", "Inlay"],
+//   },
+//   {
+//     id: 18,
+//     patient: "Matías Campos",
+//     clinic: "Oral Health",
+//     createdAt: "15 May 2026",
+//     dueDate: "20 May 2026",
+//     pieces: 3,
+//     urgent: true,
+//     overdue: false,
+//     types: ["Corona"],
+//   },
+//   {
+//     id: 19,
+//     patient: "Francisca León",
+//     clinic: "OdontoLab",
+//     createdAt: "08 May 2026",
+//     dueDate: "14 May 2026",
+//     pieces: 5,
+//     urgent: true,
+//     overdue: true,
+//     overdueDays: 5,
+//     types: ["Implante", "Onlay"],
+//   },
+//   {
+//     id: 20,
+//     patient: "Benjamín Salas",
+//     clinic: "Clínica Las Condes",
+//     createdAt: "17 May 2026",
+//     dueDate: "30 May 2026",
+//     pieces: 1,
+//     urgent: false,
+//     overdue: false,
+//     types: ["Corona"],
+//   },
+// ]
 
 const typeStyles: Record<PieceType, string> = {
   Corona: "bg-blue-100 text-blue-800",
@@ -277,8 +290,26 @@ const typeStyles: Record<PieceType, string> = {
   Carilla: "bg-emerald-100 text-emerald-800",
 }
 
+async function fetchDashboard(): Promise<DashboardResponse> {
+  const res = await fetch("/api/dashboard")
+  if (!res.ok) throw new Error("Error cargando dashboard")
+  return res.json()
+}
+
 export default function Dashboard() {
-  const overdue = works.filter((w) => w.overdue).length
+  const router = useRouter()
+
+  const { data, isLoading, isError } = useQuery<DashboardResponse>({
+    queryKey: ["dashboard"],
+    queryFn: fetchDashboard,
+  })
+
+  const works = data?.works ?? []
+  const stats = data?.stats
+
+  const handleClickWork = (workId: number) => {
+    router.push(`/work/${workId}`)
+  }
 
   return (
     <div className="min-h-screen bg-[#F5F7FA] p-6">
@@ -294,6 +325,12 @@ export default function Dashboard() {
           </p>
         </div>
 
+        {isError && (
+          <div className="bg-red-50 border border-red-200 rounded-2xl p-4 text-sm text-red-700">
+            No se pudo cargar la información del dashboard.
+          </div>
+        )}
+
         {/* Stats */}
         <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
           <div className="bg-white rounded-2xl border border-gray-200 p-5 shadow-sm">
@@ -304,7 +341,7 @@ export default function Dashboard() {
                 </p>
 
                 <h2 className="text-4xl font-bold text-[#1C4880] mt-2">
-                  28
+                  {isLoading ? "—" : stats?.enCola ?? 0}
                 </h2>
               </div>
 
@@ -322,11 +359,11 @@ export default function Dashboard() {
                 </p>
 
                 <h2 className="text-4xl font-bold text-red-600 mt-2">
-                  {overdue}
+                  {isLoading ? "—" : stats?.vencidos ?? 0}
                 </h2>
 
                 <p className="text-xs text-red-500 mt-2">
-                  Último retraso: 5 días
+                  Último retraso: {stats?.ultimoRetraso ?? 0} días
                 </p>
               </div>
 
@@ -344,7 +381,7 @@ export default function Dashboard() {
                 </p>
 
                 <h2 className="text-4xl font-bold text-[#1C4880] mt-2">
-                  124
+                  {isLoading ? "—" : stats?.delMes ?? 0}
                 </h2>
               </div>
 
@@ -394,10 +431,29 @@ export default function Dashboard() {
               </thead>
 
               <tbody>
+                {isLoading && (
+                  <tr>
+                    <td colSpan={5} className="px-6 py-10 text-center text-gray-500 text-sm">
+                      Cargando trabajos…
+                    </td>
+                  </tr>
+                )}
+
+                {!isLoading && works.length === 0 && (
+                  <tr>
+                    <td colSpan={5} className="px-6 py-10 text-center text-gray-500 text-sm">
+                      No hay trabajos activos.
+                    </td>
+                  </tr>
+                )}
+
                 {works.map((work) => (
                   <tr
                     key={work.id}
-                    className="border-b border-gray-100 hover:bg-gray-50 transition"
+                    className="border-b border-gray-100 hover:bg-gray-50 transition cursor-pointer"
+                    onClick={() => {
+                      handleClickWork(work.id)
+                    }}
                   >
                     <td className="px-6 py-4">
                       <div>

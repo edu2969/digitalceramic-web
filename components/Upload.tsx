@@ -31,6 +31,7 @@ function defaultValues(): UploadFormValues {
     fileSuperior: null,
     fileInferior: null,
     fileMordida: null,
+    fileGingival: null,
   }
 }
 
@@ -77,6 +78,7 @@ export default function UploadWizard() {
       if (data.fileSuperior) formData.append("fileSuperior", data.fileSuperior)
       if (data.fileInferior) formData.append("fileInferior", data.fileInferior)
       if (data.fileMordida) formData.append("fileMordida", data.fileMordida)
+      if (data.fileGingival) formData.append("fileGingival", data.fileGingival)
 
       const res = await fetch("/api/upload-case", {
         method: "POST",
