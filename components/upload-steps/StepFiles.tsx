@@ -16,7 +16,7 @@ type Slot = {
 const SLOTS: Slot[] = [
   { name: "fileSuperior", label: "Superior" },
   { name: "fileInferior", label: "Inferior" },
-  { name: "fileMordida", label: "Mordida" },
+  { name: "fileMordida", label: "Mordida", optional: true },
   { name: "fileGingival", label: "Gingival", optional: true },
 ]
 

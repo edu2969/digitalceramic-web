@@ -136,8 +136,7 @@ export default function UploadWizard() {
       return true
     })
 
-  const filesComplete =
-    !!values.fileSuperior && !!values.fileInferior && !!values.fileMordida
+  const filesComplete = !!values.fileSuperior && !!values.fileInferior
 
   const steps = [
     { id: 0, title: "Información básica", completed: basicComplete },
