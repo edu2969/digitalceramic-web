@@ -1,5 +1,4 @@
 import { NextResponse } from "next/server";
-import { randomUUID } from "crypto";
 import nodemailer from "nodemailer";
 
 import { createClient } from "@supabase/supabase-js";
@@ -8,6 +7,7 @@ import { createClient as createSessionClient } from "@/lib/supabase/server";
 export const runtime = "nodejs";
 
 const TRABAJO_MONTO_DEFAULT = 79990;
+const DOWNLOAD_URL_TTL_SECONDS = 60 * 60 * 24 * 7;
 
 const supabase = createClient(
   process.env.NEXT_PUBLIC_SUPABASE_URL!,
@@ -53,6 +53,20 @@ type PiecePayload = {
   colors: ColorPayload[];
 };
 
+type CommitPayload = {
+  orderId: string;
+  patientInfo: PatientInfo;
+  pieces: PiecePayload[];
+  notes: string;
+  paths: {
+    fileSuperior: string;
+    fileInferior: string;
+    fileMordida: string | null;
+    fileGingival: string | null;
+    photos: string[];
+  };
+};
+
 const SECTION_LABELS: Record<number, string[]> = {
   1: ["Color"],
   2: ["Incisal", "Cervical"],
@@ -86,61 +100,92 @@ const PALETTE_LABELS: Record<string, string> = {
   OTRO: "Otro",
 };
 
+function bad(message: string, status = 400) {
+  return NextResponse.json({ success: false, error: message }, { status });
+}
+
+async function verifyPathsExist(bucket: string, paths: string[]) {
+  const byFolder = new Map<string, string[]>();
+  for (const p of paths) {
+    const slash = p.lastIndexOf("/");
+    const folder = slash === -1 ? "" : p.slice(0, slash);
+    const file = slash === -1 ? p : p.slice(slash + 1);
+    const arr = byFolder.get(folder) ?? [];
+    arr.push(file);
+    byFolder.set(folder, arr);
+  }
+  const missing: string[] = [];
+  for (const [folder, files] of byFolder) {
+    const { data, error } = await supabase.storage
+      .from(bucket)
+      .list(folder, { limit: 1000 });
+    if (error) throw error;
+    const present = new Set((data ?? []).map((f) => f.name));
+    for (const f of files) {
+      if (!present.has(f)) missing.push(`${folder}/${f}`);
+    }
+  }
+  return missing;
+}
+
+async function signDownload(bucket: string, path: string) {
+  const { data, error } = await supabase.storage
+    .from(bucket)
+    .createSignedUrl(path, DOWNLOAD_URL_TTL_SECONDS);
+  if (error || !data) throw error ?? new Error("signed URL failed");
+  return data.signedUrl;
+}
+
 export async function POST(req: Request) {
   try {
     const sessionClient = await createSessionClient();
     const {
       data: { user },
     } = await sessionClient.auth.getUser();
+    if (!user) return bad("No hay sesión activa", 401);
 
-    if (!user) {
-      return NextResponse.json(
-        { success: false, error: "No hay sesión activa" },
-        { status: 401 }
-      );
+    let body: CommitPayload;
+    try {
+      body = await req.json();
+    } catch {
+      return bad("Body inválido");
     }
 
-    const formData = await req.formData();
+    const { orderId, patientInfo, pieces, notes, paths } = body;
+    if (!orderId || typeof orderId !== "string") return bad("orderId requerido");
+    if (!paths?.fileSuperior || !paths?.fileInferior) {
+      return bad("Faltan archivos 3D requeridos");
+    }
 
-    const patientInfo: PatientInfo = JSON.parse(
-      (formData.get("patientInfo") as string) || "{}"
-    );
-    const pieces: PiecePayload[] = JSON.parse(
-      (formData.get("pieces") as string) || "[]"
-    );
-    const notes = (formData.get("notes") as string) || "";
+    const allPaths: string[] = [
+      paths.fileSuperior,
+      paths.fileInferior,
+      ...(paths.fileMordida ? [paths.fileMordida] : []),
+      ...(paths.fileGingival ? [paths.fileGingival] : []),
+      ...(Array.isArray(paths.photos) ? paths.photos : []),
+    ];
 
-    const photos = formData.getAll("photos") as File[];
-    const fileSuperior = formData.get("fileSuperior") as File | null;
-    const fileInferior = formData.get("fileInferior") as File | null;
-    const fileMordida = formData.get("fileMordida") as File | null;
-    const fileGingival = formData.get("fileGingival") as File | null;
+    const prefix = `orders/${orderId}/`;
+    for (const p of allPaths) {
+      if (typeof p !== "string" || !p.startsWith(prefix)) {
+        return bad(`Path fuera del pedido: ${p}`);
+      }
+    }
 
-    const orderId = randomUUID();
+    const bucket = process.env.SUPABASE_BUCKET!;
+    const missing = await verifyPathsExist(bucket, allPaths);
+    if (missing.length > 0) {
+      return bad(`Archivos no subidos: ${missing.join(", ")}`);
+    }
 
-    const uploadedPhotos = await Promise.all(
-      photos.map(async (photo) =>
-        uploadAndSignFile({
-          file: photo,
-          folder: `orders/${orderId}/photos`,
-        })
-      )
-    );
-
-    const upload3D = async (file: File | null, name: string) => {
-      if (!file) return null;
-      return uploadAndSignFile({
-        file,
-        folder: `orders/${orderId}/3d/${name}`,
-      });
-    };
-
-    const [upSuperior, upInferior, upMordida, upGingival] = await Promise.all([
-      upload3D(fileSuperior, "superior"),
-      upload3D(fileInferior, "inferior"),
-      upload3D(fileMordida, "mordida"),
-      upload3D(fileGingival, "gingival"),
-    ]);
+    const [upSuperior, upInferior, upMordida, upGingival, photoUrls] =
+      await Promise.all([
+        signDownload(bucket, paths.fileSuperior),
+        signDownload(bucket, paths.fileInferior),
+        paths.fileMordida ? signDownload(bucket, paths.fileMordida) : Promise.resolve(null),
+        paths.fileGingival ? signDownload(bucket, paths.fileGingival) : Promise.resolve(null),
+        Promise.all((paths.photos ?? []).map((p) => signDownload(bucket, p))),
+      ]);
 
     const edadParsed = Number(patientInfo.patientAge);
 
@@ -156,10 +201,10 @@ export async function POST(req: Request) {
         fecha_entrega: patientInfo.deliveryDate,
         monto: TRABAJO_MONTO_DEFAULT,
         notas: notes,
-        url_superior: upSuperior?.url ?? null,
-        url_inferior: upInferior?.url ?? null,
-        url_mordida: upMordida?.url ?? null,
-        url_gingival: upGingival?.url ?? null,
+        url_superior: upSuperior,
+        url_inferior: upInferior,
+        url_mordida: upMordida,
+        url_gingival: upGingival,
       })
       .select("id")
       .single();
@@ -234,9 +279,9 @@ export async function POST(req: Request) {
       })
       .join("");
 
-    const fileHtml = (label: string, item: { url: string } | null) =>
-      item
-        ? `<li>${label}: <a href="${item.url}">Descargar</a></li>`
+    const fileHtml = (label: string, url: string | null) =>
+      url
+        ? `<li>${label}: <a href="${url}">Descargar</a></li>`
         : `<li>${label}: (no entregado)</li>`;
 
     const html = `
@@ -258,11 +303,8 @@ export async function POST(req: Request) {
 
         <h2>Fotos</h2>
         <ul>
-          ${uploadedPhotos
-            .map(
-              (photo, index) =>
-                `<li><a href="${photo.url}">Foto ${index + 1}</a></li>`
-            )
+          ${photoUrls
+            .map((url, index) => `<li><a href="${url}">Foto ${index + 1}</a></li>`)
             .join("")}
         </ul>
 
@@ -291,32 +333,4 @@ export async function POST(req: Request) {
       { status: 500 }
     );
   }
-}
-
-async function uploadAndSignFile({
-  file,
-  folder,
-}: {
-  file: File;
-  folder: string;
-}) {
-  const fileName = `${Date.now()}-${file.name}`;
-  const path = `${folder}/${fileName}`;
-
-  const bytes = await file.arrayBuffer();
-  const buffer = Buffer.from(bytes);
-
-  const { error: uploadError } = await supabase.storage
-    .from(process.env.SUPABASE_BUCKET!)
-    .upload(path, buffer, { contentType: file.type });
-
-  if (uploadError) throw uploadError;
-
-  const { data, error: signedError } = await supabase.storage
-    .from(process.env.SUPABASE_BUCKET!)
-    .createSignedUrl(path, 60 * 60 * 24 * 7);
-
-  if (signedError) throw signedError;
-
-  return { key: path, url: data.signedUrl };
 }

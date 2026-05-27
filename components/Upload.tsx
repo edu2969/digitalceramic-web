@@ -14,6 +14,18 @@ import {
   todayISO,
   minDeliveryDate,
 } from "@/components/upload-steps/types"
+import { createClient } from "@/lib/supabase/client"
+
+type Slot3D = "fileSuperior" | "fileInferior" | "fileMordida" | "fileGingival"
+
+type SignedTarget = { path: string; signedUrl: string; token: string }
+
+type SignResponse = {
+  orderId: string
+  bucket: string
+  files3d: Array<SignedTarget & { slot: Slot3D }>
+  photos: SignedTarget[]
+}
 
 function defaultValues(): UploadFormValues {
   const reception = todayISO()
@@ -48,7 +60,62 @@ export default function UploadWizard() {
 
   const mutation = useMutation({
     mutationFn: async (data: UploadFormValues) => {
-      const formData = new FormData()
+      const slotFiles: Array<{ slot: Slot3D; file: File }> = (
+        [
+          ["fileSuperior", data.fileSuperior],
+          ["fileInferior", data.fileInferior],
+          ["fileMordida", data.fileMordida],
+          ["fileGingival", data.fileGingival],
+        ] as const
+      )
+        .filter((entry): entry is [Slot3D, File] => entry[1] instanceof File)
+        .map(([slot, file]) => ({ slot, file }))
+
+      const signRes = await fetch("/api/upload-case/sign", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          files3d: slotFiles.map(({ slot, file }) => ({
+            slot,
+            name: file.name,
+            size: file.size,
+            type: file.type,
+          })),
+          photos: data.photos.map((p) => ({
+            name: p.name,
+            size: p.size,
+            type: p.type,
+          })),
+        }),
+      })
+      if (!signRes.ok) {
+        const err = await signRes.json().catch(() => ({}))
+        throw new Error(err?.error || "No se pudo iniciar la subida")
+      }
+      const signed = (await signRes.json()) as SignResponse
+
+      const supabase = createClient()
+
+      const slotByName = new Map(slotFiles.map((s) => [s.slot, s.file]))
+
+      await Promise.all([
+        ...signed.files3d.map(async (t) => {
+          const file = slotByName.get(t.slot)
+          if (!file) throw new Error(`Archivo no encontrado para ${t.slot}`)
+          const { error } = await supabase.storage
+            .from(signed.bucket)
+            .uploadToSignedUrl(t.path, t.token, file, { contentType: file.type })
+          if (error) throw error
+        }),
+        ...signed.photos.map(async (t, i) => {
+          const photo = data.photos[i]
+          if (!photo) throw new Error(`Foto no encontrada en índice ${i}`)
+          const { error } = await supabase.storage
+            .from(signed.bucket)
+            .uploadToSignedUrl(t.path, t.token, photo, { contentType: photo.type })
+          if (error) throw error
+        }),
+      ])
 
       const piecesPayload = data.pieces.map((p) => ({
         pieceId: p.pieceId,
@@ -59,33 +126,39 @@ export default function UploadWizard() {
         colors: p.colors.slice(0, p.colorSectionCount),
       }))
 
-      formData.append(
-        "patientInfo",
-        JSON.stringify({
-          patientName: data.patientName,
-          patientAge: data.patientAge,
-          receptionDate: data.receptionDate,
-          deliveryDate: data.deliveryDate,
-          dentistName: data.dentistName,
-          dentistRut: data.dentistRut,
-          medicalCenter: data.medicalCenter,
-        }),
-      )
-      formData.append("pieces", JSON.stringify(piecesPayload))
-      formData.append("notes", data.notes)
+      const pathFor = (slot: Slot3D) =>
+        signed.files3d.find((t) => t.slot === slot)?.path ?? null
 
-      data.photos.forEach((photo) => formData.append("photos", photo))
-      if (data.fileSuperior) formData.append("fileSuperior", data.fileSuperior)
-      if (data.fileInferior) formData.append("fileInferior", data.fileInferior)
-      if (data.fileMordida) formData.append("fileMordida", data.fileMordida)
-      if (data.fileGingival) formData.append("fileGingival", data.fileGingival)
-
-      const res = await fetch("/api/upload-case", {
+      const commitRes = await fetch("/api/upload-case", {
         method: "POST",
-        body: formData,
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          orderId: signed.orderId,
+          patientInfo: {
+            patientName: data.patientName,
+            patientAge: data.patientAge,
+            receptionDate: data.receptionDate,
+            deliveryDate: data.deliveryDate,
+            dentistName: data.dentistName,
+            dentistRut: data.dentistRut,
+            medicalCenter: data.medicalCenter,
+          },
+          pieces: piecesPayload,
+          notes: data.notes,
+          paths: {
+            fileSuperior: pathFor("fileSuperior"),
+            fileInferior: pathFor("fileInferior"),
+            fileMordida: pathFor("fileMordida"),
+            fileGingival: pathFor("fileGingival"),
+            photos: signed.photos.map((p) => p.path),
+          },
+        }),
       })
-      if (!res.ok) throw new Error("Error fetching upload data")
-      return res.json()
+      if (!commitRes.ok) {
+        const err = await commitRes.json().catch(() => ({}))
+        throw new Error(err?.error || "Error registrando el pedido")
+      }
+      return commitRes.json()
     },
     onSuccess: () => {
       setSuccessMessage(true)

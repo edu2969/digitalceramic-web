@@ -2,7 +2,10 @@
   "permissions": {
     "allow": [
       "PowerShell(npx next lint --max-warnings=999 2>&1 | Select-Object -Last 60; Write-Host \"EXITCODE=$LASTEXITCODE\")",
-      "PowerShell(npx tsc --noEmit; Write-Host \"EXITCODE=$LASTEXITCODE\")"
+      "PowerShell(npx tsc --noEmit; Write-Host \"EXITCODE=$LASTEXITCODE\")",
+      "Bash(node -e \"console.log\\(require\\('./package.json'\\).dependencies?.next || require\\('./package.json'\\).devDependencies?.next\\)\")",
+      "Bash(npx tsc *)",
+      "Bash(echo \"EXIT=$?\")"
     ]
   }
 }
