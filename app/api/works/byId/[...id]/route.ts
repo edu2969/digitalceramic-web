@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server"
 import { createClient } from "@supabase/supabase-js"
 import { createClient as createSessionClient } from "@/lib/supabase/server"
+import { Estado, isEstado } from "@/lib/estado"
 
 export const runtime = "nodejs"
 
@@ -128,7 +129,7 @@ export async function GET(
     const { data: trabajo, error: trabajoError } = await supabase
       .from("mood_trabajos")
       .select(
-        "id, usuario_id, paciente, edad, clinica, nombre_odontologo, fecha_envio, fecha_entrega, monto, notas, url_superior, url_inferior, url_mordida, url_gingival, mood_piezas (numero, paleta, colores, tipo, tibase_cementado, tibase_plataforma, tibase_gingival, conexion)"
+        "id, usuario_id, paciente, edad, clinica, nombre_odontologo, fecha_envio, fecha_entrega, monto, notas, estado, url_superior, url_inferior, url_mordida, url_gingival, mood_piezas (numero, paleta, colores, tipo, tibase_cementado, tibase_plataforma, tibase_gingival, conexion)"
       )
       .eq("id", trabajoIdNum)
       .single()
@@ -236,11 +237,119 @@ export async function GET(
       files,
       notes: trabajo.notas ?? "",
       monto: trabajo.monto,
+      estado: trabajo.estado ?? "CRE",
     })
   } catch (error) {
     console.error(error)
     return NextResponse.json(
       { success: false, error: "Error cargando trabajo" },
+      { status: 500 }
+    )
+  }
+}
+
+const ALLOWED_TRANSITIONS: Record<Estado, Estado[]> = {
+  CRE: ["INI", "ANU"],
+  INI: ["FIN", "ANU"],
+  FIN: ["TRA"],
+  TRA: ["REC"],
+  REC: [],
+  DEV: [],
+  ANU: [],
+}
+
+export async function PATCH(
+  req: Request,
+  ctx: { params: Promise<{ id: string[] }> }
+) {
+  try {
+    const sessionClient = await createSessionClient()
+    const {
+      data: { user },
+    } = await sessionClient.auth.getUser()
+    if (!user) {
+      return NextResponse.json(
+        { success: false, error: "No hay sesión activa" },
+        { status: 401 }
+      )
+    }
+
+    const { id } = await ctx.params
+    const trabajoId = Array.isArray(id) ? id[0] : id
+    const trabajoIdNum = Number(trabajoId)
+    if (!Number.isFinite(trabajoIdNum)) {
+      return NextResponse.json(
+        { success: false, error: "ID inválido" },
+        { status: 400 }
+      )
+    }
+
+    let body: { to?: unknown }
+    try {
+      body = await req.json()
+    } catch {
+      return NextResponse.json(
+        { success: false, error: "Body inválido" },
+        { status: 400 }
+      )
+    }
+
+    if (!isEstado(body.to)) {
+      return NextResponse.json(
+        { success: false, error: "Estado destino inválido" },
+        { status: 400 }
+      )
+    }
+    const target = body.to
+
+    const { data: current, error: readError } = await supabase
+      .from("mood_trabajos")
+      .select("id, estado")
+      .eq("id", trabajoIdNum)
+      .single()
+
+    if (readError || !current) {
+      return NextResponse.json(
+        { success: false, error: "Trabajo no encontrado" },
+        { status: 404 }
+      )
+    }
+
+    const from = (current.estado ?? "CRE") as Estado
+    if (!isEstado(from)) {
+      return NextResponse.json(
+        { success: false, error: "Estado actual desconocido" },
+        { status: 409 }
+      )
+    }
+
+    if (!ALLOWED_TRANSITIONS[from].includes(target)) {
+      return NextResponse.json(
+        { success: false, error: `Transición no permitida: ${from} → ${target}` },
+        { status: 409 }
+      )
+    }
+
+    const { data: updated, error: updateError } = await supabase
+      .from("mood_trabajos")
+      .update({ estado: target })
+      .eq("id", trabajoIdNum)
+      .eq("estado", from)
+      .select("id, estado")
+      .single()
+
+    if (updateError || !updated) {
+      return NextResponse.json(
+        { success: false, error: "No se pudo actualizar el estado" },
+        { status: 500 }
+      )
+    }
+
+    return NextResponse.json({ success: true, estado: updated.estado })
+  } catch (error) {
+    console.error(error)
+    return NextResponse.json(
+      { success: false, error: "Error actualizando estado" },
       { status: 500 }
     )
   }

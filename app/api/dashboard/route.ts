@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server"
 import { createClient } from "@supabase/supabase-js"
 import { createClient as createSessionClient } from "@/lib/supabase/server"
+import { Estado, isEstado } from "@/lib/estado"
 
 export const runtime = "nodejs"
 
@@ -68,7 +69,7 @@ export async function GET() {
     const { data: trabajos, error: trabajosError } = await supabase
       .from("mood_trabajos")
       .select(
-        "id, paciente, clinica, fecha_envio, fecha_entrega, mood_piezas (tipo)"
+        "id, paciente, clinica, fecha_envio, fecha_entrega, estado, mood_piezas (tipo)"
       )
       .order("fecha_envio", { ascending: false })
 
@@ -94,6 +95,7 @@ export async function GET() {
       const overdue = due ? days < 0 : false
       const overdueDays = overdue ? -days : undefined
       const urgent = overdue || (due ? days <= 2 : false)
+      const estado: Estado = isEstado(t.estado) ? t.estado : "CRE"
 
       return {
         id: t.id,
@@ -106,10 +108,12 @@ export async function GET() {
         overdue,
         overdueDays,
         types: Array.from(typesSet),
+        estado,
       }
     })
 
-    const enCola = works.length
+    const enEspera = works.filter((w) => w.estado === "CRE").length
+    const enProceso = works.filter((w) => w.estado === "INI").length
     const vencidos = works.filter((w) => w.overdue).length
     const ultimoRetraso = works.reduce(
       (max, w) => Math.max(max, w.overdueDays ?? 0),
@@ -120,7 +124,7 @@ export async function GET() {
     ).length
 
     return NextResponse.json({
-      stats: { enCola, vencidos, ultimoRetraso, delMes },
+      stats: { enEspera, enProceso, vencidos, ultimoRetraso, delMes },
       works,
     })
   } catch (error) {

@@ -1,15 +1,59 @@
 "use client"
 
 import { useState } from "react"
-import { useQuery } from "@tanstack/react-query"
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query"
+import { toast } from "sonner"
 import {
   FiCalendar,
   FiDownload,
   FiCheckCircle,
   FiAlertTriangle,
+  FiPlayCircle,
   FiUser,
   FiBriefcase,
+  FiLoader,
 } from "react-icons/fi"
+import { Estado, ESTADO_LABEL, ESTADO_BADGE } from "@/lib/estado"
+
+type Transition = {
+  target: Estado
+  buttonLabel: string
+  buttonIcon: React.ReactNode
+  dialogTitle: string
+  dialogText: string
+  confirmLabel: string
+  toastLoading: string
+  toastSuccess: string
+}
+
+function transitionFor(estado: Estado): Transition | null {
+  if (estado === "CRE") {
+    return {
+      target: "INI",
+      buttonLabel: "Iniciar trabajo",
+      buttonIcon: <FiPlayCircle className="w-5 h-5" />,
+      dialogTitle: "¿Iniciar trabajo?",
+      dialogText: "El trabajo pasará a estado en proceso.",
+      confirmLabel: "Iniciar",
+      toastLoading: "Iniciando trabajo…",
+      toastSuccess: "Trabajo iniciado",
+    }
+  }
+  if (estado === "INI") {
+    return {
+      target: "FIN",
+      buttonLabel: "Terminado",
+      buttonIcon: <FiCheckCircle className="w-5 h-5" />,
+      dialogTitle: "¿Marcar como terminado?",
+      dialogText:
+        "El trabajo quedará marcado como completado y disponible para entrega.",
+      confirmLabel: "Confirmar",
+      toastLoading: "Marcando como terminado…",
+      toastSuccess: "Trabajo terminado",
+    }
+  }
+  return null
+}
 
 interface WorkColor {
   label: string
@@ -48,6 +92,7 @@ interface WorkDetail {
   files: WorkFile[]
   notes: string
   monto: number | null
+  estado: Estado
 }
 
 async function fetchWork(id: string): Promise<WorkDetail> {
@@ -58,10 +103,30 @@ async function fetchWork(id: string): Promise<WorkDetail> {
 
 export default function WorkPagePage({ id }: { id: string }) {
   const [openDialog, setOpenDialog] = useState(false)
+  const queryClient = useQueryClient()
 
   const { data, isLoading, isError } = useQuery<WorkDetail>({
     queryKey: ["work", id],
     queryFn: () => fetchWork(id),
+  })
+
+  const mutation = useMutation({
+    mutationFn: async (target: Estado) => {
+      const res = await fetch(`/api/works/byId/${id}`, {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ to: target }),
+      })
+      if (!res.ok) {
+        const err = await res.json().catch(() => ({}))
+        throw new Error(err?.error || "No se pudo cambiar el estado")
+      }
+      return res.json() as Promise<{ success: true; estado: Estado }>
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["work", id] })
+      setOpenDialog(false)
+    },
   })
 
   if (isLoading) {
@@ -102,6 +167,18 @@ export default function WorkPagePage({ id }: { id: string }) {
       ? "text-amber-700"
       : "text-emerald-700"
 
+  const transition = transitionFor(data.estado)
+  const isPending = mutation.isPending
+
+  const handleConfirm = () => {
+    if (!transition) return
+    toast.promise(mutation.mutateAsync(transition.target), {
+      loading: transition.toastLoading,
+      success: transition.toastSuccess,
+      error: (e: Error) => e.message || "Error",
+    })
+  }
+
   return (
     <div className="min-h-screen bg-[#F5F7FA] py-10 px-4 md:px-8">
       <div className="max-w-6xl mx-auto space-y-6">
@@ -110,9 +187,16 @@ export default function WorkPagePage({ id }: { id: string }) {
           <div className="px-8 py-7 border-b border-gray-100">
             <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-5">
               <div>
-                <p className="text-sm font-semibold tracking-wider uppercase text-[#1C4880]">
-                  Orden #{data.orderNumber}
-                </p>
+                <div className="flex items-center gap-3 flex-wrap">
+                  <p className="text-sm font-semibold tracking-wider uppercase text-[#1C4880]">
+                    Orden #{data.orderNumber}
+                  </p>
+                  <span
+                    className={`px-3 py-1 rounded-full text-xs font-bold border ${ESTADO_BADGE[data.estado]}`}
+                  >
+                    {ESTADO_LABEL[data.estado]}
+                  </span>
+                </div>
 
                 <h1 className="text-4xl font-bold text-[#1C4880] mt-2">
                   Detalle de trabajo
@@ -299,30 +383,38 @@ export default function WorkPagePage({ id }: { id: string }) {
         </div>
 
         {/* Actions */}
-        <div className="flex justify-end">
-          <button
-            type="button"
-            onClick={() => setOpenDialog(true)}
-            className="
-              px-8 py-4
-              rounded-2xl
-              bg-[#1C4880]
-              text-white
-              font-semibold
-              flex items-center gap-3
-              hover:opacity-90
-              transition
-              shadow-lg
-            "
-          >
-            <FiCheckCircle className="w-5 h-5" />
-            Terminado
-          </button>
-        </div>
+        {transition && (
+          <div className="flex justify-end">
+            <button
+              type="button"
+              onClick={() => setOpenDialog(true)}
+              disabled={isPending}
+              className="
+                px-8 py-4
+                rounded-2xl
+                bg-[#1C4880]
+                text-white
+                font-semibold
+                flex items-center gap-3
+                hover:opacity-90
+                transition
+                shadow-lg
+                disabled:opacity-60 disabled:cursor-not-allowed
+              "
+            >
+              {isPending ? (
+                <FiLoader className="w-5 h-5 animate-spin" />
+              ) : (
+                transition.buttonIcon
+              )}
+              {transition.buttonLabel}
+            </button>
+          </div>
+        )}
       </div>
 
       {/* Dialog */}
-      {openDialog && (
+      {openDialog && transition && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4">
           <div className="w-full max-w-md bg-white rounded-3xl shadow-2xl overflow-hidden">
             <div className="p-8">
@@ -337,22 +429,22 @@ export default function WorkPagePage({ id }: { id: string }) {
                   mb-5
                 "
               >
-                <FiCheckCircle className="w-8 h-8" />
+                {transition.buttonIcon}
               </div>
 
               <h3 className="text-2xl font-bold text-center text-[#1C4880]">
-                ¿Marcar como terminado?
+                {transition.dialogTitle}
               </h3>
 
               <p className="text-gray-500 text-center mt-3 leading-relaxed">
-                El trabajo quedará marcado como completado y disponible para
-                entrega.
+                {transition.dialogText}
               </p>
 
               <div className="flex gap-4 mt-8">
                 <button
                   type="button"
                   onClick={() => setOpenDialog(false)}
+                  disabled={isPending}
                   className="
                     flex-1
                     py-3
@@ -361,6 +453,7 @@ export default function WorkPagePage({ id }: { id: string }) {
                     font-semibold
                     hover:bg-gray-100
                     transition
+                    disabled:opacity-60 disabled:cursor-not-allowed
                   "
                 >
                   Cancelar
@@ -368,6 +461,8 @@ export default function WorkPagePage({ id }: { id: string }) {
 
                 <button
                   type="button"
+                  onClick={handleConfirm}
+                  disabled={isPending}
                   className="
                     flex-1
                     py-3
@@ -377,9 +472,14 @@ export default function WorkPagePage({ id }: { id: string }) {
                     font-semibold
                     hover:opacity-90
                     transition
+                    flex items-center justify-center gap-2
+                    disabled:opacity-60 disabled:cursor-not-allowed
                   "
                 >
-                  Confirmar
+                  {isPending && (
+                    <FiLoader className="w-4 h-4 animate-spin" />
+                  )}
+                  {transition.confirmLabel}
                 </button>
               </div>
             </div>

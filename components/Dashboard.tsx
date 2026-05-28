@@ -5,6 +5,7 @@ import { useQuery } from "@tanstack/react-query"
 import {
   FiAlertTriangle,
   FiClock,
+  FiPlayCircle,
 } from "react-icons/fi"
 
 import {
@@ -18,6 +19,8 @@ import {
 import {
   PiShieldWarning,
 } from "react-icons/pi"
+
+import { Estado, ESTADO_LABEL, ESTADO_BADGE } from "@/lib/estado"
 
 type PieceType =
   | "Corona"
@@ -37,10 +40,12 @@ interface WorkItem {
   overdue: boolean
   overdueDays?: number
   types: PieceType[]
+  estado: Estado
 }
 
 interface DashboardStats {
-  enCola: number
+  enEspera: number
+  enProceso: number
   vencidos: number
   ultimoRetraso: number
   delMes: number
@@ -332,21 +337,47 @@ export default function Dashboard() {
         )}
 
         {/* Stats */}
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
           <div className="bg-white rounded-2xl border border-gray-200 p-5 shadow-sm">
             <div className="flex items-center justify-between">
               <div>
                 <p className="text-sm text-gray-500">
-                  Trabajos en cola
+                  En cola
                 </p>
 
                 <h2 className="text-4xl font-bold text-[#1C4880] mt-2">
-                  {isLoading ? "—" : stats?.enCola ?? 0}
+                  {isLoading ? "—" : stats?.enEspera ?? 0}
                 </h2>
+
+                <p className="text-xs text-gray-400 mt-2">
+                  Trabajos en espera
+                </p>
               </div>
 
               <div className="w-14 h-14 rounded-2xl bg-blue-100 flex items-center justify-center">
                 <FiClock className="w-7 h-7 text-[#1C4880]" />
+              </div>
+            </div>
+          </div>
+
+          <div className="bg-white rounded-2xl border border-gray-200 p-5 shadow-sm">
+            <div className="flex items-center justify-between">
+              <div>
+                <p className="text-sm text-gray-500">
+                  Procesando
+                </p>
+
+                <h2 className="text-4xl font-bold text-indigo-700 mt-2">
+                  {isLoading ? "—" : stats?.enProceso ?? 0}
+                </h2>
+
+                <p className="text-xs text-gray-400 mt-2">
+                  Trabajos en proceso
+                </p>
+              </div>
+
+              <div className="w-14 h-14 rounded-2xl bg-indigo-100 flex items-center justify-center">
+                <FiPlayCircle className="w-7 h-7 text-indigo-700" />
               </div>
             </div>
           </div>
@@ -383,6 +414,10 @@ export default function Dashboard() {
                 <h2 className="text-4xl font-bold text-[#1C4880] mt-2">
                   {isLoading ? "—" : stats?.delMes ?? 0}
                 </h2>
+
+                <p className="text-xs text-gray-400 mt-2">
+                  Total mensual
+                </p>
               </div>
 
               <div className="w-14 h-14 rounded-2xl bg-amber-100 flex items-center justify-center">
@@ -525,22 +560,27 @@ export default function Dashboard() {
 
                     <td className="px-4 py-4">
                       <div className="flex flex-col gap-2">
-                        {work.urgent && (
-                          <span className="inline-flex items-center gap-1 px-2 py-1 rounded-lg bg-red-100 text-red-700 text-xs font-bold w-fit">
+                        <span
+                          className={`inline-flex items-center px-2 py-1 rounded-lg border text-xs font-bold w-fit ${ESTADO_BADGE[work.estado]}`}
+                        >
+                          {ESTADO_LABEL[work.estado]}
+                        </span>
+
+                        {work.urgent && !work.overdue && (
+                          <span className="inline-flex items-center gap-1 px-2 py-1 rounded-lg bg-amber-100 text-amber-700 text-xs font-bold w-fit">
                             <FiAlertTriangle className="w-3 h-3" />
                             Urgente
                           </span>
                         )}
 
-                        {!work.overdue && (
+                        {work.overdue ? (
+                          <span className="inline-flex items-center gap-1 px-2 py-1 rounded-lg bg-red-100 text-red-700 text-xs font-bold w-fit">
+                            <FiAlertTriangle className="w-3 h-3" />
+                            Vencido
+                          </span>
+                        ) : (
                           <span className="inline-flex items-center gap-1 px-2 py-1 rounded-lg bg-emerald-100 text-emerald-700 text-xs font-bold w-fit">
                             En tiempo
-                          </span>
-                        )}
-
-                        {work.overdue && (
-                          <span className="inline-flex items-center gap-1 px-2 py-1 rounded-lg bg-red-100 text-red-700 text-xs font-bold w-fit">
-                            Vencido
                           </span>
                         )}
                       </div>
