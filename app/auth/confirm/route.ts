@@ -8,7 +8,12 @@ export async function GET(request: NextRequest) {
   const { searchParams, origin } = new URL(request.url)
   const token_hash = searchParams.get("token_hash")
   const type = searchParams.get("type") as EmailOtpType | null
-  const next = searchParams.get("next") ?? "/dashboard"
+  // En recuperación de contraseña siempre llevamos al formulario de nueva clave,
+  // no al dashboard.
+  const next =
+    type === "recovery"
+      ? "/reset-password"
+      : searchParams.get("next") ?? "/dashboard"
 
   if (!token_hash || !type) {
     return NextResponse.redirect(
