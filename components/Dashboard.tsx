@@ -30,7 +30,7 @@ type PieceType =
   | "Carilla"
 
 interface WorkItem {
-  id: number
+  id: string
   patient: string
   clinic: string
   createdAt: string
@@ -312,7 +312,7 @@ export default function Dashboard() {
   const works = data?.works ?? []
   const stats = data?.stats
 
-  const handleClickWork = (workId: number) => {
+  const handleClickWork = (workId: string) => {
     router.push(`/work/${workId}`)
   }
 
@@ -320,12 +320,12 @@ export default function Dashboard() {
     <div className="min-h-screen bg-[#F5F7FA] p-6">
       <div className="max-w-7xl mx-auto space-y-6">
         {/* Header */}
-        <div>
-          <h1 className="text-3xl font-bold tracking-tight text-[#1C4880]">
+        <div className="ml-16 lg:ml-0">
+          <h1 className="text-3xl font-bold tracking-tight text-[#1C4880] text-right md:text-left">
             Dashboard Laboratorio
           </h1>
 
-          <p className="text-gray-500 mt-1">
+          <p className="text-gray-500 mt-1 text-right md:text-left">
             Gestión de trabajos protésicos y producción
           </p>
         </div>

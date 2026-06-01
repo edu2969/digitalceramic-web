@@ -27,9 +27,9 @@ type Transition = {
 }
 
 function transitionFor(estado: Estado): Transition | null {
-  if (estado === "CRE") {
+  if (estado === "CREADO") {
     return {
-      target: "INI",
+      target: "INICIADO",
       buttonLabel: "Iniciar trabajo",
       buttonIcon: <FiPlayCircle className="w-5 h-5" />,
       dialogTitle: "¿Iniciar trabajo?",
@@ -39,9 +39,9 @@ function transitionFor(estado: Estado): Transition | null {
       toastSuccess: "Trabajo iniciado",
     }
   }
-  if (estado === "INI") {
+  if (estado === "INICIADO") {
     return {
-      target: "FIN",
+      target: "FINALIZADO",
       buttonLabel: "Terminado",
       buttonIcon: <FiCheckCircle className="w-5 h-5" />,
       dialogTitle: "¿Marcar como terminado?",
@@ -58,6 +58,7 @@ function transitionFor(estado: Estado): Transition | null {
 interface WorkColor {
   label: string
   value: string
+  palette: string
 }
 
 interface WorkPiece {
@@ -77,14 +78,14 @@ interface WorkFile {
 }
 
 interface WorkDetail {
-  id: number
+  id: string
   orderNumber: string
   status: "Atrasado" | "Urgente" | "En tiempo"
   overdue: boolean
   overdueDays: number
   patient: { name: string; age: number | null }
   clinic: { name: string }
-  dentist: { name: string }
+  dentist: { name: string; registry: string | null }
   sentBy: { name: string | null; email: string | null }
   issueDate: string
   dueDate: string
@@ -245,7 +246,11 @@ export default function WorkPagePage({ id }: { id: string }) {
               icon={<FiUser className="w-5 h-5" />}
               title="Odontólogo"
               value={data.dentist.name}
-              subtitle=""
+              subtitle={
+                data.dentist.registry
+                  ? `Reg. ${data.dentist.registry}`
+                  : ""
+              }
             />
 
             <InfoCard
@@ -536,6 +541,7 @@ function PieceCard({
   colors: {
     label: string
     value: string
+    palette: string
   }[]
 }) {
   return (
@@ -583,6 +589,12 @@ function PieceCard({
                 </p>
 
                 <p className="text-lg font-bold mt-1">{color.value}</p>
+
+                {color.palette && (
+                  <p className="text-[10px] uppercase tracking-wider opacity-70 mt-1">
+                    {color.palette}
+                  </p>
+                )}
               </div>
             ))}
           </div>

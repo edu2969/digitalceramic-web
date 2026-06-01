@@ -25,12 +25,16 @@ const transporter = nodemailer.createTransport({
 });
 
 type PatientInfo = {
+  patientId: string | null;
   patientName: string;
+  patientLastName: string;
   patientAge: string;
   receptionDate: string;
   deliveryDate: string;
   dentistName: string;
   dentistRut: string;
+  dentistRegistry: string;
+  clinicId: string | null;
   medicalCenter: string;
 };
 
@@ -136,6 +140,70 @@ async function signDownload(bucket: string, path: string) {
   return data.signedUrl;
 }
 
+function approxBirthDateFromAge(ageStr: string): string | null {
+  const age = Number(ageStr);
+  if (!Number.isFinite(age) || age < 0 || age > 120) return null;
+  const year = new Date().getFullYear() - Math.floor(age);
+  return `${year}-01-01`;
+}
+
+async function resolvePaciente(info: PatientInfo): Promise<string> {
+  if (info.patientId) {
+    return info.patientId;
+  }
+  const { data, error } = await supabase
+    .from("pacientes")
+    .insert({
+      nombre: info.patientName.trim(),
+      apellido: info.patientLastName?.trim() || null,
+      fecha_nacimiento: approxBirthDateFromAge(info.patientAge),
+    })
+    .select("id")
+    .single();
+  if (error || !data) throw error ?? new Error("paciente insert failed");
+  return data.id;
+}
+
+async function resolveClinica(info: PatientInfo): Promise<string> {
+  if (info.clinicId) {
+    return info.clinicId;
+  }
+  const { data, error } = await supabase
+    .from("clinica")
+    .insert({ nombre: info.medicalCenter.trim() })
+    .select("id")
+    .single();
+  if (error || !data) throw error ?? new Error("clinica insert failed");
+  return data.id;
+}
+
+async function resolveProfile(
+  userId: string,
+  dentistRegistry: string
+): Promise<string> {
+  const { data: profile, error } = await supabase
+    .from("profiles")
+    .select("id, numero_registro")
+    .eq("user_id", userId)
+    .maybeSingle();
+  if (error) throw error;
+  if (!profile) throw new Error("Perfil no encontrado para el usuario");
+
+  if (
+    dentistRegistry &&
+    dentistRegistry.trim() &&
+    profile.numero_registro !== dentistRegistry.trim()
+  ) {
+    const { error: updateErr } = await supabase
+      .from("profiles")
+      .update({ numero_registro: dentistRegistry.trim() })
+      .eq("id", profile.id);
+    if (updateErr) throw updateErr;
+  }
+
+  return profile.id;
+}
+
 export async function POST(req: Request) {
   try {
     const sessionClient = await createSessionClient();
@@ -187,16 +255,19 @@ export async function POST(req: Request) {
         Promise.all((paths.photos ?? []).map((p) => signDownload(bucket, p))),
       ]);
 
-    const edadParsed = Number(patientInfo.patientAge);
+    const [pacienteId, clinicaId, profileId] = await Promise.all([
+      resolvePaciente(patientInfo),
+      resolveClinica(patientInfo),
+      resolveProfile(user.id, patientInfo.dentistRegistry),
+    ]);
 
     const { data: trabajo, error: trabajoError } = await supabase
-      .from("mood_trabajos")
+      .from("trabajos")
       .insert({
-        usuario_id: user.id,
-        paciente: patientInfo.patientName,
-        edad: Number.isFinite(edadParsed) ? edadParsed : null,
-        clinica: patientInfo.medicalCenter,
-        nombre_odontologo: patientInfo.dentistName,
+        paciente_id: pacienteId,
+        clinica_id: clinicaId,
+        profile_id: profileId,
+        enviado_por: patientInfo.dentistName,
         fecha_envio: patientInfo.receptionDate,
         fecha_entrega: patientInfo.deliveryDate,
         monto: TRABAJO_MONTO_DEFAULT,
@@ -224,7 +295,7 @@ export async function POST(req: Request) {
         const numeroParsed = Number(piece.pieceId);
 
         return {
-          mood_trabajo_id: trabajo.id,
+          trabajo_id: trabajo.id,
           numero: Number.isFinite(numeroParsed) ? numeroParsed : null,
           paleta,
           colores,
@@ -237,7 +308,7 @@ export async function POST(req: Request) {
       });
 
       const { error: piezasError } = await supabase
-        .from("mood_piezas")
+        .from("piezas")
         .insert(piezasRows);
 
       if (piezasError) throw piezasError;
@@ -289,10 +360,10 @@ export async function POST(req: Request) {
         <h1>Nuevo Pedido Dental</h1>
         <hr />
         <h2>Información del paciente</h2>
-        <p><strong>Paciente:</strong> ${patientInfo.patientName} (${patientInfo.patientAge} años)</p>
+        <p><strong>Paciente:</strong> ${patientInfo.patientName} ${patientInfo.patientLastName} (${patientInfo.patientAge} años)</p>
         <p><strong>Recepción:</strong> ${patientInfo.receptionDate}</p>
         <p><strong>Entrega:</strong> ${patientInfo.deliveryDate}</p>
-        <p><strong>Odontólogo:</strong> ${patientInfo.dentistName} (${patientInfo.dentistRut})</p>
+        <p><strong>Odontólogo:</strong> ${patientInfo.dentistName} (${patientInfo.dentistRut}) · Reg ${patientInfo.dentistRegistry}</p>
         <p><strong>Centro:</strong> ${patientInfo.medicalCenter}</p>
 
         <h2>Piezas</h2>
@@ -325,7 +396,7 @@ export async function POST(req: Request) {
       html,
     });
 
-    return NextResponse.json({ success: true, orderId });
+    return NextResponse.json({ success: true, orderId, trabajoId: trabajo.id });
   } catch (error) {
     console.error(error);
     return NextResponse.json(

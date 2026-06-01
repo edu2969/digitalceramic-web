@@ -1,6 +1,8 @@
 "use client"
 
-import { useRef, useState } from "react"
+import { useEffect, useRef, useState } from "react"
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query"
+import { toast } from "sonner"
 import {
   FiCamera,
   FiMail,
@@ -8,14 +10,114 @@ import {
   FiUser,
   FiBriefcase,
   FiShield,
+  FiPhone,
+  FiMapPin,
+  FiHash,
   FiTrash2,
 } from "react-icons/fi"
+import { createClient } from "@/lib/supabase/client"
+import { UserRole } from "@/lib/userRole"
+
+type ProfileResponse = {
+  profile: {
+    id: string
+    email: string | null
+    nombre: string | null
+    apellido: string | null
+    telefono: number | null
+    centroMedico: string | null
+    direccion: string | null
+    numeroRegistro: string | null
+    userRole: UserRole | null
+  } | null
+}
+
+type FormState = {
+  nombre: string
+  apellido: string
+  telefono: string
+  centro_medico: string
+  direccion: string
+  numero_registro: string
+  user_role: string
+}
+
+const EMPTY: FormState = {
+  nombre: "",
+  apellido: "",
+  telefono: "",
+  centro_medico: "",
+  direccion: "",
+  numero_registro: "",
+  user_role: "",
+}
+
+const ROLE_LABEL: Record<UserRole, string> = {
+  ODONTOLOGO: "Odontólogo",
+  LABORATORIO: "Laboratorio",
+  ADMINISTRADOR: "Administrador",
+}
+
+async function fetchProfile(): Promise<ProfileResponse> {
+  const res = await fetch("/api/profile/me")
+  if (!res.ok) throw new Error("Error cargando perfil")
+  return res.json()
+}
+
+async function patchProfile(payload: Record<string, unknown>) {
+  const res = await fetch("/api/profile/me", {
+    method: "PATCH",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify(payload),
+  })
+  if (!res.ok) {
+    const body = await res.json().catch(() => ({}))
+    throw new Error(body?.error ?? "Error actualizando perfil")
+  }
+  return res.json() as Promise<ProfileResponse>
+}
 
 export default function AccountSettingsPage() {
   const fileInputRef = useRef<HTMLInputElement | null>(null)
+  const supabase = createClient()
+  const queryClient = useQueryClient()
 
   const [avatar, setAvatar] = useState<string | null>(null)
   const [openDeleteModal, setOpenDeleteModal] = useState(false)
+  const [form, setForm] = useState<FormState>(EMPTY)
+  const [password, setPassword] = useState("")
+  const [passwordConfirm, setPasswordConfirm] = useState("")
+
+  const { data, isLoading, isError } = useQuery({
+    queryKey: ["profile-me"],
+    queryFn: fetchProfile,
+  })
+
+  const profile = data?.profile
+
+  useEffect(() => {
+    if (!profile) return
+    setForm({
+      nombre: profile.nombre ?? "",
+      apellido: profile.apellido ?? "",
+      telefono: profile.telefono !== null ? String(profile.telefono) : "",
+      centro_medico: profile.centroMedico ?? "",
+      direccion: profile.direccion ?? "",
+      numero_registro: profile.numeroRegistro ?? "",
+      user_role: profile.userRole ?? "",
+    })
+  }, [profile])
+
+  const profileMutation = useMutation({
+    mutationFn: patchProfile,
+    onSuccess: (result) => {
+      queryClient.setQueryData(["profile-me"], result)
+      toast.success("Perfil actualizado")
+    },
+    onError: (err: Error) => {
+      toast.error(err.message || "Error actualizando perfil")
+    },
+  })
 
   const handleAvatarChange = (
     e: React.ChangeEvent<HTMLInputElement>,
@@ -28,22 +130,85 @@ export default function AccountSettingsPage() {
     setAvatar(url)
   }
 
+  const handleChange = (
+    e: React.ChangeEvent<HTMLInputElement>
+  ) => {
+    setForm((prev) => ({ ...prev, [e.target.name]: e.target.value }))
+  }
+
+  const handleSubmit = async (e: React.SubmitEvent<HTMLFormElement>) => {
+    e.preventDefault()
+
+    const profilePayload = {
+      nombre: form.nombre,
+      apellido: form.apellido,
+      telefono: form.telefono ? Number(form.telefono) : null,
+      centro_medico: form.centro_medico || null,
+      direccion: form.direccion || null,
+      numero_registro: form.numero_registro || null,
+    }
+
+    const profilePromise = profileMutation.mutateAsync(profilePayload)
+
+    if (password) {
+      if (password.length < 8) {
+        toast.error("La contraseña debe tener al menos 8 caracteres")
+        return
+      }
+      if (password !== passwordConfirm) {
+        toast.error("Las contraseñas no coinciden")
+        return
+      }
+      const { error } = await supabase.auth.updateUser({ password })
+      if (error) {
+        toast.error(error.message)
+      } else {
+        toast.success("Contraseña actualizada")
+        setPassword("")
+        setPasswordConfirm("")
+      }
+    }
+
+    await profilePromise
+  }
+
+  const fullName =
+    [profile?.nombre, profile?.apellido].filter(Boolean).join(" ").trim() ||
+    "Usuario"
+
+  const initials =
+    fullName
+      .split(/\s+/)
+      .map((s) => s.charAt(0).toUpperCase())
+      .slice(0, 2)
+      .join("") || "U"
+
+  const roleLabel = profile?.userRole ? ROLE_LABEL[profile.userRole] : "—"
+
   return (
-    <div className="min-h-screen bg-[#F5F7FA] py-10 px-4 md:px-8">
-      <div className="max-w-4xl mx-auto">
+    <div className="min-h-screen bg-[#F5F7FA] p-6">
+      <div className="max-w-7xl mx-auto space-y-6">
         {/* Header */}
-        <div className="mb-8">
-          <h1 className="text-4xl font-bold text-[#1C4880]">
+        <div className="ml-16 lg:ml-0">
+          <h1 className="text-3xl font-bold tracking-tight text-[#1C4880] text-right md:text-left">
             Configuración de cuenta
           </h1>
 
-          <p className="text-gray-500 mt-2">
-            Administra tu información personal y seguridad
+          <p className="text-gray-500 mt-2 text-right md:text-left">
+            Administra tu información personal y de seguridad
           </p>
         </div>
 
-        {/* Card */}
-        <div className="bg-white rounded-3xl border border-gray-200 shadow-sm overflow-hidden">
+        {isError && (
+          <div className="mb-6 bg-red-50 border border-red-200 rounded-2xl p-4 text-sm text-red-700">
+            No se pudo cargar tu perfil.
+          </div>
+        )}
+
+        <form
+          onSubmit={handleSubmit}
+          className="bg-white rounded-3xl border border-gray-200 shadow-sm overflow-hidden"
+        >
           {/* Avatar */}
           <div className="px-8 pt-10 pb-8 border-b border-gray-100">
             <div className="flex flex-col md:flex-row items-center gap-6">
@@ -60,6 +225,7 @@ export default function AccountSettingsPage() {
                   "
                 >
                   {avatar ? (
+                    // eslint-disable-next-line @next/next/no-img-element
                     <img
                       src={avatar}
                       alt="Avatar"
@@ -67,7 +233,7 @@ export default function AccountSettingsPage() {
                     />
                   ) : (
                     <span className="text-white text-4xl font-bold">
-                      ET
+                      {initials}
                     </span>
                   )}
                 </div>
@@ -101,11 +267,11 @@ export default function AccountSettingsPage() {
 
               <div className="text-center md:text-left">
                 <h2 className="text-2xl font-bold text-[#1C4880]">
-                  Eduardo Troncoso
+                  {isLoading ? "Cargando…" : fullName}
                 </h2>
 
                 <p className="text-gray-500 mt-1">
-                  Smile Factory
+                  {profile?.centroMedico ?? "Sin centro médico"}
                 </p>
 
                 <p className="text-sm text-gray-400 mt-3">
@@ -121,7 +287,7 @@ export default function AccountSettingsPage() {
               {/* Nombre */}
               <div className="space-y-2">
                 <label className="text-sm font-semibold text-gray-700">
-                  Nombre completo
+                  Nombre
                 </label>
 
                 <div className="relative">
@@ -129,17 +295,34 @@ export default function AccountSettingsPage() {
 
                   <input
                     type="text"
-                    defaultValue="Eduardo Troncoso"
+                    name="nombre"
+                    value={form.nombre}
+                    onChange={handleChange}
                     className="
-                      w-full
-                      pl-12 pr-4 py-3
-                      rounded-xl
-                      border border-gray-300
-                      focus:outline-none
-                      focus:ring-2
-                      focus:ring-[#1C4880]
-                      focus:border-transparent
-                      transition
+                      w-full pl-12 pr-4 py-3 rounded-xl border border-gray-300
+                      focus:outline-none focus:ring-2 focus:ring-[#1C4880] focus:border-transparent transition
+                    "
+                  />
+                </div>
+              </div>
+
+              {/* Apellido */}
+              <div className="space-y-2">
+                <label className="text-sm font-semibold text-gray-700">
+                  Apellido
+                </label>
+
+                <div className="relative">
+                  <FiUser className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400" />
+
+                  <input
+                    type="text"
+                    name="apellido"
+                    value={form.apellido}
+                    onChange={handleChange}
+                    className="
+                      w-full pl-12 pr-4 py-3 rounded-xl border border-gray-300
+                      focus:outline-none focus:ring-2 focus:ring-[#1C4880] focus:border-transparent transition
                     "
                   />
                 </div>
@@ -156,16 +339,35 @@ export default function AccountSettingsPage() {
 
                   <input
                     type="email"
-                    value="eduardo@smilefactory.cl"
+                    value={profile?.email ?? ""}
                     disabled
                     className="
-                      w-full
-                      pl-12 pr-4 py-3
-                      rounded-xl
-                      border border-gray-200
-                      bg-gray-100
-                      text-gray-500
-                      cursor-not-allowed
+                      w-full pl-12 pr-4 py-3 rounded-xl border border-gray-200
+                      bg-gray-100 text-gray-500 cursor-not-allowed
+                    "
+                  />
+                </div>
+              </div>
+
+              {/* Teléfono */}
+              <div className="space-y-2">
+                <label className="text-sm font-semibold text-gray-700">
+                  Teléfono
+                </label>
+
+                <div className="relative">
+                  <FiPhone className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400" />
+
+                  <input
+                    type="tel"
+                    name="telefono"
+                    value={form.telefono}
+                    onChange={handleChange}
+                    inputMode="numeric"
+                    pattern="[0-9]*"
+                    className="
+                      w-full pl-12 pr-4 py-3 rounded-xl border border-gray-300
+                      focus:outline-none focus:ring-2 focus:ring-[#1C4880] focus:border-transparent transition
                     "
                   />
                 </div>
@@ -183,15 +385,11 @@ export default function AccountSettingsPage() {
                   <input
                     type="password"
                     placeholder="••••••••"
+                    value={password}
+                    onChange={(e) => setPassword(e.target.value)}
                     className="
-                      w-full
-                      pl-12 pr-4 py-3
-                      rounded-xl
-                      border border-gray-300
-                      focus:outline-none
-                      focus:ring-2
-                      focus:ring-[#1C4880]
-                      focus:border-transparent
+                      w-full pl-12 pr-4 py-3 rounded-xl border border-gray-300
+                      focus:outline-none focus:ring-2 focus:ring-[#1C4880] focus:border-transparent
                     "
                   />
                 </div>
@@ -209,76 +407,105 @@ export default function AccountSettingsPage() {
                   <input
                     type="password"
                     placeholder="••••••••"
+                    value={passwordConfirm}
+                    onChange={(e) => setPasswordConfirm(e.target.value)}
                     className="
-                      w-full
-                      pl-12 pr-4 py-3
-                      rounded-xl
-                      border border-gray-300
-                      focus:outline-none
-                      focus:ring-2
-                      focus:ring-[#1C4880]
-                      focus:border-transparent
+                      w-full pl-12 pr-4 py-3 rounded-xl border border-gray-300
+                      focus:outline-none focus:ring-2 focus:ring-[#1C4880] focus:border-transparent
                     "
                   />
                 </div>
               </div>
 
-              {/* Empresa */}
-              <div className="space-y-2">
-                <label className="text-sm font-semibold text-gray-700">
-                  Empresa
-                </label>
+              {/* Centro médico */}
+              {form.user_role === "dentista" && (
+                <div className="space-y-2">
+                  <label className="text-sm font-semibold text-gray-700">
+                    Centro médico
+                  </label>
 
                 <div className="relative">
                   <FiBriefcase className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400" />
 
                   <input
                     type="text"
-                    defaultValue="Smile Factory"
+                    name="centro_medico"
+                    value={form.centro_medico}
+                    onChange={handleChange}
                     className="
-                      w-full
-                      pl-12 pr-4 py-3
-                      rounded-xl
-                      border border-gray-300
-                      focus:outline-none
-                      focus:ring-2
-                      focus:ring-[#1C4880]
-                      focus:border-transparent
+                      w-full pl-12 pr-4 py-3 rounded-xl border border-gray-300
+                      focus:outline-none focus:ring-2 focus:ring-[#1C4880] focus:border-transparent
+                    "
+                  />
+                </div>
+              </div>)}
+
+              {/* Número de registro */}
+              {form.user_role === "dentista" && (
+                <div className="space-y-2">
+                  <label className="text-sm font-semibold text-gray-700">
+                    Número de registro
+                  </label>
+
+                <div className="relative">
+                  <FiHash className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400" />
+
+                  <input
+                    type="text"
+                    name="numero_registro"
+                    value={form.numero_registro}
+                    onChange={handleChange}
+                    className="
+                      w-full pl-12 pr-4 py-3 rounded-xl border border-gray-300
+                      focus:outline-none focus:ring-2 focus:ring-[#1C4880] focus:border-transparent
+                    "
+                  />
+                </div>
+              </div>)}
+
+              {/* Dirección */}
+              <div className="space-y-2 md:col-span-2">
+                <label className="text-sm font-semibold text-gray-700">
+                  Dirección
+                </label>
+
+                <div className="relative">
+                  <FiMapPin className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400" />
+
+                  <input
+                    type="text"
+                    name="direccion"
+                    value={form.direccion}
+                    onChange={handleChange}
+                    className="
+                      w-full pl-12 pr-4 py-3 rounded-xl border border-gray-300
+                      focus:outline-none focus:ring-2 focus:ring-[#1C4880] focus:border-transparent
                     "
                   />
                 </div>
               </div>
 
               {/* Rol */}
-              <div className="space-y-2">
-                <label className="text-sm font-semibold text-gray-700">
-                  Rol
-                </label>
+              {form.user_role === "dentista" && (
+                <div className="space-y-2 md:col-span-2">
+                  <label className="text-sm font-semibold text-gray-700">
+                    Rol
+                  </label>
 
                 <div className="relative">
                   <FiShield className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400" />
 
-                  <select
-                    defaultValue="Administrador"
+                  <input
+                    type="text"
+                    value={roleLabel}
+                    disabled
                     className="
-                      w-full
-                      pl-12 pr-4 py-3
-                      rounded-xl
-                      border border-gray-300
-                      bg-white
-                      focus:outline-none
-                      focus:ring-2
-                      focus:ring-[#1C4880]
-                      focus:border-transparent
+                      w-full pl-12 pr-4 py-3 rounded-xl border border-gray-200
+                      bg-gray-100 text-gray-500 cursor-not-allowed
                     "
-                  >
-                    <option>Administrador</option>
-                    <option>Operador</option>
-                    <option>Diseñador CAD</option>
-                    <option>Recepción</option>
-                  </select>
+                  />
                 </div>
-              </div>
+              </div>)}
             </div>
 
             {/* Actions */}
@@ -307,6 +534,23 @@ export default function AccountSettingsPage() {
               <div className="flex gap-4 w-full md:w-auto">
                 <button
                   type="button"
+                  onClick={() => {
+                    if (!profile) return
+                    setForm({
+                      nombre: profile.nombre ?? "",
+                      apellido: profile.apellido ?? "",
+                      telefono:
+                        profile.telefono !== null
+                          ? String(profile.telefono)
+                          : "",
+                      centro_medico: profile.centroMedico ?? "",
+                      direccion: profile.direccion ?? "",
+                      numero_registro: profile.numeroRegistro ?? "",
+                      user_role: profile.userRole ?? "",
+                    })
+                    setPassword("")
+                    setPasswordConfirm("")
+                  }}
                   className="
                     flex-1 md:flex-none
                     px-6 py-3
@@ -323,6 +567,7 @@ export default function AccountSettingsPage() {
 
                 <button
                   type="submit"
+                  disabled={profileMutation.isPending || isLoading}
                   className="
                     flex-1 md:flex-none
                     px-8 py-3
@@ -331,16 +576,19 @@ export default function AccountSettingsPage() {
                     text-white
                     font-semibold
                     hover:opacity-90
+                    disabled:opacity-60
                     transition
                     shadow-lg
                   "
                 >
-                  Guardar cambios
+                  {profileMutation.isPending
+                    ? "Guardando…"
+                    : "Guardar cambios"}
                 </button>
               </div>
             </div>
           </div>
-        </div>
+        </form>
       </div>
 
       {/* Modal */}

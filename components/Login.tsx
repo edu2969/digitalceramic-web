@@ -4,6 +4,8 @@ import Image from "next/image"
 import { useState } from "react"
 import { useRouter } from "next/navigation"
 import { createClient } from "@/lib/supabase/client"
+import Link from "next/link"
+import { dashboardPathFor, isUserRole } from "@/lib/userRole"
 
 export default function Login() {
   const router = useRouter()
@@ -25,14 +27,26 @@ export default function Login() {
       password,
     })
 
-    setLoading(false)
-
     if (error) {
+      setLoading(false)
       setLoginError("Credenciales inválidas")
       return
     }
 
-    router.push("/dashboard")
+    let target = "/dashboard"
+    try {
+      const res = await fetch("/api/profile/me")
+      if (res.ok) {
+        const json = await res.json()
+        const role = json?.profile?.userRole
+        target = dashboardPathFor(isUserRole(role) ? role : null)
+      }
+    } catch {
+      // fallback al default
+    }
+
+    setLoading(false)
+    router.push(target)
   }
 
   return (
@@ -172,7 +186,17 @@ export default function Login() {
 
           {/* Footer */}
           <div className={`mt-8 text-center text-sm ${loginError ? 'text-red-400' : 'text-gray-500'}`}>
-            {loginError || "Plataforma DigitalCeramic"}
+            {loginError || (
+              <span>
+                ¿Aún no tienes cuenta?{" "}
+                <Link
+                  href="/new-account"
+                  className="text-[#269FD0] hover:underline font-semibold"
+                >
+                  Crear cuenta
+                </Link>
+              </span>
+            )}
           </div>
         </div>
       </div>

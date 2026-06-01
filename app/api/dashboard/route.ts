@@ -52,6 +52,16 @@ function daysDiff(targetISO: string, fromISO: string): number {
   return Math.floor(ms / (1000 * 60 * 60 * 24))
 }
 
+type TrabajoRow = {
+  id: string
+  fecha_envio: string | null
+  fecha_entrega: string | null
+  estado: string | null
+  pacientes: { nombre: string | null; apellido: string | null } | null
+  clinica: { nombre: string | null } | null
+  piezas: { tipo: string | null }[] | null
+}
+
 export async function GET() {
   try {
     const sessionClient = await createSessionClient()
@@ -66,14 +76,15 @@ export async function GET() {
       )
     }
 
-    const { data: trabajos, error: trabajosError } = await supabase
-      .from("mood_trabajos")
+    const { data: trabajosData, error: trabajosError } = await supabase
+      .from("trabajos")
       .select(
-        "id, paciente, clinica, fecha_envio, fecha_entrega, estado, mood_piezas (tipo)"
+        "id, fecha_envio, fecha_entrega, estado, pacientes (nombre, apellido), clinica (nombre), piezas (tipo)"
       )
       .order("fecha_envio", { ascending: false })
 
     if (trabajosError) throw trabajosError
+    const trabajos = (trabajosData ?? []) as unknown as TrabajoRow[]
 
     const now = new Date()
     const todayISO = now.toISOString().slice(0, 10)
@@ -81,9 +92,8 @@ export async function GET() {
       .toISOString()
       .slice(0, 10)
 
-    const works = (trabajos ?? []).map((t) => {
-      const piezas =
-        (t.mood_piezas as { tipo: string | null }[] | null) ?? []
+    const works = trabajos.map((t) => {
+      const piezas = t.piezas ?? []
       const typesSet = new Set<string>()
       piezas.forEach((p) => {
         const label = p.tipo ? TYPE_LABEL[p.tipo] : null
@@ -95,12 +105,20 @@ export async function GET() {
       const overdue = due ? days < 0 : false
       const overdueDays = overdue ? -days : undefined
       const urgent = overdue || (due ? days <= 2 : false)
-      const estado: Estado = isEstado(t.estado) ? t.estado : "CRE"
+      const estado: Estado = isEstado(t.estado) ? t.estado : "CREADO"
+
+      const patientName = [
+        t.pacientes?.nombre ?? null,
+        t.pacientes?.apellido ?? null,
+      ]
+        .filter(Boolean)
+        .join(" ")
+        .trim()
 
       return {
         id: t.id,
-        patient: t.paciente ?? "-",
-        clinic: t.clinica ?? "-",
+        patient: patientName || "-",
+        clinic: t.clinica?.nombre ?? "-",
         createdAt: formatDate(t.fecha_envio),
         dueDate: formatDate(t.fecha_entrega),
         pieces: piezas.length,
@@ -112,14 +130,14 @@ export async function GET() {
       }
     })
 
-    const enEspera = works.filter((w) => w.estado === "CRE").length
-    const enProceso = works.filter((w) => w.estado === "INI").length
+    const enEspera = works.filter((w) => w.estado === "CREADO").length
+    const enProceso = works.filter((w) => w.estado === "INICIADO").length
     const vencidos = works.filter((w) => w.overdue).length
     const ultimoRetraso = works.reduce(
       (max, w) => Math.max(max, w.overdueDays ?? 0),
       0
     )
-    const delMes = (trabajos ?? []).filter(
+    const delMes = trabajos.filter(
       (t) => t.fecha_envio && t.fecha_envio >= monthStartISO
     ).length
 

@@ -30,12 +30,16 @@ type SignResponse = {
 function defaultValues(): UploadFormValues {
   const reception = todayISO()
   return {
+    patientId: null,
     patientName: "",
+    patientLastName: "",
     patientAge: "",
     receptionDate: reception,
     deliveryDate: minDeliveryDate(reception),
     dentistName: "",
     dentistRut: "",
+    dentistRegistry: "",
+    clinicId: null,
     medicalCenter: "",
     pieces: [],
     notes: "",
@@ -135,12 +139,16 @@ export default function UploadWizard() {
         body: JSON.stringify({
           orderId: signed.orderId,
           patientInfo: {
+            patientId: data.patientId,
             patientName: data.patientName,
+            patientLastName: data.patientLastName,
             patientAge: data.patientAge,
             receptionDate: data.receptionDate,
             deliveryDate: data.deliveryDate,
             dentistName: data.dentistName,
             dentistRut: data.dentistRut,
+            dentistRegistry: data.dentistRegistry,
+            clinicId: data.clinicId,
             medicalCenter: data.medicalCenter,
           },
           pieces: piecesPayload,
@@ -183,6 +191,7 @@ export default function UploadWizard() {
     !!values.patientAge?.toString().trim() &&
     !!values.dentistName?.trim() &&
     !!values.dentistRut?.trim() &&
+    !!values.dentistRegistry?.trim() &&
     !!values.medicalCenter?.trim() &&
     !!values.receptionDate &&
     !!values.deliveryDate &&

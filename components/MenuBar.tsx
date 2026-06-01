@@ -7,14 +7,56 @@ import {
   FiLogOut,
 } from "react-icons/fi"
 import { useRouter } from "next/navigation"
+import { useQuery } from "@tanstack/react-query"
+import { createClient } from "@/lib/supabase/client"
+import { dashboardPathFor, isUserRole } from "@/lib/userRole"
+
+async function fetchProfile() {
+  const res = await fetch("/api/profile/me")
+  if (!res.ok) return null
+  return res.json()
+}
 
 export default function SidebarLayout({
   children,
 }: {
   children: React.ReactNode
 }) {
-    const router = useRouter();
+  const router = useRouter()
+  const supabase = createClient()
   const [open, setOpen] = useState(false)
+  const [loggingOut, setLoggingOut] = useState(false)
+
+  const { data: profileData } = useQuery({
+    queryKey: ["profile-me"],
+    queryFn: fetchProfile,
+    staleTime: 5 * 60 * 1000,
+  })
+
+  const role = profileData?.profile?.userRole
+  const homePath = dashboardPathFor(isUserRole(role) ? role : null)
+  const fullName =
+    [profileData?.profile?.nombre, profileData?.profile?.apellido]
+      .filter(Boolean)
+      .join(" ")
+      .trim() || "Usuario"
+  const subtitle =
+    profileData?.profile?.centroMedico ?? profileData?.profile?.email ?? ""
+  const initials =
+    fullName
+      .split(/\s+/)
+      .map((s) => s.charAt(0).toUpperCase())
+      .slice(0, 2)
+      .join("") || "U"
+
+  const handleLogout = async () => {
+    if (loggingOut) return
+    setLoggingOut(true)
+    setOpen(false)
+    await supabase.auth.signOut()
+    router.replace("/")
+    router.refresh()
+  }
 
   return (
     <>
@@ -87,11 +129,15 @@ export default function SidebarLayout({
         {/* Header */}
         <div className="px-6 pt-24 pb-8 border-b border-gray-100">
           <h2 className="text-2xl font-bold text-[#1C4880]">
-            Smile Factory
+            Digital Ceramic
           </h2>
 
           <p className="text-sm text-gray-500 mt-1">
-            Panel de laboratorio
+            {role === "ODONTOLOGO"
+              ? "Panel del odontólogo"
+              : role === "ADMINISTRADOR"
+              ? "Panel de administrador"
+              : "Panel de laboratorio"}
           </p>
         </div>
 
@@ -112,7 +158,7 @@ export default function SidebarLayout({
             "
             onClick={() => {
                 setOpen(false);
-                router.push('/dashboard')
+                router.push(homePath)
             }}
           >
             <FiHome className="w-5 h-5" />
@@ -143,6 +189,7 @@ export default function SidebarLayout({
 
           <button
             type="button"
+            disabled={loggingOut}
             className="
               w-full
               flex items-center gap-4
@@ -150,16 +197,14 @@ export default function SidebarLayout({
               rounded-xl
               text-red-600
               hover:bg-red-50
+              disabled:opacity-60
               transition cursor-pointer
             "
-            onClick={() => {
-                setOpen(false);
-                router.push('/login')
-            }}
+            onClick={handleLogout}
           >
             <FiLogOut className="w-5 h-5" />
 
-            <span>Cerrar sesión</span>
+            <span>{loggingOut ? "Cerrando…" : "Cerrar sesión"}</span>
           </button>
         </nav>
 
@@ -177,16 +222,16 @@ export default function SidebarLayout({
                 shadow-md
               "
             >
-              ET
+              {initials}
             </div>
 
             <div>
               <p className="font-semibold text-gray-900">
-                Eduardo Troncoso
+                {fullName}
               </p>
 
               <p className="text-sm text-gray-500">
-                Smile Factory
+                {subtitle}
               </p>
             </div>
           </div>

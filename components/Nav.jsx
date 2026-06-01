@@ -36,6 +36,7 @@ export default function Nav() {
                     <ul className="flex gap-8 font-semibold text-[#1C4880] text-lg">
                         <li><Link href="/" className="hover:text-[#269FD0] transition">Inicio</Link></li>
                         <li><Link href="/quienes-somos" className="hover:text-[#269FD0] transition">Quiénes somos</Link></li>
+                        <li><Link href="/new-account" className="hover:text-[#269FD0] transition">Inscribete aquí</Link></li>
                         <li><Link href="/contact" className="hover:text-[#269FD0] transition">Contacto</Link></li>
                     </ul>
                 </nav>
@@ -59,6 +60,7 @@ export default function Nav() {
                         <ul className="flex flex-col gap-4 font-semibold text-[#1C4880] text-base">
                             <li><Link href="/" className="hover:text-[#269FD0] transition block py-2" onClick={handleNavClick}>Inicio</Link></li>
                             <li><Link href="/quienes-somos" className="hover:text-[#269FD0] transition block py-2" onClick={handleNavClick}>Quiénes somos</Link></li>
+                            <li><Link href="/new-account" className="hover:text-[#269FD0] transition block py-2" onClick={handleNavClick}>Inscribete aquí</Link></li>
                             <li><Link href="/contact" className="hover:text-[#269FD0] transition block py-2" onClick={handleNavClick}>Contacto</Link></li>
                         </ul>
                     </nav>

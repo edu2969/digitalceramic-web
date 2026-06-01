@@ -69,10 +69,7 @@ function paletteLabel(paleta: string | null): string {
   return PALETTE_LABEL[paleta] ?? paleta
 }
 
-function pieceTypeLabel(
-  tipo: string | null,
-  hasTiBase: boolean
-): string {
+function pieceTypeLabel(tipo: string | null, hasTiBase: boolean): string {
   if (!tipo) return "-"
   if (tipo === "CORONA_IMPLANTE") {
     return hasTiBase ? "Corona atornillada" : "Corona cementada"
@@ -80,11 +77,13 @@ function pieceTypeLabel(
   return TYPE_LABEL_BASE[tipo] ?? tipo
 }
 
-function orderNumber(id: number, fechaEnvio: string | null): string {
-  const year = fechaEnvio
-    ? new Date(fechaEnvio).getFullYear()
-    : new Date().getFullYear()
-  return `${year}-${String(id).padStart(5, "0")}`
+function ageFromBirthDate(iso: string | null): number | null {
+  if (!iso) return null
+  const d = new Date(iso)
+  if (Number.isNaN(d.getTime())) return null
+  const diffMs = Date.now() - d.getTime()
+  const years = Math.floor(diffMs / (365.25 * 24 * 60 * 60 * 1000))
+  return Number.isFinite(years) && years >= 0 ? years : null
 }
 
 type PiezaRow = {
@@ -96,6 +95,33 @@ type PiezaRow = {
   tibase_plataforma: number | null
   tibase_gingival: number | null
   conexion: string | null
+}
+
+type TrabajoRow = {
+  id: string
+  fecha_envio: string | null
+  fecha_entrega: string | null
+  monto: number | null
+  notas: string | null
+  estado: string | null
+  enviado_por: string | null
+  url_superior: string | null
+  url_inferior: string | null
+  url_mordida: string | null
+  url_gingival: string | null
+  pacientes: {
+    nombre: string | null
+    apellido: string | null
+    fecha_nacimiento: string | null
+  } | null
+  clinica: { nombre: string | null } | null
+  profiles: {
+    user_id: string | null
+    nombre: string | null
+    apellido: string | null
+    numero_registro: string | null
+  } | null
+  piezas: PiezaRow[] | null
 }
 
 export async function GET(
@@ -117,42 +143,37 @@ export async function GET(
 
     const { id } = await ctx.params
     const trabajoId = Array.isArray(id) ? id[0] : id
-    const trabajoIdNum = Number(trabajoId)
-
-    if (!Number.isFinite(trabajoIdNum)) {
+    if (!trabajoId || typeof trabajoId !== "string") {
       return NextResponse.json(
         { success: false, error: "ID inválido" },
         { status: 400 }
       )
     }
 
-    const { data: trabajo, error: trabajoError } = await supabase
-      .from("mood_trabajos")
+    const { data: trabajoData, error: trabajoError } = await supabase
+      .from("trabajos")
       .select(
-        "id, usuario_id, paciente, edad, clinica, nombre_odontologo, fecha_envio, fecha_entrega, monto, notas, estado, url_superior, url_inferior, url_mordida, url_gingival, mood_piezas (numero, paleta, colores, tipo, tibase_cementado, tibase_plataforma, tibase_gingival, conexion)"
+        "id, fecha_envio, fecha_entrega, monto, notas, estado, enviado_por, url_superior, url_inferior, url_mordida, url_gingival, pacientes (nombre, apellido, fecha_nacimiento), clinica (nombre), profiles (user_id, nombre, apellido, numero_registro), piezas (numero, paleta, colores, tipo, tibase_cementado, tibase_plataforma, tibase_gingival, conexion)"
       )
-      .eq("id", trabajoIdNum)
-      .single()
+      .eq("id", trabajoId)
+      .maybeSingle()
 
-    if (trabajoError || !trabajo) {
+    if (trabajoError || !trabajoData) {
       return NextResponse.json(
         { success: false, error: "Trabajo no encontrado" },
         { status: 404 }
       )
     }
 
-    let sentByName: string | null = null
+    const trabajo = trabajoData as unknown as TrabajoRow
+
     let sentByEmail: string | null = null
-    if (trabajo.usuario_id) {
+    const ownerUserId = trabajo.profiles?.user_id ?? null
+    if (ownerUserId) {
       const { data: ownerData } = await supabase.auth.admin.getUserById(
-        trabajo.usuario_id
+        ownerUserId
       )
       sentByEmail = ownerData?.user?.email ?? null
-      const meta = (ownerData?.user?.user_metadata ?? {}) as {
-        full_name?: string
-        name?: string
-      }
-      sentByName = meta.full_name ?? meta.name ?? null
     }
 
     const todayISO = new Date().toISOString().slice(0, 10)
@@ -163,7 +184,7 @@ export async function GET(
     const urgent = overdue || (due ? days <= 2 : false)
     const status = overdue ? "Atrasado" : urgent ? "Urgente" : "En tiempo"
 
-    const piezasRaw = (trabajo.mood_piezas as PiezaRow[] | null) ?? []
+    const piezasRaw = trabajo.piezas ?? []
 
     const pieces = piezasRaw.map((p) => {
       const hasTiBase =
@@ -183,9 +204,7 @@ export async function GET(
                   ? `${p.tibase_plataforma} mm`
                   : "-",
               gingival:
-                p.tibase_gingival !== null
-                  ? `${p.tibase_gingival} mm`
-                  : "-",
+                p.tibase_gingival !== null ? `${p.tibase_gingival} mm` : "-",
             }
           : null
 
@@ -198,8 +217,9 @@ export async function GET(
       const palette = paletteLabel(p.paleta)
 
       const colors = codes.map((code, i) => ({
-        label: codes.length === 1 ? palette || labels[0] : labels[i],
+        label: codes.length === 1 ? labels[0] : labels[i],
         value: code,
+        palette,
       }))
 
       return {
@@ -215,29 +235,48 @@ export async function GET(
       { name: "Inferior", href: trabajo.url_inferior },
       { name: "Mordida", href: trabajo.url_mordida },
       { name: "Gingival", href: trabajo.url_gingival },
+    ].filter((f): f is { name: string; href: string } => !!f.href)
+
+    const profileName = [
+      trabajo.profiles?.nombre,
+      trabajo.profiles?.apellido,
     ]
-      .filter((f): f is { name: string; href: string } => !!f.href)
+      .filter(Boolean)
+      .join(" ")
+      .trim()
+    const dentistName = trabajo.enviado_por || profileName || "-"
+
+    const patientFullName = [
+      trabajo.pacientes?.nombre ?? null,
+      trabajo.pacientes?.apellido ?? null,
+    ]
+      .filter(Boolean)
+      .join(" ")
+      .trim()
 
     return NextResponse.json({
       id: trabajo.id,
-      orderNumber: orderNumber(trabajo.id, trabajo.fecha_envio),
+      orderNumber: String(trabajo.id).slice(0, 8),
       status,
       overdue,
       overdueDays,
       patient: {
-        name: trabajo.paciente ?? "-",
-        age: trabajo.edad,
+        name: patientFullName || "-",
+        age: ageFromBirthDate(trabajo.pacientes?.fecha_nacimiento ?? null),
       },
-      clinic: { name: trabajo.clinica ?? "-" },
-      dentist: { name: trabajo.nombre_odontologo ?? "-" },
-      sentBy: { name: sentByName, email: sentByEmail },
+      clinic: { name: trabajo.clinica?.nombre ?? "-" },
+      dentist: {
+        name: dentistName,
+        registry: trabajo.profiles?.numero_registro ?? null,
+      },
+      sentBy: { name: dentistName, email: sentByEmail },
       issueDate: formatDateLong(trabajo.fecha_envio),
       dueDate: formatDateLong(trabajo.fecha_entrega),
       pieces,
       files,
       notes: trabajo.notas ?? "",
       monto: trabajo.monto,
-      estado: trabajo.estado ?? "CRE",
+      estado: isEstado(trabajo.estado) ? trabajo.estado : ("CREADO" as Estado),
     })
   } catch (error) {
     console.error(error)
@@ -249,13 +288,13 @@ export async function GET(
 }
 
 const ALLOWED_TRANSITIONS: Record<Estado, Estado[]> = {
-  CRE: ["INI", "ANU"],
-  INI: ["FIN", "ANU"],
-  FIN: ["TRA"],
-  TRA: ["REC"],
-  REC: [],
-  DEV: [],
-  ANU: [],
+  CREADO: ["INICIADO", "ANULADO"],
+  INICIADO: ["FINALIZADO", "ANULADO"],
+  FINALIZADO: ["TRA"],
+  TRA: ["RECIBIDO"],
+  RECIBIDO: [],
+  DEVUELTO: [],
+  ANULADO: [],
 }
 
 export async function PATCH(
@@ -276,8 +315,7 @@ export async function PATCH(
 
     const { id } = await ctx.params
     const trabajoId = Array.isArray(id) ? id[0] : id
-    const trabajoIdNum = Number(trabajoId)
-    if (!Number.isFinite(trabajoIdNum)) {
+    if (!trabajoId || typeof trabajoId !== "string") {
       return NextResponse.json(
         { success: false, error: "ID inválido" },
         { status: 400 }
@@ -303,10 +341,10 @@ export async function PATCH(
     const target = body.to
 
     const { data: current, error: readError } = await supabase
-      .from("mood_trabajos")
+      .from("trabajos")
       .select("id, estado")
-      .eq("id", trabajoIdNum)
-      .single()
+      .eq("id", trabajoId)
+      .maybeSingle()
 
     if (readError || !current) {
       return NextResponse.json(
@@ -315,7 +353,7 @@ export async function PATCH(
       )
     }
 
-    const from = (current.estado ?? "CRE") as Estado
+    const from = (current.estado ?? "CREADO") as Estado
     if (!isEstado(from)) {
       return NextResponse.json(
         { success: false, error: "Estado actual desconocido" },
@@ -331,9 +369,9 @@ export async function PATCH(
     }
 
     const { data: updated, error: updateError } = await supabase
-      .from("mood_trabajos")
+      .from("trabajos")
       .update({ estado: target })
-      .eq("id", trabajoIdNum)
+      .eq("id", trabajoId)
       .eq("estado", from)
       .select("id, estado")
       .single()

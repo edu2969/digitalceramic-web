@@ -1,0 +1,42 @@
+[
+  {
+    "enum_name": "trabajo_estado",
+    "enum_value": "CREADO"
+  },
+  {
+    "enum_name": "trabajo_estado",
+    "enum_value": "INICIADO"
+  },
+  {
+    "enum_name": "trabajo_estado",
+    "enum_value": "DEVUELTO"
+  },
+  {
+    "enum_name": "trabajo_estado",
+    "enum_value": "ANULADO"
+  },
+  {
+    "enum_name": "trabajo_estado",
+    "enum_value": "FINALIZADO"
+  },
+  {
+    "enum_name": "trabajo_estado",
+    "enum_value": "RECIBIDO"
+  },
+  {
+    "enum_name": "trabajo_estado",
+    "enum_value": "TRA"
+  },
+  {
+    "enum_name": "user_role",
+    "enum_value": "ODONTOLOGO"
+  },
+  {
+    "enum_name": "user_role",
+    "enum_value": "LABORATORIO"
+  },
+  {
+    "enum_name": "user_role",
+    "enum_value": "ADMINISTRADOR"
+  }
+]

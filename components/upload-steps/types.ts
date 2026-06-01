@@ -45,12 +45,16 @@ export type PieceConfig = {
 }
 
 export type UploadFormValues = {
+  patientId: string | null
   patientName: string
+  patientLastName: string
   patientAge: string
   receptionDate: string
   deliveryDate: string
   dentistName: string
   dentistRut: string
+  dentistRegistry: string
+  clinicId: string | null
   medicalCenter: string
   pieces: PieceConfig[]
   notes: string

@@ -13,7 +13,7 @@ export default function Services() {
         {/* Servicio 1: Box de arriendo */}
         <div className="border rounded-xl hover:shadow-lg transition hover:scale-105">
           <div className="w-full aspect-4/3 relative">
-            <Image src="/serv_box.png" alt="servicio" fill style={{ objectFit: 'cover' }} className="rounded-lg rounded-b-none" />
+            <Image src="/serv_box.png" alt="servicio" fill sizes="(min-width: 768px) 25vw, 100vw" style={{ objectFit: 'cover' }} className="rounded-lg rounded-b-none" />
           </div>
           <div className="p-4">
             <h3 className="font-semibold text-xl">Box de arriendo</h3>
@@ -26,7 +26,7 @@ export default function Services() {
         {/* Servicio 2: Escáner dental */}
         <div className="border rounded-xl hover:shadow-lg transition hover:scale-105">
           <div className="w-full aspect-4/3 relative">
-            <Image src="/serv_escaner_inal.png" alt="servicio" fill style={{ objectFit: 'cover' }} className="rounded-lg rounded-b-none" />
+            <Image src="/serv_escaner_inal.png" alt="servicio" fill sizes="(min-width: 768px) 25vw, 100vw" style={{ objectFit: 'cover' }} className="rounded-lg rounded-b-none" />
           </div>
           <div className="p-4">
             <h3 className="font-semibold text-xl">Escáner dental</h3>
@@ -39,7 +39,7 @@ export default function Services() {
         {/* Servicio 3: Diseño de piezas dentales */}
         <div className="border rounded-xl hover:shadow-lg transition hover:scale-105">
           <div className="w-full aspect-4/3 relative">
-            <Image src="/serv_diseno_3d.png" alt="servicio" fill style={{ objectFit: 'cover' }} className="rounded-lg rounded-b-none" />
+            <Image src="/serv_diseno_3d.png" alt="servicio" fill sizes="(min-width: 768px) 25vw, 100vw" style={{ objectFit: 'cover' }} className="rounded-lg rounded-b-none" />
           </div>
           <div className="p-4">
             <h3 className="font-semibold text-xl">Diseño de piezas dentales</h3>
@@ -52,7 +52,7 @@ export default function Services() {
         {/* Servicio 4: Coronas dentales */}
         <div className="border rounded-xl hover:shadow-lg transition hover:scale-105">
           <div className="w-full aspect-4/3 relative">
-            <Image src="/serv_corona.png" alt="servicio" fill style={{ objectFit: 'cover' }} className="rounded-lg rounded-b-none" />
+            <Image src="/serv_corona.png" alt="servicio" fill sizes="(min-width: 768px) 25vw, 100vw" style={{ objectFit: 'cover' }} className="rounded-lg rounded-b-none" />
           </div>
           <div className="p-4">
             <h3 className="font-semibold text-xl">Coronas dentales</h3>
