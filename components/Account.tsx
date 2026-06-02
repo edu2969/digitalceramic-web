@@ -28,6 +28,7 @@ type ProfileResponse = {
     centroMedico: string | null
     direccion: string | null
     numeroRegistro: string | null
+    avatarUrl: string | null
     userRole: UserRole | null
   } | null
 }
@@ -58,6 +59,16 @@ const ROLE_LABEL: Record<UserRole, string> = {
   ADMINISTRADOR: "Administrador",
 }
 
+const MAX_AVATAR_SIZE = 5 * 1024 * 1024
+const VALID_AVATAR_TYPES = new Set(["image/png", "image/jpeg", "image/webp"])
+
+type SignedAvatar = {
+  bucket: string
+  path: string
+  signedUrl: string
+  token: string
+}
+
 async function fetchProfile(): Promise<ProfileResponse> {
   const res = await fetch("/api/profile/me")
   if (!res.ok) throw new Error("Error cargando perfil")
@@ -83,6 +94,7 @@ export default function AccountSettingsPage() {
   const queryClient = useQueryClient()
 
   const [avatar, setAvatar] = useState<string | null>(null)
+  const [avatarUploading, setAvatarUploading] = useState(false)
   const [openDeleteModal, setOpenDeleteModal] = useState(false)
   const [form, setForm] = useState<FormState>(EMPTY)
   const [password, setPassword] = useState("")
@@ -119,15 +131,69 @@ export default function AccountSettingsPage() {
     },
   })
 
-  const handleAvatarChange = (
+  const handleAvatarChange = async (
     e: React.ChangeEvent<HTMLInputElement>,
   ) => {
     const file = e.target.files?.[0]
+    // Permite volver a elegir el mismo archivo tras un error.
+    e.target.value = ""
 
     if (!file) return
 
-    const url = URL.createObjectURL(file)
-    setAvatar(url)
+    if (!VALID_AVATAR_TYPES.has(file.type)) {
+      toast.error("Formato no permitido. Usa JPG, PNG o WEBP")
+      return
+    }
+    if (file.size > MAX_AVATAR_SIZE) {
+      toast.error("La imagen supera los 5MB")
+      return
+    }
+
+    const previewUrl = URL.createObjectURL(file)
+    setAvatar(previewUrl)
+    setAvatarUploading(true)
+
+    try {
+      // 1. Pedir URL firmada de subida (carpeta keyeada por el usuario).
+      const signRes = await fetch("/api/profile/avatar/sign", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          name: file.name,
+          size: file.size,
+          type: file.type,
+        }),
+      })
+      if (!signRes.ok) {
+        const body = await signRes.json().catch(() => ({}))
+        throw new Error(body?.error ?? "No se pudo preparar la subida")
+      }
+      const signed = (await signRes.json()) as SignedAvatar
+
+      // 2. Subir el archivo directo al bucket de Supabase.
+      const { error: uploadError } = await supabase.storage
+        .from(signed.bucket)
+        .uploadToSignedUrl(signed.path, signed.token, file, {
+          contentType: file.type,
+        })
+      if (uploadError) throw uploadError
+
+      // 3. Persistir la ruta en el perfil; la respuesta trae la URL firmada.
+      const result = await patchProfile({ avatar_url: signed.path })
+      queryClient.setQueryData(["profile-me"], result)
+      if (result.profile?.avatarUrl) {
+        setAvatar(result.profile.avatarUrl)
+      }
+      toast.success("Avatar actualizado")
+    } catch (err) {
+      setAvatar(profile?.avatarUrl ?? null)
+      toast.error(
+        err instanceof Error ? err.message : "Error subiendo el avatar",
+      )
+    } finally {
+      URL.revokeObjectURL(previewUrl)
+      setAvatarUploading(false)
+    }
   }
 
   const handleChange = (
@@ -185,11 +251,14 @@ export default function AccountSettingsPage() {
 
   const roleLabel = profile?.userRole ? ROLE_LABEL[profile.userRole] : "—"
 
+  const avatarSrc = avatar ?? profile?.avatarUrl ?? null
+  const isDentist = profile?.userRole === "ODONTOLOGO"
+
   return (
     <div className="min-h-screen bg-[#F5F7FA] p-6">
       <div className="max-w-7xl mx-auto space-y-6">
         {/* Header */}
-        <div className="ml-16 lg:ml-0">
+        <div className="ml-16 2xl:ml-0">
           <h1 className="text-3xl font-bold tracking-tight text-[#1C4880] text-right md:text-left">
             Configuración de cuenta
           </h1>
@@ -224,10 +293,10 @@ export default function AccountSettingsPage() {
                     flex items-center justify-center
                   "
                 >
-                  {avatar ? (
+                  {avatarSrc ? (
                     // eslint-disable-next-line @next/next/no-img-element
                     <img
-                      src={avatar}
+                      src={avatarSrc}
                       alt="Avatar"
                       className="w-full h-full object-cover"
                     />
@@ -236,10 +305,17 @@ export default function AccountSettingsPage() {
                       {initials}
                     </span>
                   )}
+
+                  {avatarUploading && (
+                    <div className="absolute inset-0 flex items-center justify-center bg-black/40">
+                      <span className="w-8 h-8 rounded-full border-2 border-white border-t-transparent animate-spin" />
+                    </div>
+                  )}
                 </div>
 
                 <button
                   type="button"
+                  disabled={avatarUploading}
                   onClick={() => fileInputRef.current?.click()}
                   className="
                     absolute bottom-1 right-1
@@ -259,8 +335,9 @@ export default function AccountSettingsPage() {
                 <input
                   ref={fileInputRef}
                   type="file"
-                  accept="image/*"
+                  accept="image/png,image/jpeg,image/webp"
                   className="hidden"
+                  disabled={avatarUploading}
                   onChange={handleAvatarChange}
                 />
               </div>
@@ -418,7 +495,7 @@ export default function AccountSettingsPage() {
               </div>
 
               {/* Centro médico */}
-              {form.user_role === "dentista" && (
+              {isDentist && (
                 <div className="space-y-2">
                   <label className="text-sm font-semibold text-gray-700">
                     Centro médico
@@ -441,7 +518,7 @@ export default function AccountSettingsPage() {
               </div>)}
 
               {/* Número de registro */}
-              {form.user_role === "dentista" && (
+              {isDentist && (
                 <div className="space-y-2">
                   <label className="text-sm font-semibold text-gray-700">
                     Número de registro
@@ -486,7 +563,7 @@ export default function AccountSettingsPage() {
               </div>
 
               {/* Rol */}
-              {form.user_role === "dentista" && (
+              {isDentist && (
                 <div className="space-y-2 md:col-span-2">
                   <label className="text-sm font-semibold text-gray-700">
                     Rol

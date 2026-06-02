@@ -42,7 +42,7 @@ export default function DentistDashboard() {
     <div className="min-h-screen bg-[#F5F7FA] p-6">
       <div className="max-w-6xl mx-auto space-y-6">
         <div className="flex flex-col md:flex-row md:items-end md:justify-between gap-4">
-          <div>
+          <div className="ml-16 2xl:ml-0">
             <h1 className="text-3xl font-bold tracking-tight text-[#1C4880]">
               Mis trabajos
             </h1>

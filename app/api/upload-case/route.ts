@@ -1,5 +1,5 @@
 import { NextResponse } from "next/server";
-import nodemailer from "nodemailer";
+import { Resend } from "resend";
 
 import { createClient } from "@supabase/supabase-js";
 import { createClient as createSessionClient } from "@/lib/supabase/server";
@@ -14,15 +14,7 @@ const supabase = createClient(
   process.env.SUPABASE_SERVICE_ROLE_KEY!
 );
 
-const transporter = nodemailer.createTransport({
-  host: process.env.SMTP_HOST,
-  port: Number(process.env.SMTP_PORT),
-  secure: false,
-  auth: {
-    user: process.env.SMTP_USER,
-    pass: process.env.SMTP_PASS,
-  },
-});
+const resend = new Resend(process.env.RESEND_APIKEY);
 
 type PatientInfo = {
   patientId: string | null;
@@ -389,12 +381,18 @@ export async function POST(req: Request) {
       </div>
     `;
 
-    await transporter.sendMail({
-      from: process.env.SMTP_FROM,
-      to: process.env.DENTAL_EMAIL_TO,
+    const { error: emailError } = await resend.emails.send({
+      from: process.env.RESEND_FROM!,
+      to: process.env.DENTAL_EMAIL_TO!,
       subject: `Nuevo pedido dental #${orderId}`,
       html,
     });
+
+    if (emailError) {
+      // El pedido ya quedó persistido en la base de datos; solo falló el aviso
+      // al laboratorio. No revertimos, pero lo registramos para reenvío manual.
+      console.error("Error al enviar correo del pedido:", emailError);
+    }
 
     return NextResponse.json({ success: true, orderId, trabajoId: trabajo.id });
   } catch (error) {

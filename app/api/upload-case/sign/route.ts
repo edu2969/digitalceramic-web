@@ -102,7 +102,11 @@ export async function POST(req: Request) {
   }
 
   const orderId = randomUUID();
-  const bucket = process.env.SUPABASE_BUCKET!;
+  const bucket = process.env.SUPABASE_BUCKET;
+  if (!bucket) {
+    console.error("sign error: SUPABASE_BUCKET no está configurada");
+    return bad("Almacenamiento no configurado (SUPABASE_BUCKET)", 500);
+  }
 
   const signOne = async (path: string): Promise<SignedTarget> => {
     const { data, error } = await supabaseAdmin.storage
@@ -138,7 +142,8 @@ export async function POST(req: Request) {
     };
     return NextResponse.json(response);
   } catch (err) {
+    const detail = err instanceof Error ? err.message : String(err);
     console.error("sign error", err);
-    return bad("No se pudieron generar URLs de subida", 500);
+    return bad(`No se pudieron generar URLs de subida: ${detail}`, 500);
   }
 }

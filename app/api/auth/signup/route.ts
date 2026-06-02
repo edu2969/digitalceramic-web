@@ -94,10 +94,10 @@ export async function POST(request: Request) {
     )
   }
 
-  // El enlace apunta a nuestra ruta /auth/confirm, que verifica el token con
+  // El enlace apunta a nuestra ruta /api/auth/confirm, que verifica el token con
   // verifyOtp({ token_hash, type }).
   const confirmUrl =
-    `${origin}/auth/confirm` +
+    `${origin}/api/auth/confirm` +
     `?token_hash=${encodeURIComponent(tokenHash)}` +
     `&type=signup&next=${encodeURIComponent("/dashboard")}`
 
@@ -125,6 +125,7 @@ export async function POST(request: Request) {
     // El usuario quedó creado pero el correo falló: lo eliminamos para que
     // pueda reintentar el registro.
     await admin.auth.admin.deleteUser(userId)
+    console.error("Error al enviar correo de confirmación:", emailError)
     return NextResponse.json(
       { error: "No se pudo enviar el correo de confirmación" },
       { status: 500 }

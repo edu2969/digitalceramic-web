@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server";
 import { createClient } from "@supabase/supabase-js";
-import nodemailer from "nodemailer";
+import { Resend } from "resend";
 import crypto from "crypto";
 
 const supabase = createClient(
@@ -8,15 +8,7 @@ const supabase = createClient(
   process.env.SUPABASE_SERVICE_ROLE_KEY!
 );
 
-const transporter = nodemailer.createTransport({
-  host: process.env.SMTP_HOST,
-  port: Number(process.env.SMTP_PORT),
-  secure: false,
-  auth: {
-    user: process.env.SMTP_USER,
-    pass: process.env.SMTP_PASS,
-  },
-});
+const resend = new Resend(process.env.RESEND_APIKEY);
 
 export async function POST(req: Request) {
   try {
@@ -90,9 +82,9 @@ export async function POST(req: Request) {
     // ENVIAR EMAIL
     // =========================
 
-    await transporter.sendMail({
-      from: process.env.SMTP_FROM,
-      to: "laboratorio@midominio.com",
+    const { error: emailError } = await resend.emails.send({
+      from: process.env.RESEND_FROM!,
+      to: process.env.DENTAL_EMAIL_TO!,
       subject: `Nuevo caso dental - ${paciente}`,
 
       html: `
@@ -125,6 +117,10 @@ export async function POST(req: Request) {
         </ul>
       `,
     });
+
+    if (emailError) {
+      console.error("Error al enviar correo del caso:", emailError);
+    }
 
     // =========================
     // RESPUESTA

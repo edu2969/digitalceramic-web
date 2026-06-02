@@ -34,6 +34,7 @@ export default function SidebarLayout({
   })
 
   const role = profileData?.profile?.userRole
+  const avatarUrl = profileData?.profile?.avatarUrl ?? null
   const homePath = dashboardPathFor(isUserRole(role) ? role : null)
   const fullName =
     [profileData?.profile?.nombre, profileData?.profile?.apellido]
@@ -215,6 +216,7 @@ export default function SidebarLayout({
               className="
                 w-14 h-14
                 rounded-full
+                overflow-hidden
                 bg-[#1C4880]
                 text-white
                 flex items-center justify-center
@@ -222,7 +224,16 @@ export default function SidebarLayout({
                 shadow-md
               "
             >
-              {initials}
+              {avatarUrl ? (
+                // eslint-disable-next-line @next/next/no-img-element
+                <img
+                  src={avatarUrl}
+                  alt="Avatar"
+                  className="w-full h-full object-cover"
+                />
+              ) : (
+                initials
+              )}
             </div>
 
             <div>
