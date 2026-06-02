@@ -99,7 +99,7 @@ export async function POST(request: Request) {
   const confirmUrl =
     `${origin}/api/auth/confirm` +
     `?token_hash=${encodeURIComponent(tokenHash)}` +
-    `&type=signup&next=${encodeURIComponent("/dashboard")}`
+    `&type=signup&next=${encodeURIComponent("/dashboard-odontologo")}`
 
   const { error: emailError } = await resend.emails.send({
     from: process.env.RESEND_FROM!,
