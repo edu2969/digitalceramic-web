@@ -143,11 +143,25 @@ async function resolvePaciente(info: PatientInfo): Promise<string> {
   if (info.patientId) {
     return info.patientId;
   }
+  const nombre = info.patientName.trim();
+  const apellido = info.patientLastName?.trim() || null;
+
+  // El autocompletado limpia patientId en cada tecla, así que un paciente ya
+  // existente escrito (sin seleccionarlo) llega sin id. Reutilizamos el que
+  // coincida en nombre + apellido (case-insensitive) para no duplicarlo.
+  let findQuery = supabase.from("pacientes").select("id").ilike("nombre", nombre);
+  findQuery = apellido
+    ? findQuery.ilike("apellido", apellido)
+    : findQuery.is("apellido", null);
+  const { data: matches, error: findError } = await findQuery.limit(1);
+  if (findError) throw findError;
+  if (matches && matches.length > 0) return matches[0].id;
+
   const { data, error } = await supabase
     .from("pacientes")
     .insert({
-      nombre: info.patientName.trim(),
-      apellido: info.patientLastName?.trim() || null,
+      nombre,
+      apellido,
       fecha_nacimiento: approxBirthDateFromAge(info.patientAge),
     })
     .select("id")
@@ -160,9 +174,22 @@ async function resolveClinica(info: PatientInfo): Promise<string> {
   if (info.clinicId) {
     return info.clinicId;
   }
+  const nombre = info.medicalCenter.trim();
+
+  // medicalCenter llega pre-rellenado desde el perfil del odontólogo (sin
+  // clinicId), así que sin esta búsqueda se crearía una clínica nueva en cada
+  // envío. Reutilizamos la que coincida en nombre (case-insensitive).
+  const { data: matches, error: findError } = await supabase
+    .from("clinica")
+    .select("id")
+    .ilike("nombre", nombre)
+    .limit(1);
+  if (findError) throw findError;
+  if (matches && matches.length > 0) return matches[0].id;
+
   const { data, error } = await supabase
     .from("clinica")
-    .insert({ nombre: info.medicalCenter.trim() })
+    .insert({ nombre })
     .select("id")
     .single();
   if (error || !data) throw error ?? new Error("clinica insert failed");
