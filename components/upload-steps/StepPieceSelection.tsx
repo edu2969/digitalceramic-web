@@ -97,11 +97,13 @@ export default function StepPieceSelection() {
         </p>
       )}
 
-      {orderedFieldIndices.map(({ idx }) => {
-        const fieldKey = (fields[idx] as PieceConfig & { _key: string })._key
+      {orderedFieldIndices.map(({ idx, gridIndex }) => {
+        // Usamos gridIndex (posición FDI, única e inmutable por pieza) como key.
+        // El _key de useFieldArray se regenera en cada setValue anidado dentro de
+        // "pieces", lo que remontaría todas las PieceCard y resetearía el scroll.
         return (
           <PieceCard
-            key={fieldKey}
+            key={gridIndex}
             index={idx}
             piece={watchedPieces[idx] as PieceConfig | undefined}
             register={register}
