@@ -23,32 +23,32 @@ export default function Club() {
               Comienza con ventajas exclusivas
             </div>
           </div>
-          <div className="border-r-2 border-white/20">
-            <Image src={'/tool_01.png'} width={325} height={267} className="-mt-3 w-25 h-auto" alt="tool_01" />
+          <div className="border-r-2 border-white/20 px-2">
+            <Image src={'/tool_01.png'} width={325} height={267} className="-mt-3 w-25 h-auto mx-auto" alt="tool_01" />
             <p className="text-xs text-center">Escaneo intraoral profesional</p>
           </div>
-          <div className="border-r-2 border-white/20">
-            <Image src={'/tool_02.png'} width={325} height={267} className="-mt-3 w-25 h-auto" alt="tool_02" />
+          <div className="border-r-2 border-white/20 px-2">
+            <Image src={'/tool_02.png'} width={325} height={267} className="-mt-3 w-25 h-auto mx-auto" alt="tool_02" />
             <p className="text-xs text-center">Escaneo de modelos</p>
           </div>
-          <div className="border-r-2 border-white/20">
-            <Image src={'/tool_03.png'} width={325} height={267} className="-mt-3 w-25 h-auto" alt="tool_03" />
+          <div className="border-r-2 border-white/20 px-2">
+            <Image src={'/tool_03.png'} width={325} height={267} className="-mt-3 w-25 h-auto mx-auto" alt="tool_03" />
             <p className="text-xs text-center">Arriendo de box equipado</p>
           </div>
-          <div className="border-r-2 border-white/20">
-            <Image src={'/tool_04.png'} width={325} height={267} className="-mt-3 w-25 h-auto" alt="tool_04" />
+          <div className="border-r-2 border-white/20 px-2">
+            <Image src={'/tool_04.png'} width={325} height={267} className="-mt-3 w-25 h-auto mx-auto" alt="tool_04" />
             <p className="text-xs text-center">Diseño CAD/CAM</p>
           </div>
-          <div className="border-r-2 border-white/20">
-            <Image src={'/tool_05.png'} width={325} height={267} className="-mt-3 w-25 h-auto" alt="tool_05" />
+          <div className="border-r-2 border-white/20 px-2">
+            <Image src={'/tool_05.png'} width={325} height={267} className="-mt-3 w-25 h-auto mx-auto" alt="tool_05" />
             <p className="text-xs text-center">10 coronas promocionales de bienvenida</p>
           </div>
-          <div className="border-r-2 border-white/20">
-            <Image src={'/tool_06.png'} width={325} height={267} className="-mt-3 w-25 h-auto" alt="tool_06" />
+          <div className="border-r-2 border-white/20 px-2">
+            <Image src={'/tool_06.png'} width={325} height={267} className="-mt-3 w-25 h-auto mx-auto" alt="tool_06" />
             <p className="text-xs text-center">Soporte técnico digital</p>
           </div>
-          <div>
-            <Image src={'/tool_071.png'} width={325} height={267} className="-mt-3 w-25 h-auto" alt="tool_07" />
+          <div className="px-2">
+            <Image src={'/tool_071.png'} width={325} height={267} className="-mt-3 w-25 h-auto mx-auto" alt="tool_07" />
             <p className="text-xs text-center">Capacitación en flujo digital</p>
           </div>
           <div className="col-span-10">
