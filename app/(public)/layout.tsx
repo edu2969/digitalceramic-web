@@ -1,5 +1,5 @@
 import Navbar from "@/components/Nav"
-import Footer from "@/components/Footer"
+import Footer from "@/components/landing/Footer"
 
 export default function PublicLayout({
   children,
@@ -9,9 +9,7 @@ export default function PublicLayout({
   return (
     <div className="mt-24">
       <Navbar />
-
-      <main>{children}</main>
-
+      <main>{children}</main>      
       <Footer />
     </div>
   )

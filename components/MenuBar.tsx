@@ -117,7 +117,7 @@ export default function SidebarLayout({
       {/* Sidebar */}
       <aside
         className={`
-          fixed top-0 left-0 h-screen w-[290px]
+          fixed top-0 left-0 h-screen w-72.5
           bg-white
           border-r border-gray-200
           shadow-2xl
@@ -253,7 +253,7 @@ export default function SidebarLayout({
       <main
         className={`
           transition-all duration-300
-          ${open ? "md:pl-[290px]" : ""}
+          ${open ? "md:pl-72.5" : ""}
         `}
       >
         {children}

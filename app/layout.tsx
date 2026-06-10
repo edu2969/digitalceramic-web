@@ -23,7 +23,7 @@ export default function RootLayout({
       lang="en"
       className={`${montserrat.variable} h-full antialiased`}
     >
-      <body className="min-h-full flex flex-col bg-white">
+      <body className="min-h-full flex flex-col">
         {children}
         <Toaster position="top-right" richColors closeButton />
       </body>

@@ -18,7 +18,7 @@ export default async function AuthLayout({
   }
 
   return (
-    <main className="min-h-screen">
+    <main className="min-h-screen bg-[#000A13]">
       <QueryProvider>
         <MenuBar>{children}</MenuBar>
       </QueryProvider>
