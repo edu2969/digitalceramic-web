@@ -34,7 +34,7 @@ export default function Contact() {
   }
 
   return (
-    <section className="bg-[#F7FBFF] py-16 px-6">
+    <section className="bg-[#F7FBFF] py-16 px-6 mt-20">
       <div className="max-w-xl mx-auto bg-white rounded-xl shadow-lg p-8">
         <h2 className="text-3xl font-bold text-center">Contáctanos</h2>
         <p className="mt-2 text-gray-600 text-center">

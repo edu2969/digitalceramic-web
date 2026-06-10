@@ -1,9 +1,13 @@
+"use client"
+
 import Image from "next/image";
+import { useRouter } from "next/navigation";
 import { FaCheck } from "react-icons/fa";
 import { LuMoveRight } from "react-icons/lu";
 
 export default function Services() {
-  return (<section className="px-6 text-[#24335D]" id="servicios">
+  const router = useRouter();
+  return (<section id="servicios" className="px-6 text-[#24335D]">
     <div className="mx-auto text-center">      
       <div className="grid md:grid-cols-5 gap-8 mt-6">
         <div className="w-full grid grid-cols-3 col-span-3 gap-4">
@@ -14,32 +18,32 @@ export default function Services() {
             </p>
           </div>
           <div className="bg-[#F0F1F3] border-gray-300 border-2 rounded-xl py-6">
-            <Image src="/tool_b_01.png" width={90} height={90} className="mx-auto" />
+            <Image src="/tool_b_01.png" width={142} height={112} className="mx-auto w-22.5 h-auto" alt="tool_b_01"/>
             <p className="font-bold">Estaneo intraoral</p>
             <p className="text-xs">Captura digital precisa sin impresiones tradicionales</p>
           </div>
           <div className="bg-[#F0F1F3] border-gray-300 border-2 rounded-xl py-6">
-            <Image src="/tool_b_02.png" width={90} height={90} className="mx-auto" />
+            <Image src="/tool_b_02.png" width={142} height={112} className="mx-auto w-22.5 h-auto" alt="tool_b_02"/>
             <p className="font-bold">Estaneo intraoral</p>
             <p className="text-xs">Captura digital precisa sin impresiones tradicionales</p>
           </div>
           <div className="bg-[#F0F1F3] border-gray-300 border-2 rounded-xl py-6">
-            <Image src="/tool_b_03.png" width={90} height={90} className="mx-auto" />
+            <Image src="/tool_b_03.png" width={142} height={112} className="mx-auto w-22.5 h-auto" alt="tool_b_03"/>
             <p className="font-bold">Estaneo intraoral</p>
             <p className="text-xs">Captura digital precisa sin impresiones tradicionales</p>
           </div>
           <div className="bg-[#F0F1F3] border-gray-300 border-2 rounded-xl py-6">
-            <Image src="/tool_b_04.png" width={90} height={90} className="mx-auto" />
+            <Image src="/tool_b_04.png" width={142} height={112} className="mx-auto w-22.5 h-auto" alt="tool_b_04"/>
             <p className="font-bold">Estaneo intraoral</p>
             <p className="text-xs">Captura digital precisa sin impresiones tradicionales</p>
           </div>
           <div className="bg-[#F0F1F3] border-gray-300 border-2 rounded-xl py-6">
-            <Image src="/tool_b_05.png" width={90} height={90} className="mx-auto" />
+            <Image src="/tool_b_05.png" width={142} height={112} className="mx-auto w-22.5 h-auto" alt="tool_b_05"/>
             <p className="font-bold">Estaneo intraoral</p>
             <p className="text-xs">Captura digital precisa sin impresiones tradicionales</p>
           </div>
           <div className="bg-[#F0F1F3] border-gray-300 border-2 rounded-xl py-6">
-            <Image src="/tool_b_06.png" width={90} height={90} className="mx-auto" />
+            <Image src="/tool_b_06.png" width={142} height={112} className="mx-auto w-22.5 h-auto" alt="tool_b_06"/>
             <p className="font-bold">Estaneo intraoral</p>
             <p className="text-xs">Captura digital precisa sin impresiones tradicionales</p>
           </div>
@@ -62,11 +66,14 @@ export default function Services() {
               <p className="flex"><FaCheck className="bg-[#7E3EDA] p-0.5 rounded-sm mr-3 mt-1" />Cupos limitados</p>
             </div>
             <div className="col-span-2">
-              <Image src="/molar-plat.png" width={160} height={160} className="mt-16" />
+              <Image src="/molar-plat.png" width={245} height={197} className="mt-16 w-40 h-auto" alt="molar plat"/>
             </div>
           </div>
           <div className="col-span-10">
-            <button className="w-full bg-[#F1C71D] py-3 text-black font-bold rounded-md mt-6 flex justify-center">
+            <button className="w-full bg-[#F1C71D] py-3 text-black font-bold rounded-md mt-6 flex justify-center cursor-pointer"
+            onClick={() => {
+              router.push('/new-account')
+            }}>
               <div className="flex">
                 QUIERO MIS 10 CORONAS
                 <LuMoveRight size="24" className="ml-6"/>

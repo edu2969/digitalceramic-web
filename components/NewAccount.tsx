@@ -88,7 +88,7 @@ export default function NewAccount() {
   }
 
   return (
-    <section className="relative min-h-screen flex items-center justify-center overflow-hidden bg-white px-6 py-16">
+    <section className="relative flex items-center justify-center overflow-hidden bg-white px-6 mt-30 py-4">
       <div className="pointer-events-none absolute inset-0">
         <Image
           src="/corona_fondo_blanco_wide.png"

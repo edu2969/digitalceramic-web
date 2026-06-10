@@ -35,11 +35,29 @@ export default function Nav() {
                 <nav className="hidden md:block">
                     <ul className="flex gap-8 font-semibold text-white text-lg">
                         <li><Link href="/" className="border-[#2A6294] hover:border-b-3 transition">Inicio</Link></li>
-                        <li><Link href="/quienes-somos" className="border-[#2A6294] hover:border-b-3 transition">Club de beneficios 🔥</Link></li>
-                        <li><Link href="/new-account" className="border-[#2A6294] hover:border-b-3 transition">Servicio</Link></li>
+                        <li><div className="border-[#2A6294] hover:border-b-3 transition" onClick={() => {
+                            const element = document.getElementById('club');
+                            if (!element) return;
+                            const elementPosition = element.getBoundingClientRect().top + window.scrollY;
+                            const offset = 80; // Ajusta este valor (píxeles hacia arriba)              
+                            window.scrollTo({
+                                top: elementPosition - offset,
+                                behavior: 'smooth'
+                            });
+                        }}>Club de beneficios 🔥</div></li>
+                        <li><div className="border-[#2A6294] hover:border-b-3 transition" onClick={() => {
+                            const element = document.getElementById('servicios');
+                            if (!element) return;
+                            const elementPosition = element.getBoundingClientRect().top + window.scrollY;
+                            const offset = 80; // Ajusta este valor (píxeles hacia arriba)              
+                            window.scrollTo({
+                                top: elementPosition - offset,
+                                behavior: 'smooth'
+                            });
+                        }}>Servicio</div></li>
                         <li><Link href="/contact" className="border-[#2A6294] hover:border-b-3 transition">Casos clinicos</Link></li>
                         <li><Link href="/contact" className="border-[#2A6294] hover:border-b-3 transition">Contacto</Link></li>
-                        <li><Link href="/contact" className="flex bg-linear-to-b from-[#7C31CF] to-[#731BD1] px-6 py-2 rounded-xl -mt-2 gap-2">
+                        <li><Link href="/new-account" className="flex bg-linear-to-b from-[#7C31CF] to-[#731BD1] px-6 py-2 rounded-xl -mt-2 gap-2">
                             INSCRIBETE
                             <FaUserShield className="mt-1" />
                         </Link></li>

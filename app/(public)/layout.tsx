@@ -1,5 +1,12 @@
 import Navbar from "@/components/Nav"
 import Footer from "@/components/landing/Footer"
+import { Montserrat } from "next/font/google";
+import "../globals.css";
+
+const montserrat = Montserrat({
+  variable: "--font-montserrat",
+  subsets: ["latin"],
+});
 
 export default function PublicLayout({
   children,
@@ -7,10 +14,15 @@ export default function PublicLayout({
   children: React.ReactNode
 }) {
   return (
-    <div className="mt-24">
+    <html
+      lang="en"
+      className={`${montserrat.variable} h-full antialiased`}
+    >
+      <body className="min-h-full flex flex-col">
       <Navbar />
       <main>{children}</main>      
       <Footer />
-    </div>
+    </body>
+    </html>
   )
 }
