@@ -32,7 +32,7 @@ export default function Nav() {
                 </div>
                 
                 {/* Menú Desktop */}
-                <nav className="hidden md:block">
+                <nav className="hidden lg:block">
                     <ul className="flex gap-8 font-semibold text-white text-lg">
                         <li><Link href="/" className="border-[#2A6294] hover:border-b-3 transition">Inicio</Link></li>
                         <li><div className="border-[#2A6294] hover:border-b-3 transition" onClick={() => {
@@ -65,20 +65,20 @@ export default function Nav() {
                 </nav>
 
                 {/* Botón Hamburguesa Mobile */}
-                <button 
-                    className="md:hidden flex flex-col gap-1.5 p-2"
+                <button
+                    className="lg:hidden flex flex-col gap-1.5 p-2"
                     onClick={() => setMenuOpen(!menuOpen)}
                     aria-label="Toggle menu"
                 >
-                    <span className={`w-6 h-0.5 bg-[#1C4880] transition-all duration-300 ${menuOpen ? "rotate-45 translate-y-2" : ""}`}></span>
-                    <span className={`w-6 h-0.5 bg-[#1C4880] transition-all duration-300 ${menuOpen ? "opacity-0" : ""}`}></span>
-                    <span className={`w-6 h-0.5 bg-[#1C4880] transition-all duration-300 ${menuOpen ? "-rotate-45 -translate-y-2" : ""}`}></span>
+                    <span className={`w-6 h-0.5 bg-white transition-all duration-300 ${menuOpen ? "rotate-45 translate-y-2" : ""}`}></span>
+                    <span className={`w-6 h-0.5 bg-white transition-all duration-300 ${menuOpen ? "opacity-0" : ""}`}></span>
+                    <span className={`w-6 h-0.5 bg-white transition-all duration-300 ${menuOpen ? "-rotate-45 -translate-y-2" : ""}`}></span>
                 </button>
             </div>
 
             {/* Menú Mobile Desplegable */}
             {menuOpen && (
-                <div className="md:hidden border-t border-gray-100 bg-white">
+                <div className="lg:hidden border-t border-gray-100 bg-white">
                     <nav className="max-w-7xl mx-auto px-4 py-4">
                         <ul className="flex flex-col gap-4 font-semibold text-[#1C4880] text-base">
                             <li><Link href="/" className="border-[#2A6294] hover:border-b-3 transition block py-2" onClick={handleNavClick}>Inicio</Link></li>
