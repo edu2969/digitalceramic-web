@@ -121,7 +121,8 @@ export default function DentistDashboard() {
                 {works.map((work) => (
                   <tr
                     key={work.id}
-                    className="border-b border-gray-100"
+                    onClick={() => router.push(`/work/${work.id}?view=dentist`)}
+                    className="border-b border-gray-100 hover:bg-gray-50 transition cursor-pointer"
                   >
                     <td className="px-6 py-4 text-sm font-semibold text-gray-900">
                       {work.patient}

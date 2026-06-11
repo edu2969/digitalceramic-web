@@ -319,8 +319,11 @@ export async function POST(req: Request) {
           paleta,
           colores,
           tipo: piece.type,
-          tibase_cementado: piece.tiBase?.diameter ?? null,
-          tibase_plataforma: piece.tiBase?.platformHeight ?? null,
+          // En la tabla TiBase: "Plataforma" es el diámetro (∅) y "Altura de
+          // muñón" (antes "Cementado") es platformHeight. Guardamos cada valor
+          // en la columna que le corresponde por etiqueta, no por nombre de campo.
+          tibase_cementado: piece.tiBase?.platformHeight ?? null,
+          tibase_plataforma: piece.tiBase?.diameter ?? null,
           tibase_gingival: piece.tiBase?.gingivalHeight ?? null,
           conexion: "NONE",
         };
@@ -345,7 +348,7 @@ export async function POST(req: Request) {
         }
         if (piece.tiBase) {
           lines.push(
-            `TiBase: plataforma ${piece.tiBase.platformHeight} mm · cementado ${piece.tiBase.diameter} mm · gingival ${piece.tiBase.gingivalHeight} mm`
+            `TiBase: plataforma ∅ ${piece.tiBase.diameter} mm · altura de muñón ${piece.tiBase.platformHeight} mm · gingival ${piece.tiBase.gingivalHeight} mm`
           );
         }
         const labels =

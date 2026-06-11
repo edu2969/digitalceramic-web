@@ -100,12 +100,15 @@ export async function GET() {
         if (label) typesSet.add(label)
       })
 
+      const estado: Estado = isEstado(t.estado) ? t.estado : "CREADO"
+      // Solo los trabajos aún en curso (en espera o en proceso) pueden estar
+      // atrasados/urgentes; los terminados ya no se marcan como vencidos.
+      const isOpen = estado === "CREADO" || estado === "INICIADO"
       const due = t.fecha_entrega
       const days = due ? daysDiff(due, todayISO) : 0
-      const overdue = due ? days < 0 : false
+      const overdue = isOpen && !!due && days < 0
       const overdueDays = overdue ? -days : undefined
-      const urgent = overdue || (due ? days <= 2 : false)
-      const estado: Estado = isEstado(t.estado) ? t.estado : "CREADO"
+      const urgent = isOpen && (overdue || (due ? days <= 2 : false))
 
       const patientName = [
         t.pacientes?.nombre ?? null,

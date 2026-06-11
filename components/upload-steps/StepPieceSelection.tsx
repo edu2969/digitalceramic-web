@@ -322,7 +322,7 @@ function TiBaseTable({
               <Fragment key={`group-${plat}`}>
                 {TIBASE_DIAMETERS.map((dia, diaIdx) => (
                   <tr key={`${plat}-${dia}`}>
-                    {/* Plataforma vertical SOLO una vez cada 2 filas */}
+                    {/* Altura de muñón (platformHeight) vertical, una vez cada 2 filas */}
                     {diaIdx === 0 && (
                       <td
                         rowSpan={TIBASE_DIAMETERS.length}
@@ -344,7 +344,7 @@ function TiBaseTable({
                       </td>
                     )}
 
-                    {/* Cementado */}
+                    {/* Plataforma (diámetro ∅) */}
                     <th className="px-3 py-0 border border-gray-300 bg-gray-100 font-semibold text-gray-700 leading-none whitespace-nowrap">
                       {dia}
                     </th>

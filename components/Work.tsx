@@ -2,6 +2,7 @@
 
 import { useState } from "react"
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query"
+import { useRouter } from "next/navigation"
 import { toast } from "sonner"
 import {
   FiCalendar,
@@ -12,6 +13,7 @@ import {
   FiUser,
   FiBriefcase,
   FiLoader,
+  FiArrowLeft,
 } from "react-icons/fi"
 import { Estado, ESTADO_LABEL, ESTADO_BADGE } from "@/lib/estado"
 
@@ -102,9 +104,16 @@ async function fetchWork(id: string): Promise<WorkDetail> {
   return res.json()
 }
 
-export default function WorkPagePage({ id }: { id: string }) {
+export default function WorkPagePage({
+  id,
+  dentistView = false,
+}: {
+  id: string
+  dentistView?: boolean
+}) {
   const [openDialog, setOpenDialog] = useState(false)
   const queryClient = useQueryClient()
+  const router = useRouter()
 
   const { data, isLoading, isError } = useQuery<WorkDetail>({
     queryKey: ["work", id],
@@ -168,7 +177,9 @@ export default function WorkPagePage({ id }: { id: string }) {
       ? "text-amber-700"
       : "text-emerald-700"
 
-  const transition = transitionFor(data.estado)
+  // El odontólogo solo consulta el detalle: no puede cambiar el estado del
+  // trabajo, así que ocultamos las acciones de transición del laboratorio.
+  const transition = dentistView ? null : transitionFor(data.estado)
   const isPending = mutation.isPending
 
   const handleConfirm = () => {
@@ -183,6 +194,23 @@ export default function WorkPagePage({ id }: { id: string }) {
   return (
     <div className="min-h-screen bg-[#F5F7FA] py-10 px-4 md:px-8">
       <div className="max-w-6xl mx-auto space-y-6">
+        {dentistView && (
+          <button
+            type="button"
+            onClick={() => router.back()}
+            className="
+              inline-flex items-center gap-2
+              px-4 py-2 rounded-xl
+              bg-white border border-gray-200
+              text-[#1C4880] font-semibold
+              hover:bg-blue-50 transition shadow-sm
+            "
+          >
+            <FiArrowLeft className="w-5 h-5" />
+            Volver
+          </button>
+        )}
+
         {/* Header */}
         <div className="bg-white rounded-3xl border border-gray-200 shadow-sm overflow-hidden">
           <div className="px-8 py-7 border-b border-gray-100">
@@ -337,20 +365,22 @@ export default function WorkPagePage({ id }: { id: string }) {
             </p>
           </div>
 
-          <div className="p-8 space-y-6">
+          <div className="p-6">
             {data.pieces.length === 0 && (
               <p className="text-sm text-gray-500">Sin piezas registradas.</p>
             )}
 
-            {data.pieces.map((piece, idx) => (
-              <PieceCard
-                key={`${piece.tooth}-${idx}`}
-                tooth={piece.tooth}
-                type={piece.type}
-                tiBase={piece.tiBase ?? undefined}
-                colors={piece.colors}
-              />
-            ))}
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
+              {data.pieces.map((piece, idx) => (
+                <PieceCard
+                  key={`${piece.tooth}-${idx}`}
+                  tooth={piece.tooth}
+                  type={piece.type}
+                  tiBase={piece.tiBase ?? undefined}
+                  colors={piece.colors}
+                />
+              ))}
+            </div>
           </div>
         </div>
 
@@ -545,40 +575,40 @@ function PieceCard({
   }[]
 }) {
   return (
-    <div className="rounded-3xl border border-gray-200 overflow-hidden">
-      <div className="px-6 py-5 bg-gray-50 border-b border-gray-100 flex items-center justify-between">
+    <div className="rounded-2xl border border-gray-200 overflow-hidden h-full">
+      <div className="px-4 py-3 bg-gray-50 border-b border-gray-100 flex items-center justify-between">
         <div>
-          <p className="text-xs uppercase tracking-wider text-[#1C4880] font-bold">
+          <p className="text-[10px] uppercase tracking-wider text-[#1C4880] font-bold">
             Pieza dental
           </p>
 
-          <h3 className="text-2xl font-bold text-[#1C4880] mt-1">{tooth}</h3>
+          <h3 className="text-xl font-bold text-[#1C4880] mt-0.5">{tooth}</h3>
         </div>
 
-        <div className="px-4 py-2 rounded-xl bg-blue-100 text-[#1C4880] font-semibold text-sm">
+        <div className="px-3 py-1.5 rounded-lg bg-blue-100 text-[#1C4880] font-semibold text-xs">
           {type}
         </div>
       </div>
 
-      <div className="p-6 space-y-5">
+      <div className="p-4 space-y-4">
         {tiBase && (
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-            <SpecBadge label="Cementado" value={tiBase.cementado} />
+          <div className="grid grid-cols-3 gap-2">
             <SpecBadge label="Plataforma" value={tiBase.plataforma} />
+            <SpecBadge label="Altura de muñón" value={tiBase.cementado} />
             <SpecBadge label="Gingival" value={tiBase.gingival} />
           </div>
         )}
 
         <div>
-          <p className="text-sm font-semibold text-gray-500 mb-3">Colores</p>
+          <p className="text-xs font-semibold text-gray-500 mb-2">Colores</p>
 
-          <div className="flex flex-wrap gap-3">
+          <div className="flex flex-wrap gap-2">
             {colors.map((color, index) => (
               <div
                 key={index}
                 className="
-                  px-4 py-3
-                  rounded-2xl
+                  px-3 py-2
+                  rounded-xl
                   bg-[#1C4880]
                   text-white
                   shadow-sm
@@ -588,10 +618,10 @@ function PieceCard({
                   {color.label}
                 </p>
 
-                <p className="text-lg font-bold mt-1">{color.value}</p>
+                <p className="text-base font-bold mt-0.5">{color.value}</p>
 
                 {color.palette && (
-                  <p className="text-[10px] uppercase tracking-wider opacity-70 mt-1">
+                  <p className="text-[10px] uppercase tracking-wider opacity-70 mt-0.5">
                     {color.palette}
                   </p>
                 )}
@@ -606,12 +636,12 @@ function PieceCard({
 
 function SpecBadge({ label, value }: { label: string; value: string }) {
   return (
-    <div className="bg-blue-50 rounded-2xl p-4 border border-blue-100">
-      <p className="text-xs uppercase tracking-wide text-[#1C4880] font-bold">
+    <div className="bg-blue-50 rounded-xl p-3 border border-blue-100">
+      <p className="text-[10px] uppercase tracking-wide text-[#1C4880] font-bold leading-tight">
         {label}
       </p>
 
-      <p className="text-xl font-bold text-[#1C4880] mt-1">{value}</p>
+      <p className="text-lg font-bold text-[#1C4880] mt-1">{value}</p>
     </div>
   )
 }

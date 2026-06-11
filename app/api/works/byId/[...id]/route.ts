@@ -176,12 +176,18 @@ export async function GET(
       sentByEmail = ownerData?.user?.email ?? null
     }
 
+    const estado: Estado = isEstado(trabajo.estado) ? trabajo.estado : "CREADO"
+    // Solo los trabajos aún en curso (en espera o en proceso) pueden estar
+    // atrasados. Una vez terminados/enviados/recibidos/anulados ya no se marcan
+    // como atrasados, aunque hayan pasado de la fecha de entrega.
+    const isOpen = estado === "CREADO" || estado === "INICIADO"
+
     const todayISO = new Date().toISOString().slice(0, 10)
     const due = trabajo.fecha_entrega
     const days = due ? daysDiff(due, todayISO) : 0
-    const overdue = due ? days < 0 : false
+    const overdue = isOpen && !!due && days < 0
     const overdueDays = overdue ? -days : 0
-    const urgent = overdue || (due ? days <= 2 : false)
+    const urgent = isOpen && (overdue || (due ? days <= 2 : false))
     const status = overdue ? "Atrasado" : urgent ? "Urgente" : "En tiempo"
 
     const piezasRaw = trabajo.piezas ?? []
@@ -276,7 +282,7 @@ export async function GET(
       files,
       notes: trabajo.notas ?? "",
       monto: trabajo.monto,
-      estado: isEstado(trabajo.estado) ? trabajo.estado : ("CREADO" as Estado),
+      estado,
     })
   } catch (error) {
     console.error(error)
