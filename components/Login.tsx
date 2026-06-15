@@ -6,6 +6,7 @@ import { useRouter } from "next/navigation"
 import { createClient } from "@/lib/supabase/client"
 import Link from "next/link"
 import { dashboardPathFor, isUserRole } from "@/lib/userRole"
+import { FiLoader } from "react-icons/fi"
 
 export default function Login() {
   const router = useRouter()
@@ -21,6 +22,7 @@ export default function Login() {
     e.preventDefault()
 
     setLoading(true)
+    setLoginError(null)
 
     const { error } = await supabase.auth.signInWithPassword({
       email,
@@ -168,19 +170,23 @@ export default function Login() {
               type="submit"
               disabled={loading}
               className="
-                w-full
+                px-8 py-4
+                rounded-2xl
                 bg-[#1C4880]
-                hover:opacity-90
                 text-white
                 font-semibold
-                py-3
-                rounded-xl
+                flex items-center gap-3
+                hover:opacity-90
                 transition
                 shadow-lg
-                shadow-[#1C4880]/20
+                mx-auto
+                disabled:opacity-60 disabled:cursor-not-allowed
+                cursor-pointer
               "
             >
-              Iniciar sesión
+              {loading ? <>
+                <FiLoader className="w-5 h-5 animate-spin" /> Validando
+              </> : 'Iniciar sesión'}
             </button>
           </form>
 
