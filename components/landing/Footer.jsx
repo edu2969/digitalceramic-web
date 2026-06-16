@@ -4,7 +4,7 @@ import Image from "next/image";
 import { BiSolidPhoneCall } from "react-icons/bi";
 import { BsFillGeoAltFill } from "react-icons/bs";
 import { MdEmail } from "react-icons/md";
-import Whatssap from "../Whatssap";
+import Whatssap from "../Whatsapp";
 import { useRouter } from "next/navigation";
 
 export default function Footer() {

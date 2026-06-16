@@ -1,6 +1,6 @@
 import { FaWhatsapp } from "react-icons/fa";
 
-export default function Whatssap() {
+export default function Whatsapp() {
   return (
     <div className="flex flex-col items-center w-full">
             <a
@@ -14,7 +14,7 @@ export default function Whatssap() {
                 <FaWhatsapp size={40} />
                 <div className="ml-2">
                   <p className="text-sm font-bold">Escríbenos</p>
-                  <p className="text-xs">por WahtsApp</p>
+                  <p className="text-xs">por WhatsApp</p>
                 </div>
               </div>
             </a>
