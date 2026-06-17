@@ -45,8 +45,20 @@ type TrabajoRow = {
   id: string
   fecha_envio: string | null
   estado: string | null
+  enviado_por?: string | null
   pacientes: { nombre: string | null; apellido: string | null } | null
   piezas: { numero: number | string | null; tipo: string | null }[] | null
+  profiles?: { nombre: string | null; apellido: string | null } | null
+}
+
+function fullName(
+  nombre: string | null | undefined,
+  apellido: string | null | undefined
+): string {
+  return [nombre ?? null, apellido ?? null]
+    .filter(Boolean)
+    .join(" ")
+    .trim()
 }
 
 export async function GET() {
@@ -64,7 +76,7 @@ export async function GET() {
 
   const { data: profile, error: profileError } = await supabase
     .from("profiles")
-    .select("id")
+    .select("id, user_role")
     .eq("user_id", user.id)
     .maybeSingle()
 
@@ -75,13 +87,25 @@ export async function GET() {
     )
   }
 
-  const { data, error } = await supabase
+  const isAdmin = profile.user_role === "ADMINISTRADOR"
+
+  // El administrador ve los trabajos de TODOS los odontólogos (incluyendo el
+  // nombre del doctor que los envió). El odontólogo solo ve los suyos.
+  const baseQuery = supabase
     .from("trabajos")
     .select(
-      "id, fecha_envio, estado, pacientes (nombre, apellido), piezas (numero, tipo)"
+      isAdmin
+        ? "id, fecha_envio, estado, enviado_por, pacientes (nombre, apellido), piezas (numero, tipo), profiles (nombre, apellido)"
+        : "id, fecha_envio, estado, pacientes (nombre, apellido), piezas (numero, tipo)"
     )
-    .eq("profile_id", profile.id)
-    .order("fecha_envio", { ascending: false })
+
+  const filteredQuery = isAdmin
+    ? baseQuery
+    : baseQuery.eq("profile_id", profile.id)
+
+  const { data, error } = await filteredQuery.order("fecha_envio", {
+    ascending: false,
+  })
 
   if (error) {
     return NextResponse.json(
@@ -102,6 +126,14 @@ export async function GET() {
     return {
       id: t.id,
       patient: patient || "-",
+      ...(isAdmin
+        ? {
+            doctor:
+              fullName(t.profiles?.nombre, t.profiles?.apellido) ||
+              (t.enviado_por ?? "").trim() ||
+              "-",
+          }
+        : {}),
       sentAt: formatDate(t.fecha_envio),
       pieces: piezas.map((p) => ({
         tooth: p.numero !== null && p.numero !== undefined ? String(p.numero) : "-",
@@ -111,5 +143,5 @@ export async function GET() {
     }
   })
 
-  return NextResponse.json({ works })
+  return NextResponse.json({ works, isAdmin })
 }

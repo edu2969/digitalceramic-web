@@ -23,3 +23,22 @@ body {
   color: var(--foreground);
   font-family: var(--font-montserrat);
 }
+
+/*
+ * El body usa `color: transparent` como base, por lo que los controles de
+ * formulario (que heredan el color vía el preflight de Tailwind) renderizan su
+ * texto invisible. Fijamos un color legible por defecto. Va en @layer base para
+ * que cualquier utilidad `text-*` aplicada directamente al input siga ganando.
+ */
+@layer base {
+  input,
+  textarea,
+  select {
+    color: #111827; /* gray-900 */
+  }
+
+  input::placeholder,
+  textarea::placeholder {
+    color: #9ca3af; /* gray-400 */
+  }
+}

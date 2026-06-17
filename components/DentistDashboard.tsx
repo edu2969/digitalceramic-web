@@ -14,6 +14,7 @@ interface DentistWorkPiece {
 interface DentistWork {
   id: string
   patient: string
+  doctor?: string
   sentAt: string
   pieces: DentistWorkPiece[]
   estado: Estado
@@ -21,6 +22,7 @@ interface DentistWork {
 
 interface DentistDashboardResponse {
   works: DentistWork[]
+  isAdmin?: boolean
 }
 
 async function fetchDashboard(): Promise<DentistDashboardResponse> {
@@ -37,6 +39,8 @@ export default function DentistDashboard() {
   })
 
   const works = data?.works ?? []
+  const isAdmin = data?.isAdmin ?? false
+  const columnCount = isAdmin ? 5 : 4
 
   return (
     <div className="min-h-screen bg-[#F5F7FA] p-6">
@@ -44,26 +48,30 @@ export default function DentistDashboard() {
         <div className="flex flex-col md:flex-row md:items-end md:justify-between gap-4">
           <div className="ml-16 2xl:ml-0">
             <h1 className="text-3xl font-bold tracking-tight text-[#1C4880]">
-              Mis trabajos
+              {isAdmin ? "Trabajos de odontólogos" : "Mis trabajos"}
             </h1>
             <p className="text-gray-500 mt-1">
-              Sigue el estado de los casos que has enviado al laboratorio.
+              {isAdmin
+                ? "Listado de todos los casos enviados al laboratorio."
+                : "Sigue el estado de los casos que has enviado al laboratorio."}
             </p>
           </div>
 
-          <button
-            type="button"
-            onClick={() => router.push("/upload")}
-            className="
-              inline-flex items-center gap-2
-              px-5 py-3 rounded-xl
-              bg-[#1C4880] text-white font-semibold
-              hover:opacity-90 transition shadow-lg
-            "
-          >
-            <FiUpload className="w-5 h-5" />
-            Subir nuevo caso
-          </button>
+          {!isAdmin && (
+            <button
+              type="button"
+              onClick={() => router.push("/upload")}
+              className="
+                inline-flex items-center gap-2
+                px-5 py-3 rounded-xl
+                bg-[#1C4880] text-white font-semibold
+                hover:opacity-90 transition shadow-lg
+              "
+            >
+              <FiUpload className="w-5 h-5" />
+              Subir nuevo caso
+            </button>
+          )}
         </div>
 
         {isError && (
@@ -80,6 +88,12 @@ export default function DentistDashboard() {
                   <th className="text-left px-6 py-4 text-xs font-bold uppercase tracking-wider text-gray-500">
                     Paciente
                   </th>
+
+                  {isAdmin && (
+                    <th className="text-left px-4 py-4 text-xs font-bold uppercase tracking-wider text-gray-500">
+                      Doctor
+                    </th>
+                  )}
 
                   <th className="text-left px-4 py-4 text-xs font-bold uppercase tracking-wider text-gray-500">
                     Fecha de envío
@@ -99,7 +113,7 @@ export default function DentistDashboard() {
                 {isLoading && (
                   <tr>
                     <td
-                      colSpan={4}
+                      colSpan={columnCount}
                       className="px-6 py-10 text-center text-gray-500 text-sm"
                     >
                       Cargando trabajos…
@@ -110,7 +124,7 @@ export default function DentistDashboard() {
                 {!isLoading && works.length === 0 && (
                   <tr>
                     <td
-                      colSpan={4}
+                      colSpan={columnCount}
                       className="px-6 py-10 text-center text-gray-500 text-sm"
                     >
                       Aún no has enviado trabajos.
@@ -127,6 +141,12 @@ export default function DentistDashboard() {
                     <td className="px-6 py-4 text-sm font-semibold text-gray-900">
                       {work.patient}
                     </td>
+
+                    {isAdmin && (
+                      <td className="px-4 py-4 text-sm text-gray-700">
+                        {work.doctor ?? "-"}
+                      </td>
+                    )}
 
                     <td className="px-4 py-4 text-sm text-gray-700">
                       {work.sentAt}
