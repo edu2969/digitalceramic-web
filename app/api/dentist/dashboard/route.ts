@@ -47,8 +47,20 @@ type TrabajoRow = {
   estado: string | null
   enviado_por?: string | null
   pacientes: { nombre: string | null; apellido: string | null } | null
-  piezas: { numero: number | string | null; tipo: string | null }[] | null
+  piezas:
+    | {
+        numero: number | string | null
+        tipo: string | null
+        tibase_cementado: number | null
+        tibase_plataforma: number | null
+        tibase_gingival: number | null
+      }[]
+    | null
   profiles?: { nombre: string | null; apellido: string | null } | null
+}
+
+function mm(value: number | null): string {
+  return value !== null && value !== undefined ? `${value} mm` : "-"
 }
 
 function fullName(
@@ -95,8 +107,8 @@ export async function GET() {
     .from("trabajos")
     .select(
       isAdmin
-        ? "id, fecha_envio, estado, enviado_por, pacientes (nombre, apellido), piezas (numero, tipo), profiles (nombre, apellido)"
-        : "id, fecha_envio, estado, pacientes (nombre, apellido), piezas (numero, tipo)"
+        ? "id, fecha_envio, estado, enviado_por, pacientes (nombre, apellido), piezas (numero, tipo, tibase_cementado, tibase_plataforma, tibase_gingival), profiles (nombre, apellido)"
+        : "id, fecha_envio, estado, pacientes (nombre, apellido), piezas (numero, tipo, tibase_cementado, tibase_plataforma, tibase_gingival)"
     )
 
   const filteredQuery = isAdmin
@@ -135,10 +147,30 @@ export async function GET() {
           }
         : {}),
       sentAt: formatDate(t.fecha_envio),
-      pieces: piezas.map((p) => ({
-        tooth: p.numero !== null && p.numero !== undefined ? String(p.numero) : "-",
-        type: p.tipo ? TYPE_LABEL[p.tipo] ?? p.tipo : "-",
-      })),
+      pieces: piezas.map((p) => {
+        const hasTiBase =
+          p.tibase_cementado !== null ||
+          p.tibase_plataforma !== null ||
+          p.tibase_gingival !== null
+
+        return {
+          tooth:
+            p.numero !== null && p.numero !== undefined
+              ? String(p.numero)
+              : "-",
+          type: p.tipo ? TYPE_LABEL[p.tipo] ?? p.tipo : "-",
+          // Solo las coronas sobre implante con medidas registradas exponen el
+          // tibase para mostrarse debajo de la pieza en el dashboard.
+          tiBase:
+            p.tipo === "CORONA_IMPLANTE" && hasTiBase
+              ? {
+                  plataforma: mm(p.tibase_plataforma),
+                  cementado: mm(p.tibase_cementado),
+                  gingival: mm(p.tibase_gingival),
+                }
+              : null,
+        }
+      }),
       estado: (isEstado(t.estado) ? t.estado : "CREADO") as Estado,
     }
   })

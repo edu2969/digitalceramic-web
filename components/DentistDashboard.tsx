@@ -9,6 +9,11 @@ import { Estado, ESTADO_LABEL, ESTADO_BADGE } from "@/lib/estado"
 interface DentistWorkPiece {
   tooth: string
   type: string
+  tiBase: {
+    plataforma: string
+    cementado: string
+    gingival: string
+  } | null
 }
 
 interface DentistWork {
@@ -153,18 +158,28 @@ export default function DentistDashboard() {
                     </td>
 
                     <td className="px-4 py-4">
-                      <div className="flex flex-wrap gap-2">
+                      <div className="flex flex-wrap items-start gap-2">
                         {work.pieces.length === 0 && (
                           <span className="text-xs text-gray-400">-</span>
                         )}
 
                         {work.pieces.map((piece, idx) => (
-                          <span
+                          <div
                             key={`${piece.tooth}-${idx}`}
-                            className="px-2 py-1 rounded-lg bg-blue-50 text-[#1C4880] text-xs font-semibold"
+                            className="flex flex-col gap-1"
                           >
-                            {piece.tooth} · {piece.type}
-                          </span>
+                            <span className="px-2 py-1 rounded-lg bg-blue-50 text-[#1C4880] text-xs font-semibold w-fit">
+                              {piece.tooth} · {piece.type}
+                            </span>
+
+                            {piece.tiBase && (
+                              <div className="flex flex-col gap-0.5 pl-1 text-[10px] leading-tight text-gray-500">
+                                <span>Plataforma: {piece.tiBase.plataforma}</span>
+                                <span>Altura de muñón: {piece.tiBase.cementado}</span>
+                                <span>Gingival: {piece.tiBase.gingival}</span>
+                              </div>
+                            )}
+                          </div>
                         ))}
                       </div>
                     </td>
