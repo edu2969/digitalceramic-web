@@ -10,9 +10,9 @@ export default function Services() {
       "Digitalización de impresiones y modelos físicos para integrar casos analógicos al flujo digital"
     ]
 
-  return (<section id="servicios" className="px-6 text-[#24335D]">
+  return (<section id="servicios" className="pb-6 px-6 text-[#24335D]">
     <div className="mx-auto text-center">
-      <div className="mt-6">
+      <div>
         <div className="w-full grid grid-cols-2 sm:grid-cols-3 md:col-span-3 gap-4">
           <div className="text-center col-span-2 sm:col-span-3">
             <h2 className="text-2xl sm:text-3xl font-bold">SOLUCIONES DIGITALES</h2>
@@ -39,7 +39,7 @@ export default function Services() {
               {/* Imagen */}
               <div className="relative h-64 w-full overflow-hidden">
                 <Image
-                  src={`/services/service_${index + 1}.png`}
+                  src={`/soluciones/solucion_0${[2, 1, 5, 4][index]}.png`}
                   alt={`service ${index}`}
                   fill
                   className="

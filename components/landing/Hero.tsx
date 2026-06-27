@@ -2,75 +2,80 @@
 
 import Image from "next/image";
 import { useRouter } from "next/navigation";
-import { FaEye, FaUserShield } from "react-icons/fa";
 
 export default function Hero() {
   const router = useRouter();
   return (
     <section
-      className="relative mt-20 md:mt-24 flex items-center overflow-hidden bg-[#000A13] text-white z-0 py-14 md:py-0 md:h-92"
-    >
-      {/* Fondo corona */}
-      <div className="pointer-events-none absolute inset-0 md:inset-y-0 md:left-1/3 md:right-0">
-        <Image
-          src="/smile.png"
-          alt="Sonrisa antes-despues"
-          width={1200}
-          height={0}
-          className="
-      absolute
-      bottom-0
-      right-0
-      h-full
-      w-auto
-      max-h-full
-      object-cover md:object-contain
-      object-right
-      opacity-20 md:opacity-100
-    "
-          priority
-        />
-      </div>
-      <div className="relative z-20 w-full px-6 md:ml-12 md:max-w-1/2 text-left">
-        <div className="flex text-4xl md:text-5xl font-bold">
-          <p>Digital</p>
-          <p className="text-[#1F9CE7]">Ceramic</p>
-        </div>
-        <p className="mt-4 text-xl md:text-2xl font-bold">
-          Tu puerta de entrada a la odontología digital
-        </p>
-        <p className="mt-2 text-sm md:text-base text-gray-100">Escaneo intraoral, diseño CAD/CAM y restauraciones de alta precisión para
-          odontólogos que buscan productividad, mejores resultados y menos inversión inicial
-        </p>
-        <div className="mt-6 mb-2 md:mb-8 flex gap-4 flex-wrap">
-          <button
-            className="flex gap-2 bg-linear-to-b from-[#7C31CF] to-[#731BD1] px-10 py-3 rounded-lg font-semibold hover:opacity-90"
-            onClick={() => router.push("/new-account")}
-          >
-            <FaUserShield className="mt-1 text-5xl" />
-            <div className="text-left ml-3">
-              <p className="text-lg">INSCRÍBETE AL CLUB</p>
-              <p className="text-md">Digital Ceramic</p>
-            </div>
-          </button>
-          <button
-            className="flex h-14 border border-white/80 px-8 py-3 rounded-lg hover:opacity-90 gap-4 items-center mt-2"
-            onClick={() => {
-              const element = document.getElementById('club');
-              if(!element) return;
-              const elementPosition = element.getBoundingClientRect().top + window.scrollY;
-              const offset = 80; // Ajusta este valor (píxeles hacia arriba)              
-              window.scrollTo({
-                top: elementPosition - offset,
-                behavior: 'smooth'
-              });             
-            }}
-          >
-            <FaEye size={24}/>
-            Ver beneficios
-          </button>
-        </div>
-      </div>
-    </section>
+  className="relative mt-20 md:mt-24 flex items-center overflow-hidden bg-[#000A13] text-white z-0 min-h-[500px] md:h-[calc(100vh/2)]"
+>
+  {/* Contenedor de la imagen - desktop: mitad derecha, móvil: fondo completo */}
+  <div className="absolute inset-0 md:inset-y-0 md:left-1/2 md:right-0">
+    {/* Degradado azul que cubre la mitad izquierda de la imagen */}
+    <div className="absolute inset-0 z-10 bg-gradient-to-r from-[#000A13] via-[#000A13]/80 to-transparent md:from-[#000A13] md:via-[#000A13]/60 md:to-transparent" />
+    
+    <div className="relative w-full h-full">
+      <Image
+        src="/soluciones/solucion_03.png"
+        alt="Sonrisa antes-despues"
+        fill
+        className="object-cover md:object-cover object-center"
+        priority
+        sizes="(max-width: 768px) 100vw, 50vw"
+        style={{
+          objectPosition: 'center 30%', // Enfoca en el tercio superior de la imagen (ajustable)
+        }}
+      />
+      
+      {/* Degradado azul superpuesto en la mitad inferior de la imagen (efecto de acercamiento) */}
+      <div className="absolute inset-0 z-10 bg-gradient-to-b from-transparent via-[#000A13]/20 to-[#000A13]/60 pointer-events-none" />
+      
+      {/* Degradado lateral izquierdo para mejor fusión con el texto */}
+      <div className="absolute inset-y-0 left-0 w-1/2 z-10 bg-gradient-to-r from-[#000A13] to-transparent md:from-[#000A13]/80 md:to-transparent pointer-events-none" />
+    </div>
+  </div>
+
+  {/* Contenido textual */}
+  <div className="relative z-20 w-full px-6 md:ml-12 md:max-w-1/2 text-left py-8">
+    <div className="flex text-3xl md:text-5xl font-bold">
+      <p>Digital</p>
+      <p className="text-[#1F9CE7] ml-2">Ceramic</p>
+    </div>
+    
+    <p className="mt-4 text-lg md:text-2xl font-bold leading-tight">
+      Coronal digitales de alta precisión,{' '}
+      <span className="text-[#1F9CE7]">hasta 30% más baratas</span> - sin invertir en escáner
+    </p>
+    
+    <p className="mt-2 text-sm md:text-base text-gray-100 max-w-xl">
+      Escaneo intraoral, diseño CAD/CAM y fabricación con flujo 100% digital. Únete al Club Digital Ceramic y fija precios protegidos desde tu primera corona.
+    </p>
+    
+    <div className="mt-6 md:mt-8 flex gap-4 flex-wrap">
+      <button
+        className="flex bg-gradient-to-b from-[#7C31CF] to-[#731BD1] px-8 md:px-10 py-3 md:py-4 rounded-lg font-semibold hover:opacity-90 transition-opacity"
+        onClick={() => {
+          const element = document.getElementById('club');
+          if (!element) return;
+          const elementPosition = element.getBoundingClientRect().top + window.scrollY;
+          const offset = 80;
+          window.scrollTo({
+            top: elementPosition - offset,
+            behavior: 'smooth'
+          });
+        }}
+      >
+        <p className="text-base md:text-lg">Ver beneficios del club</p>
+      </button>
+      
+      <button className="flex font-bold bg-[#22B35E] px-6 md:px-8 py-3 md:py-4 rounded-lg hover:opacity-90 transition-opacity gap-3 items-center">
+        <span>Escribenos por WhatsApp</span>
+      </button>
+    </div>
+  </div>
+
+  {/* Línea decorativa inferior */}
+  <div className="absolute bottom-0 left-0 right-0 h-[2px] bg-gradient-to-r from-[#1F9CE7]/20 via-[#1F9CE7]/50 to-transparent" />
+</section>
   );
 }

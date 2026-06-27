@@ -7,7 +7,7 @@ export default function Whatsapp() {
               href="https://wa.me/56994974378"
               target="_blank"
               rel="noopener noreferrer"
-              className="flex text-white bg-[#28A75A] rounded-full px-4 py-2"
+              className="flex text-white bg-[#28A75A] rounded-full px-4 py-2 z-50"
               aria-label="Hablar por WhatsApp"
             >
               <div className="flex">
