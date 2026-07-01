@@ -12,6 +12,7 @@ type Props = {
   value: string
   onChange: (text: string) => void
   onSelect: (option: Option | null) => void
+  onBlur?: (value: string) => void
   fetchOptions: (q: string) => Promise<Option[]>
   placeholder?: string
   className?: string
@@ -21,6 +22,7 @@ export default function Autocomplete({
   value,
   onChange,
   onSelect,
+  onBlur,
   fetchOptions,
   placeholder,
   className,
@@ -29,21 +31,26 @@ export default function Autocomplete({
   const [open, setOpen] = useState(false)
   const [loading, setLoading] = useState(false)
   const wrapperRef = useRef<HTMLDivElement | null>(null)
+  const isSelectingRef = useRef(false) // ← NUEVO: para evitar llamar onSelect(null) durante escritura
 
   useEffect(() => {
     if (!open) return
+
     let cancel = false
-    setLoading(true)
-    const t = setTimeout(async () => {
-      const res = await fetchOptions(value)
-      if (!cancel) {
-        setOptions(res)
-        setLoading(false)
-      }
+    const t = window.setTimeout(() => {
+      void (async () => {
+        setLoading(true)
+        const res = await fetchOptions(value)
+        if (!cancel) {
+          setOptions(res)
+          setLoading(false)
+        }
+      })()
     }, 200)
+
     return () => {
       cancel = true
-      clearTimeout(t)
+      window.clearTimeout(t)
     }
   }, [value, open, fetchOptions])
 
@@ -61,11 +68,15 @@ export default function Autocomplete({
         type="text"
         value={value}
         onChange={(e) => {
-          onChange(e.target.value)
-          onSelect(null)
+          const newValue = e.target.value
+          onChange(newValue)
           setOpen(true)
         }}
         onFocus={() => setOpen(true)}
+        onBlur={() => {
+          onBlur?.(value)
+          setOpen(false)
+        }}
         placeholder={placeholder}
         className={className}
         autoComplete="off"
@@ -81,10 +92,16 @@ export default function Autocomplete({
             options.map((o) => (
               <li
                 key={o.id}
+                onMouseDown={(e) => e.preventDefault()}
                 onClick={() => {
+                  const nextValue = o.label
+                  isSelectingRef.current = true
                   onSelect(o)
-                  onChange(o.label)
+                  onChange(nextValue)
                   setOpen(false)
+                  setTimeout(() => {
+                    isSelectingRef.current = false
+                  }, 100)
                 }}
                 className="cursor-pointer px-4 py-2 hover:bg-blue-50"
               >

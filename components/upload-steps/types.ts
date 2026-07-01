@@ -6,16 +6,16 @@ export type ColorSelection = {
   code: string
 }
 
-export type PieceType =
+export type PiezaType =
   | ""
   | "INLAY"
   | "ONLAY"
   | "CARILLA"
   | "CORONA"
   | "CORONA_IMPLANTE"
-export type PieceSubType = "" | "CEMENTADA" | "ATORNILLADA"
+export type PiezaSubType = "" | "CEMENTADA" | "ATORNILLADA"
 
-export const PIECE_TYPE_OPTIONS: { value: Exclude<PieceType, "">; label: string }[] = [
+export const PIECE_TYPE_OPTIONS: { value: Exclude<PiezaType, "">; label: string }[] = [
   { value: "INLAY", label: "Inlay" },
   { value: "ONLAY", label: "Onlay" },
   { value: "CARILLA", label: "Carilla" },
@@ -23,7 +23,7 @@ export const PIECE_TYPE_OPTIONS: { value: Exclude<PieceType, "">; label: string 
   { value: "CORONA_IMPLANTE", label: "Corona sobre implante" },
 ]
 
-export function materialForPieceType(type: PieceType): string {
+export function materialForPieceType(type: PiezaType): string {
   if (!type) return ""
   return type === "CORONA_IMPLANTE" ? "Zirconia" : "Disilicato"
 }
@@ -34,31 +34,45 @@ export type TiBase = {
   platformHeight: number
 } | null
 
-export type PieceConfig = {
-  pieceId: string
-  gridIndex: number
-  type: PieceType
-  subType: PieceSubType
+export type PiezaConfig = {
+  id: string
+  numero: number
+  tipo: PiezaType
+  subTipo: PiezaSubType
   tiBase: TiBase
-  colorSectionCount: 1 | 2 | 3
-  colors: ColorSelection[]
+  cantidadColores: 1 | 2 | 3
+  colores: ColorSelection[]
 }
 
 export type UploadFormValues = {
-  patientId: string | null
-  patientName: string
-  patientLastName: string
-  patientAge: string
-  receptionDate: string
-  deliveryDate: string
-  dentistName: string
-  dentistRut: string
-  dentistRegistry: string
-  clinicId: string | null
-  medicalCenter: string
-  pieces: PieceConfig[]
+  paciente: {
+    id: string | null,
+    nombre: string | null,
+    apellido: string | null
+    edad: string | null
+  },
+  enviadoPor: string
+  fecha_envio: string
+  fecha_entrega: string
+  profile: {
+    id: string | null,
+    nombre: string | null,
+    rut: string | null,
+    numero_registro: string | null
+  },
+  clinica: {
+    id: string | null,
+    nombre: string | null
+  },
+  piezas: PiezaConfig[]
   notes: string
   photos: File[]
+  fileUrls: {
+    superior: string | null
+    inferior: string | null
+    mordida: string | null
+    gingival: string | null
+  }
   fileSuperior: File | null
   fileInferior: File | null
   fileMordida: File | null
@@ -102,15 +116,15 @@ export function emptyColorSection(): ColorSelection {
   return { paletteType: "VITA_CLASSIC", customPalette: "", code: "" }
 }
 
-export function emptyPieceConfig(pieceId: string, gridIndex: number): PieceConfig {
+export function emptyPieceConfig(id: string, numero: number): PiezaConfig {
   return {
-    pieceId,
-    gridIndex,
-    type: "",
-    subType: "",
+    id,
+    numero,
+    tipo: "",
+    subTipo: "",
     tiBase: null,
-    colorSectionCount: 1,
-    colors: [emptyColorSection()],
+    cantidadColores: 1,
+    colores: [emptyColorSection()],
   }
 }
 
@@ -134,3 +148,9 @@ export function minDeliveryDate(receptionISO: string): string {
   if (Number.isNaN(reception.getTime())) return ""
   return toISODate(addDays(reception, 8))
 }
+
+export type AutocompleteOption = {
+    id: string;
+    label: string;
+    sublabel?: string;
+};

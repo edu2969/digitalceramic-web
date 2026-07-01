@@ -42,3 +42,13 @@ body {
     color: #9ca3af; /* gray-400 */
   }
 }
+
+/* globals.css o tailwind.config.js */
+@keyframes progressPulse {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.5; }
+}
+
+.uploading-progress {
+  animation: progressPulse 1.5s ease-in-out infinite;
+}

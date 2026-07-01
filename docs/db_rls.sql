@@ -132,15 +132,19 @@ create policy "piezas_owner_or_staff"
 -- -----------------------------------------------------------------------------
 drop policy if exists "clinica read"  on public.clinica;
 drop policy if exists "clinica write" on public.clinica;
+drop policy if exists "clinica update" on public.clinica;
 
 create policy "clinica read"  on public.clinica for select to authenticated using (true);
 create policy "clinica write" on public.clinica for insert to authenticated with check (true);
+create policy "clinica update" on public.clinica for update to authenticated using (true) with check (true);
 
 drop policy if exists "pacientes read"  on public.pacientes;
 drop policy if exists "pacientes write" on public.pacientes;
+drop policy if exists "pacientes update" on public.pacientes;
 
 create policy "pacientes read"  on public.pacientes for select to authenticated using (true);
 create policy "pacientes write" on public.pacientes for insert to authenticated with check (true);
+create policy "pacientes update" on public.pacientes for update to authenticated using (true) with check (true);
 
 -- NOTA PII (pacientes / clinica):
 -- DECISIÓN DELIBERADA: lectura/inserción abiertas a cualquier autenticado.

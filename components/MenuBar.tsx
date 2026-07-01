@@ -180,7 +180,7 @@ export default function SidebarLayout({
             "
             onClick={() => {
                 setOpen(false);
-                router.push('/account')
+                router.push('/cuenta')
             }}
           >
             <FiUser className="w-5 h-5" />

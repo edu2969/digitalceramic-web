@@ -86,6 +86,51 @@ function ageFromBirthDate(iso: string | null): number | null {
   return Number.isFinite(years) && years >= 0 ? years : null
 }
 
+function parsePiezaDraft(pieza: PiezaRow) {
+  const colorCodes = (pieza.colores ?? "")
+    .split(",")
+    .map((value) => value.trim())
+    .filter(Boolean)
+
+  const paletteType = (() => {
+    if (pieza.paleta === "VITA_3D") return "VITA_3D"
+    if (pieza.paleta && pieza.paleta !== "VITA_CLASSIC") return "OTRO"
+    return "VITA_CLASSIC"
+  })()
+
+  const hasTiBase =
+    pieza.tibase_cementado != null ||
+    pieza.tibase_plataforma != null ||
+    pieza.tibase_gingival != null
+
+  const inferredSubType = (() => {
+    if (pieza.tipo !== "CORONA_IMPLANTE") return ""
+    if (pieza.conexion === "ATORNILLADA") return "ATORNILLADA"
+    if (pieza.conexion === "CEMENTADA") return "CEMENTADA"
+    return hasTiBase ? "ATORNILLADA" : ""
+  })()
+
+  return {
+    id: pieza.numero != null ? String(pieza.numero) : `pieza-${Math.random()}`,
+    numero: pieza.numero != null ? Number(pieza.numero) : null,
+    tipo: pieza.tipo ?? "",
+    subTipo: inferredSubType,
+    tiBase: hasTiBase
+      ? {
+          gingivalHeight: pieza.tibase_gingival ?? 0,
+          diameter: pieza.tibase_plataforma ?? 0,
+          platformHeight: pieza.tibase_cementado ?? 0,
+        }
+      : null,
+    cantidadColores: Math.max(1, colorCodes.length || 1),
+    colores: colorCodes.map((code) => ({
+      paletteType,
+      customPalette: paletteType === "OTRO" ? pieza.paleta ?? "" : "",
+      code,
+    })),
+  }
+}
+
 type PiezaRow = {
   numero: number | string | null
   paleta: string | null
@@ -120,6 +165,7 @@ type TrabajoRow = {
     nombre: string | null
     apellido: string | null
     numero_registro: string | null
+    rut: string | null
   } | null
   piezas: PiezaRow[] | null
 }
@@ -153,7 +199,7 @@ export async function GET(
     const { data: trabajoData, error: trabajoError } = await supabase
       .from("trabajos")
       .select(
-        "id, fecha_envio, fecha_entrega, monto, notas, estado, enviado_por, url_superior, url_inferior, url_mordida, url_gingival, pacientes (nombre, apellido, fecha_nacimiento), clinica (nombre), profiles (user_id, nombre, apellido, numero_registro), piezas (numero, paleta, colores, tipo, tibase_cementado, tibase_plataforma, tibase_gingival, conexion)"
+        "id, fecha_envio, fecha_entrega, monto, notas, estado, enviado_por, url_superior, url_inferior, url_mordida, url_gingival, pacientes (nombre, apellido, fecha_nacimiento), clinica (nombre), profiles (user_id, nombre, apellido, numero_registro, rut), piezas (numero, paleta, colores, tipo, tibase_cementado, tibase_plataforma, tibase_gingival, conexion)"
       )
       .eq("id", trabajoId)
       .maybeSingle()
@@ -252,13 +298,14 @@ export async function GET(
       .trim()
     const dentistName = trabajo.enviado_por || profileName || "-"
 
-    const patientFullName = [
-      trabajo.pacientes?.nombre ?? null,
-      trabajo.pacientes?.apellido ?? null,
-    ]
+    const patientFirstName = trabajo.pacientes?.nombre ?? null
+    const patientSurname = trabajo.pacientes?.apellido ?? null
+    const patientFullName = [patientFirstName, patientSurname]
       .filter(Boolean)
       .join(" ")
       .trim()
+
+    const draftPiezas = (trabajo.piezas ?? []).map(parsePiezaDraft)
 
     return NextResponse.json({
       id: trabajo.id,
@@ -268,12 +315,15 @@ export async function GET(
       overdueDays,
       patient: {
         name: patientFullName || "-",
+        firstName: patientFirstName ?? null,
+        surname: patientSurname ?? null,
         age: ageFromBirthDate(trabajo.pacientes?.fecha_nacimiento ?? null),
       },
       clinic: { name: trabajo.clinica?.nombre ?? "-" },
       dentist: {
         name: dentistName,
         registry: trabajo.profiles?.numero_registro ?? null,
+        rut: trabajo.profiles?.rut ?? null,
       },
       sentBy: { name: dentistName, email: sentByEmail },
       issueDate: formatDateLong(trabajo.fecha_envio),
@@ -283,6 +333,19 @@ export async function GET(
       notes: trabajo.notas ?? "",
       monto: trabajo.monto,
       estado,
+      draft: {
+        piezas: draftPiezas,
+        notes: trabajo.notas ?? "",
+        fecha_envio: trabajo.fecha_envio ?? null,
+        fecha_entrega: trabajo.fecha_entrega ?? null,
+        enviadoPor: trabajo.enviado_por ?? null,
+        urls: {
+          superior: trabajo.url_superior ?? null,
+          inferior: trabajo.url_inferior ?? null,
+          mordida: trabajo.url_mordida ?? null,
+          gingival: trabajo.url_gingival ?? null,
+        },
+      },
     })
   } catch (error) {
     console.error(error)
@@ -294,6 +357,9 @@ export async function GET(
 }
 
 const ALLOWED_TRANSITIONS: Record<Estado, Estado[]> = {
+  // El borrador pasa a CREADO al enviarse el caso (vía /api/nuevo-caso), no
+  // mediante esta máquina de transiciones del laboratorio.
+  BORRADOR: [],
   CREADO: ["INICIADO", "ANULADO"],
   INICIADO: ["FINALIZADO", "ANULADO"],
   FINALIZADO: ["TRA"],

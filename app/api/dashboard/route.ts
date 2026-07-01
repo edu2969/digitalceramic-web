@@ -81,6 +81,7 @@ export async function GET() {
       .select(
         "id, fecha_envio, fecha_entrega, estado, pacientes (nombre, apellido), clinica (nombre), piezas (tipo)"
       )
+      .neq("estado", "BORRADOR")
       .order("fecha_envio", { ascending: false })
 
     if (trabajosError) throw trabajosError

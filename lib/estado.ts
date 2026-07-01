@@ -1,4 +1,5 @@
 export type Estado =
+  "BORRADOR"
   | "CREADO"
   | "INICIADO"
   | "DEVUELTO"
@@ -8,6 +9,7 @@ export type Estado =
   | "TRA"
 
 export const ESTADO_LABEL: Record<Estado, string> = {
+  BORRADOR: "Borrador",
   CREADO: "En espera",
   INICIADO: "En proceso",
   FINALIZADO: "Terminado",
@@ -18,6 +20,7 @@ export const ESTADO_LABEL: Record<Estado, string> = {
 }
 
 export const ESTADO_BADGE: Record<Estado, string> = {
+  BORRADOR: "bg-slate-200 text-slate-400 border-slate-300",
   CREADO: "bg-slate-100 text-slate-700 border-slate-200",
   INICIADO: "bg-blue-50 text-[#1C4880] border-blue-200",
   FINALIZADO: "bg-emerald-50 text-emerald-700 border-emerald-200",
@@ -29,6 +32,7 @@ export const ESTADO_BADGE: Record<Estado, string> = {
 
 export function isEstado(value: unknown): value is Estado {
   return (
+    value === "BORRADOR" ||
     value === "CREADO" ||
     value === "INICIADO" ||
     value === "DEVUELTO" ||

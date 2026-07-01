@@ -1,4 +1,4 @@
-import Work from "@/components/Work";
+import Work from "@/components/Caso";
 import QueryProvider from "../../../(public)/providers/QueryProvider";
 
 export default async function WorkPage({

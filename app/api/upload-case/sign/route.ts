@@ -13,8 +13,6 @@ const VALID_3D_EXTENSIONS = new Set(["stl", "obj", "step", "stp", "ply"]);
 
 type Slot3D = "fileSuperior" | "fileInferior" | "fileMordida" | "fileGingival";
 
-const REQUIRED_3D_SLOTS: Slot3D[] = ["fileSuperior", "fileInferior"];
-
 const SLOT_FOLDER: Record<Slot3D, string> = {
   fileSuperior: "superior",
   fileInferior: "inferior",
@@ -90,10 +88,6 @@ export async function POST(req: Request) {
       return bad(`Extensión 3D inválida (${f.slot})`);
     }
   }
-  for (const required of REQUIRED_3D_SLOTS) {
-    if (!seen.has(required)) return bad(`Falta archivo 3D requerido: ${required}`);
-  }
-
   for (const p of photos) {
     if (!Number.isFinite(p.size) || p.size <= 0 || p.size > MAX_PHOTO_SIZE) {
       return bad("Tamaño de foto inválido");
@@ -115,7 +109,12 @@ export async function POST(req: Request) {
     if (error || !data) {
       throw new Error(`createSignedUploadUrl failed: ${error?.message ?? "unknown"}`);
     }
-    return { path: data.path, signedUrl: data.signedUrl, token: data.token };
+
+    return {
+      path: data.path,
+      signedUrl: data.signedUrl,
+      token: data.token,
+    };
   };
 
   try {

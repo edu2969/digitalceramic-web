@@ -1,10 +1,10 @@
 "use client"
 
-import { Fragment } from "react"
+import { Fragment, useCallback, useEffect } from "react"
 import { useFormContext, useFieldArray, useWatch, Controller } from "react-hook-form"
 import {
   UploadFormValues,
-  PieceConfig,
+  PiezaConfig,
   ColorSelection,
   PaletteType,
   VITA_CLASSIC_CODES,
@@ -18,6 +18,7 @@ import {
   emptyPieceConfig,
   emptyColorSection,
 } from "@/components/upload-steps/types"
+import { usePieceAutoSave } from "@/components/form/hooks/usePieceAutoSave"
 
 const SECTION_LABELS: Record<number, string[]> = {
   1: ["Color"],
@@ -25,28 +26,50 @@ const SECTION_LABELS: Record<number, string[]> = {
   3: ["Incisal", "Medio", "Cervical"],
 }
 
-export default function StepPieceSelection() {
-  const { control, register, setValue } = useFormContext<UploadFormValues>()
+export default function StepPieceSelection({
+  id
+}: {
+  id?: string;
+}) {
+  const { control, register, setValue, getValues } = useFormContext<UploadFormValues>()
+  const { saveField, saveFieldImmediate } = usePieceAutoSave(300)
+  
   const { fields, append, remove } = useFieldArray({
     control,
-    name: "pieces",
+    name: "piezas",
     keyName: "_key",
   })
 
-  const watchedPieces = useWatch({ control, name: "pieces" }) ?? []
+  const watchedPieces = useWatch({ control, name: "piezas" }) ?? []
+
+  // Autoguardar cuando cambien las piezas
+  useEffect(() => {
+    const pieces = getValues("piezas")
+    if (pieces) {
+      saveField("piezas", pieces)
+    }
+  }, [watchedPieces, saveField, getValues])
 
   const togglePiece = (gridIndex: number) => {
     const pieceId = getFdiForGridIndex(gridIndex)
-    const existingIdx = fields.findIndex((f) => f.gridIndex === gridIndex)
+    const existingIdx = fields.findIndex((f) => f.numero === gridIndex)
+    
     if (existingIdx >= 0) {
       remove(existingIdx)
+      // Guardar inmediatamente la eliminación
+      const currentPieces = getValues("piezas")
+      saveFieldImmediate("piezas", currentPieces)
     } else {
-      append(emptyPieceConfig(pieceId, gridIndex))
+      const newPiece = emptyPieceConfig(pieceId, gridIndex)
+      append(newPiece)
+      // Guardar inmediatamente la adición
+      const currentPieces = getValues("piezas")
+      saveFieldImmediate("piezas", currentPieces)
     }
   }
 
   const orderedFieldIndices = fields
-    .map((f, idx) => ({ idx, gridIndex: f.gridIndex }))
+    .map((f, idx) => ({ idx, gridIndex: f.numero }))
     .sort((a, b) => a.gridIndex - b.gridIndex)
 
   return (
@@ -61,7 +84,7 @@ export default function StepPieceSelection() {
             const col = (gridIndex % 16) + 1
             const fdiId = getFdiForGridIndex(gridIndex)
             const imagePath = `/dental_layout/row-${row}-column-${col}.png`
-            const isSelected = fields.some((f) => f.gridIndex === gridIndex)
+            const isSelected = fields.some((f) => f.numero === gridIndex)
 
             return (
               <button
@@ -98,17 +121,16 @@ export default function StepPieceSelection() {
       )}
 
       {orderedFieldIndices.map(({ idx, gridIndex }) => {
-        // Usamos gridIndex (posición FDI, única e inmutable por pieza) como key.
-        // El _key de useFieldArray se regenera en cada setValue anidado dentro de
-        // "pieces", lo que remontaría todas las PieceCard y resetearía el scroll.
         return (
           <PieceCard
             key={gridIndex}
             index={idx}
-            piece={watchedPieces[idx] as PieceConfig | undefined}
+            piece={watchedPieces[idx] as PiezaConfig | undefined}
             register={register}
             control={control}
             setValue={setValue}
+            saveField={saveField}
+            saveFieldImmediate={saveFieldImmediate}
           />
         )
       })}
@@ -116,44 +138,63 @@ export default function StepPieceSelection() {
   )
 }
 
+type SaveFieldFn = (field: string, value: unknown) => void
+
 type PieceCardProps = {
   index: number
-  piece: PieceConfig | undefined
+  piece: PiezaConfig | undefined
   register: ReturnType<typeof useFormContext<UploadFormValues>>["register"]
   control: ReturnType<typeof useFormContext<UploadFormValues>>["control"]
   setValue: ReturnType<typeof useFormContext<UploadFormValues>>["setValue"]
+  saveField: SaveFieldFn
+  saveFieldImmediate: SaveFieldFn
 }
 
-function PieceCard({ index, piece, register, control, setValue }: PieceCardProps) {
-  if (!piece) return null
-  const basePath = `pieces.${index}` as const
-  const type = piece.type
-  const subType = piece.subType
-  const count = piece.colorSectionCount ?? 1
+function PieceCard({ 
+  index, 
+  piece, 
+  register, 
+  control, 
+  setValue,
+  saveField,
+  saveFieldImmediate
+}: PieceCardProps) {
+  const basePath = `piezas.${index}` as const
 
-  const handleTypeChange = (newType: PieceConfig["type"]) => {
-    setValue(`${basePath}.type`, newType, { shouldDirty: true })
+  const savePieceChange = useCallback((path: string, value: unknown) => {
+    const fullPath = `${basePath}.${path}`
+    setValue(fullPath as any, value, { shouldDirty: true })
+    saveField(fullPath, value)
+  }, [basePath, saveField, setValue])
+
+  if (!piece) return null
+  const type = piece.tipo
+  const subType = piece.subTipo
+  const count = piece.cantidadColores ?? 1
+
+  const handleTypeChange = (newType: PiezaConfig["tipo"]) => {
+    savePieceChange("tipo", newType)
     if (newType !== "CORONA_IMPLANTE") {
-      setValue(`${basePath}.subType`, "", { shouldDirty: true })
-      setValue(`${basePath}.tiBase`, null, { shouldDirty: true })
+      savePieceChange("subTipo", "")
+      savePieceChange("tiBase", null)
     }
   }
 
-  const handleSubTypeChange = (newSub: PieceConfig["subType"]) => {
-    setValue(`${basePath}.subType`, newSub, { shouldDirty: true })
+  const handleSubTypeChange = (newSub: PiezaConfig["subTipo"]) => {
+    savePieceChange("subTipo", newSub)
     if (newSub !== "ATORNILLADA") {
-      setValue(`${basePath}.tiBase`, null, { shouldDirty: true })
+      savePieceChange("tiBase", null)
     }
   }
 
   const handleSectionCountChange = (next: 1 | 2 | 3) => {
-    setValue(`${basePath}.colorSectionCount`, next, { shouldDirty: true })
-    const current = piece.colors ?? []
+    savePieceChange("cantidadColores", next)
+    const current = piece.colores ?? []
     const resized: ColorSelection[] = Array.from(
       { length: next },
       (_, i) => current[i] ?? emptyColorSection(),
     )
-    setValue(`${basePath}.colors`, resized, { shouldDirty: true })
+    savePieceChange("colores", resized)
   }
 
   const labels = SECTION_LABELS[count] ?? SECTION_LABELS[1]
@@ -161,7 +202,7 @@ function PieceCard({ index, piece, register, control, setValue }: PieceCardProps
   return (
     <div className="border-2 border-gray-200 rounded-xl p-5 space-y-5">
       <h4 className="text-lg font-bold text-[#1C4880]">
-        Pieza FDI {piece.pieceId}
+        Pieza FDI {piece.id}
       </h4>
 
       <div>
@@ -172,7 +213,7 @@ function PieceCard({ index, piece, register, control, setValue }: PieceCardProps
           <select
             value={type}
             onChange={(e) =>
-              handleTypeChange(e.target.value as PieceConfig["type"])
+              handleTypeChange(e.target.value as PiezaConfig["tipo"])
             }
             className="px-3 py-2 border-2 border-gray-300 rounded-lg focus:border-[#1C4880] focus:outline-none md:w-64"
           >
@@ -205,7 +246,7 @@ function PieceCard({ index, piece, register, control, setValue }: PieceCardProps
                 key={opt.v}
                 type="button"
                 onClick={() =>
-                  handleSubTypeChange(opt.v as PieceConfig["subType"])
+                  handleSubTypeChange(opt.v as PiezaConfig["subTipo"])
                 }
                 className={`px-4 py-2 rounded-lg font-medium transition ${
                   subType === opt.v
@@ -225,6 +266,7 @@ function PieceCard({ index, piece, register, control, setValue }: PieceCardProps
           basePath={basePath}
           current={piece.tiBase}
           setValue={setValue}
+          saveField={saveField}
         />
       )}
 
@@ -254,13 +296,14 @@ function PieceCard({ index, piece, register, control, setValue }: PieceCardProps
         {Array.from({ length: count }, (_, i) => (
           <ColorSectionEditor
             key={i}
-            basePath={`${basePath}.colors.${i}` as const}
+            basePath={`${basePath}.colores.${i}` as const}
             label={labels[i] ?? `Color ${i + 1}`}
             piece={piece}
             colorIndex={i}
             register={register}
             control={control}
             setValue={setValue}
+            saveField={saveField}
           />
         ))}
       </div>
@@ -272,17 +315,18 @@ function TiBaseTable({
   basePath,
   current,
   setValue,
+  saveField,
 }: {
-  basePath: `pieces.${number}`
-  current: PieceConfig["tiBase"]
+  basePath: `piezas.${number}`
+  current: PiezaConfig["tiBase"]
   setValue: ReturnType<typeof useFormContext<UploadFormValues>>["setValue"]
+  saveField: SaveFieldFn
 }) {
   const select = (gh: number, dia: number, plat: number) => {
-    setValue(
-      `${basePath}.tiBase`,
-      { gingivalHeight: gh, diameter: dia, platformHeight: plat },
-      { shouldDirty: true },
-    )
+    const tiBase = { gingivalHeight: gh, diameter: dia, platformHeight: plat }
+    const fullPath = `${basePath}.tiBase`
+    setValue(fullPath as any, tiBase, { shouldDirty: true })
+    saveField(fullPath, tiBase)
   }
 
   const isActive = (gh: number, dia: number, plat: number) =>
@@ -295,18 +339,15 @@ function TiBaseTable({
     <div className="bg-gray-50 border border-gray-200 rounded-lg p-4">
       <p className="text-sm font-semibold text-gray-700 mb-3">
         TiBase — selecciona plataforma (fila), cementado (grupo) y altura gingival (columna)
-         
       </p>
       <div className="overflow-x-auto">
         <table className="border-collapse text-sm">
           <thead>
             <tr>
               <th className="w-10" />
-
               <th className="px-3 py-0 text-gray-500 text-lg leading-none">
                 ∅
               </th>
-
               {TIBASE_GINGIVAL_HEIGHTS.map((gh) => (
                 <th
                   key={gh}
@@ -322,19 +363,18 @@ function TiBaseTable({
               <Fragment key={`group-${plat}`}>
                 {TIBASE_DIAMETERS.map((dia, diaIdx) => (
                   <tr key={`${plat}-${dia}`}>
-                    {/* Altura de muñón (platformHeight) vertical, una vez cada 2 filas */}
                     {diaIdx === 0 && (
                       <td
                         rowSpan={TIBASE_DIAMETERS.length}
                         className={`
-                border border-gray-300
-                relative
-                min-w-10.5
-                ${gIdx === 0
+                          border border-gray-300
+                          relative
+                          min-w-10.5
+                          ${gIdx === 0
                             ? "bg-blue-50 text-[#1C4880]"
                             : "bg-amber-50 text-amber-800"
                           }
-              `}
+                        `}
                       >
                         <div className="absolute inset-0 flex items-center justify-center">
                           <span className="-rotate-90 whitespace-nowrap text-xs font-bold tracking-wide">
@@ -343,16 +383,11 @@ function TiBaseTable({
                         </div>
                       </td>
                     )}
-
-                    {/* Plataforma (diámetro ∅) */}
                     <th className="px-3 py-0 border border-gray-300 bg-gray-100 font-semibold text-gray-700 leading-none whitespace-nowrap">
                       {dia}
                     </th>
-
-                    {/* Gingival */}
                     {TIBASE_GINGIVAL_HEIGHTS.map((gh) => {
                       const active = isActive(gh, dia, plat)
-
                       return (
                         <td
                           key={`${plat}-${dia}-${gh}`}
@@ -361,10 +396,11 @@ function TiBaseTable({
                           <button
                             type="button"
                             onClick={() => select(gh, dia, plat)}
-                            className={`w-full h-7 leading-none transition ${active
+                            className={`w-full h-7 leading-none transition ${
+                              active
                                 ? "bg-[#1C4880] text-white"
                                 : "hover:bg-blue-50"
-                              }`}
+                            }`}
                           >
                             {active ? "✓" : ""}
                           </button>
@@ -385,22 +421,15 @@ function TiBaseTable({
           </p>
           <p className="text-base font-semibold flex flex-wrap gap-x-4 gap-y-1 mt-1">
             <span>
-              Plataforma{" "}
-              <span className="font-bold">∅ {current.diameter}</span>
+              Plataforma <span className="font-bold">∅ {current.diameter}</span>
             </span>
-            <span aria-hidden="true" className="opacity-60">
-              ·
-            </span>
+            <span aria-hidden="true" className="opacity-60">·</span>
             <span>
-              Cementado{" "}
-              <span className="font-bold">{current.platformHeight} mm</span>
+              Cementado <span className="font-bold">{current.platformHeight} mm</span>
             </span>
-            <span aria-hidden="true" className="opacity-60">
-              ·
-            </span>
+            <span aria-hidden="true" className="opacity-60">·</span>
             <span>
-              Gingival{" "}
-              <span className="font-bold">{current.gingivalHeight} mm</span>
+              Gingival <span className="font-bold">{current.gingivalHeight} mm</span>
             </span>
           </p>
         </div>
@@ -417,16 +446,18 @@ function ColorSectionEditor({
   register,
   control,
   setValue,
+  saveField,
 }: {
-  basePath: `pieces.${number}.colors.${number}`
+  basePath: `piezas.${number}.colores.${number}`
   label: string
-  piece: PieceConfig
+  piece: PiezaConfig
   colorIndex: number
   register: ReturnType<typeof useFormContext<UploadFormValues>>["register"]
   control: ReturnType<typeof useFormContext<UploadFormValues>>["control"]
   setValue: ReturnType<typeof useFormContext<UploadFormValues>>["setValue"]
+  saveField: SaveFieldFn
 }) {
-  const color = piece.colors?.[colorIndex] ?? emptyColorSection()
+  const color = piece.colores?.[colorIndex] ?? emptyColorSection()
   const paletteType = color.paletteType
 
   const codesForPalette =
@@ -442,6 +473,18 @@ function ColorSectionEditor({
     if (next !== "OTRO") {
       setValue(`${basePath}.customPalette`, "", { shouldDirty: true })
     }
+    // Guardar cambios
+    saveField(`${basePath}.paletteType`, next)
+    saveField(`${basePath}.code`, "")
+    if (next !== "OTRO") {
+      saveField(`${basePath}.customPalette`, "")
+    }
+  }
+
+  const handleInputChange = (field: string, value: unknown) => {
+    const fullPath = `${basePath}.${field}`
+    setValue(fullPath as any, value, { shouldDirty: true })
+    saveField(fullPath, value)
   }
 
   return (
@@ -469,12 +512,18 @@ function ColorSectionEditor({
             type="text"
             placeholder="Nombre paleta"
             className="px-3 py-2 border-2 border-gray-300 rounded-lg focus:border-[#1C4880] focus:outline-none"
-            {...register(`${basePath}.customPalette`, { required: true })}
+            {...register(`${basePath}.customPalette`, { 
+              required: true,
+              onChange: (e) => handleInputChange("customPalette", e.target.value)
+            })}
           />
         ) : (
           <select
             className="px-3 py-2 border-2 border-gray-300 rounded-lg focus:border-[#1C4880] focus:outline-none"
-            {...register(`${basePath}.code`, { required: true })}
+            {...register(`${basePath}.code`, { 
+              required: true,
+              onChange: (e) => handleInputChange("code", e.target.value)
+            })}
           >
             <option value="">-- Código --</option>
             {codesForPalette.map((c) => (
@@ -490,7 +539,10 @@ function ColorSectionEditor({
             type="text"
             placeholder="Código color"
             className="px-3 py-2 border-2 border-gray-300 rounded-lg focus:border-[#1C4880] focus:outline-none"
-            {...register(`${basePath}.code`, { required: true })}
+            {...register(`${basePath}.code`, { 
+              required: true,
+              onChange: (e) => handleInputChange("code", e.target.value)
+            })}
           />
         )}
       </div>

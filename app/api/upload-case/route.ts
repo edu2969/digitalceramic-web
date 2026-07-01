@@ -51,6 +51,9 @@ type PiecePayload = {
 
 type CommitPayload = {
   orderId: string;
+  // id del trabajo (borrador) creado previamente. Si viene, actualizamos ese
+  // trabajo en lugar de insertar uno nuevo, evitando duplicados.
+  trabajoId?: string | null;
   patientInfo: PatientInfo;
   pieces: PiecePayload[];
   notes: string;
@@ -238,8 +241,11 @@ export async function POST(req: Request) {
       return bad("Body inválido");
     }
 
-    const { orderId, patientInfo, pieces, notes, paths } = body;
+    const { orderId, trabajoId, patientInfo, pieces, notes, paths } = body;
     if (!orderId || typeof orderId !== "string") return bad("orderId requerido");
+    if (trabajoId != null && typeof trabajoId !== "string") {
+      return bad("trabajoId inválido");
+    }
     if (!paths?.fileSuperior || !paths?.fileInferior) {
       return bad("Faltan archivos 3D requeridos");
     }
@@ -280,26 +286,60 @@ export async function POST(req: Request) {
       resolveProfile(user.id, patientInfo.dentistRegistry),
     ]);
 
-    const { data: trabajo, error: trabajoError } = await supabase
-      .from("trabajos")
-      .insert({
-        paciente_id: pacienteId,
-        clinica_id: clinicaId,
-        profile_id: profileId,
-        enviado_por: patientInfo.dentistName,
-        fecha_envio: patientInfo.receptionDate,
-        fecha_entrega: patientInfo.deliveryDate,
-        monto: TRABAJO_MONTO_DEFAULT,
-        notas: notes,
-        url_superior: upSuperior,
-        url_inferior: upInferior,
-        url_mordida: upMordida,
-        url_gingival: upGingival,
-      })
-      .select("id")
-      .single();
+    const trabajoFields = {
+      paciente_id: pacienteId,
+      clinica_id: clinicaId,
+      profile_id: profileId,
+      enviado_por: patientInfo.dentistName,
+      fecha_envio: patientInfo.receptionDate,
+      fecha_entrega: patientInfo.deliveryDate,
+      monto: TRABAJO_MONTO_DEFAULT,
+      notas: notes,
+      url_superior: upSuperior,
+      url_inferior: upInferior,
+      url_mordida: upMordida,
+      url_gingival: upGingival,
+    };
 
-    if (trabajoError || !trabajo) throw trabajoError;
+    let trabajoIdFinal: string;
+
+    if (trabajoId) {
+      // Reanudación de un borrador: verificamos que pertenezca al perfil del
+      // usuario antes de actualizarlo, para no escribir sobre trabajos ajenos.
+      const { data: existing, error: existingError } = await supabase
+        .from("trabajos")
+        .select("id, profile_id")
+        .eq("id", trabajoId)
+        .maybeSingle();
+      if (existingError) throw existingError;
+      if (!existing) return bad("Trabajo no encontrado", 404);
+      if (existing.profile_id !== profileId) {
+        return bad("No autorizado para este trabajo", 403);
+      }
+
+      const { error: updateError } = await supabase
+        .from("trabajos")
+        .update({ ...trabajoFields, estado: "CREADO" })
+        .eq("id", trabajoId);
+      if (updateError) throw updateError;
+      trabajoIdFinal = trabajoId;
+
+      // Reemplazamos las piezas previas: el borrador puede reenviarse y no
+      // queremos acumular piezas obsoletas de envíos anteriores.
+      const { error: delError } = await supabase
+        .from("piezas")
+        .delete()
+        .eq("trabajo_id", trabajoId);
+      if (delError) throw delError;
+    } else {
+      const { data: trabajo, error: trabajoError } = await supabase
+        .from("trabajos")
+        .insert(trabajoFields)
+        .select("id")
+        .single();
+      if (trabajoError || !trabajo) throw trabajoError;
+      trabajoIdFinal = trabajo.id;
+    }
 
     if (pieces.length > 0) {
       const piezasRows = pieces.map((piece) => {
@@ -314,7 +354,7 @@ export async function POST(req: Request) {
         const numeroParsed = Number(piece.pieceId);
 
         return {
-          trabajo_id: trabajo.id,
+          trabajo_id: trabajoIdFinal,
           numero: Number.isFinite(numeroParsed) ? numeroParsed : null,
           paleta,
           colores,
@@ -424,7 +464,7 @@ export async function POST(req: Request) {
       console.error("Error al enviar correo del pedido:", emailError);
     }
 
-    return NextResponse.json({ success: true, orderId, trabajoId: trabajo.id });
+    return NextResponse.json({ success: true, orderId, trabajoId: trabajoIdFinal });
   } catch (error) {
     console.error(error);
     return NextResponse.json(

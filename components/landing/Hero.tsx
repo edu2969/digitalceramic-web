@@ -12,7 +12,7 @@ export default function Hero() {
   {/* Contenedor de la imagen - desktop: mitad derecha, móvil: fondo completo */}
   <div className="absolute inset-0 md:inset-y-0 md:left-1/2 md:right-0">
     {/* Degradado azul que cubre la mitad izquierda de la imagen */}
-    <div className="absolute inset-0 z-10 bg-gradient-to-r from-[#000A13] via-[#000A13]/80 to-transparent md:from-[#000A13] md:via-[#000A13]/60 md:to-transparent" />
+    <div className="absolute inset-0 z-10 bg-linear-to-r from-[#000A13] via-[#000A13]/80 to-transparent md:from-[#000A13] md:via-[#000A13]/60 md:to-transparent" />
     
     <div className="relative w-full h-full">
       <Image
@@ -28,10 +28,10 @@ export default function Hero() {
       />
       
       {/* Degradado azul superpuesto en la mitad inferior de la imagen (efecto de acercamiento) */}
-      <div className="absolute inset-0 z-10 bg-gradient-to-b from-transparent via-[#000A13]/20 to-[#000A13]/60 pointer-events-none" />
+      <div className="absolute inset-0 z-10 bg-linear-to-b from-transparent via-[#000A13]/20 to-[#000A13]/60 pointer-events-none" />
       
       {/* Degradado lateral izquierdo para mejor fusión con el texto */}
-      <div className="absolute inset-y-0 left-0 w-1/2 z-10 bg-gradient-to-r from-[#000A13] to-transparent md:from-[#000A13]/80 md:to-transparent pointer-events-none" />
+      <div className="absolute inset-y-0 left-0 w-1/2 z-10 bg-linear-to-r from-[#000A13] to-transparent md:from-[#000A13]/80 md:to-transparent pointer-events-none" />
     </div>
   </div>
 
@@ -43,7 +43,7 @@ export default function Hero() {
     </div>
     
     <p className="mt-4 text-lg md:text-2xl font-bold leading-tight">
-      Coronal digitales de alta precisión,{' '}
+      Coronas digitales de alta precisión,&nbsp;
       <span className="text-[#1F9CE7]">hasta 30% más baratas</span> - sin invertir en escáner
     </p>
     
@@ -53,7 +53,7 @@ export default function Hero() {
     
     <div className="mt-6 md:mt-8 flex gap-4 flex-wrap">
       <button
-        className="flex bg-gradient-to-b from-[#7C31CF] to-[#731BD1] px-8 md:px-10 py-3 md:py-4 rounded-lg font-semibold hover:opacity-90 transition-opacity"
+        className="flex bg-linear-to-b from-[#7C31CF] to-[#731BD1] px-8 md:px-10 py-3 md:py-4 rounded-lg font-semibold hover:opacity-90 transition-opacity"
         onClick={() => {
           const element = document.getElementById('club');
           if (!element) return;
@@ -75,7 +75,7 @@ export default function Hero() {
   </div>
 
   {/* Línea decorativa inferior */}
-  <div className="absolute bottom-0 left-0 right-0 h-[2px] bg-gradient-to-r from-[#1F9CE7]/20 via-[#1F9CE7]/50 to-transparent" />
+  <div className="absolute bottom-0 left-0 right-0 h-[2px] bg-linear-to-r from-[#1F9CE7]/20 via-[#1F9CE7]/50 to-transparent" />
 </section>
   );
 }

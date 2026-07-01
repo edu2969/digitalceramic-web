@@ -43,9 +43,9 @@ export default function Nav() {
                                 src="/logo_02.png"
                                 alt="Digital Ceramic"
                                 fill
-                                className="object-contain"
                                 priority
-                                sizes="56px auto"
+                                sizes="56px"
+                                className="object-contain"
                             />
                         </div>
                         <div className={`hidden sm:flex text-xl md:text-2xl font-bold transition-all duration-300 ${scrolled ? 'opacity-100' : 'opacity-100'}`}>
@@ -57,12 +57,12 @@ export default function Nav() {
                     {/* Menú Desktop */}
                     <nav className="hidden lg:flex items-center gap-1 xl:gap-2">
                         <ul className="flex items-center gap-1 xl:gap-2 font-medium text-white text-sm xl:text-base">
-                            <li>
+                            <li key="link_01">
                                 <Link href="/" className="px-3 xl:px-4 py-2 rounded-lg hover:bg-white/10 transition-colors">
                                     Inicio
                                 </Link>
                             </li>
-                            <li>
+                            <li key="link_02">
                                 <button 
                                     onClick={() => scrollToSection('club')}
                                     className="px-3 xl:px-4 py-2 rounded-lg hover:bg-white/10 transition-colors cursor-pointer"
@@ -70,7 +70,7 @@ export default function Nav() {
                                     Club de beneficios
                                 </button>
                             </li>
-                            <li>
+                            <li key="link_03">
                                 <button 
                                     onClick={() => scrollToSection('servicios')}
                                     className="px-3 xl:px-4 py-2 rounded-lg hover:bg-white/10 transition-colors cursor-pointer"
@@ -83,18 +83,18 @@ export default function Nav() {
                                     Casos clínicos
                                 </Link>
                             </li>*/}
-                            <li>
+                            <li key="link_05">
                                 <Link href="/contacto" className="px-3 xl:px-4 py-2 rounded-lg hover:bg-white/10 transition-colors">
                                     Contacto
                                 </Link>
                             </li>
-                            <li className="ml-2">
-                                <Link href="/login" className="px-4 xl:px-6 py-2.5 rounded-xl bg-white text-[#16213E] font-semibold hover:bg-gray-100 transition-colors whitespace-nowrap">
+                            <li key="link_06" className="ml-2">
+                                <Link href="/login" className="px-4 xl:px-6 py-4 rounded-xl bg-white text-[#16213E] font-semibold hover:bg-gray-100 transition-colors whitespace-nowrap">
                                     Acceso clientes
                                 </Link>
                             </li>
-                            <li>
-                                <Link href="/new-account" className="px-4 xl:px-6 py-2.5 rounded-xl bg-gradient-to-b from-[#7C31CF] to-[#731BD1] text-white font-semibold hover:opacity-90 transition-opacity whitespace-nowrap">
+                            <li key="link_07">
+                                <Link href="/cuenta" className="px-4 xl:px-6 py-4 rounded-xl bg-linear-to-b from-[#7C31CF] to-[#731BD1] text-white font-semibold hover:opacity-90 transition-opacity whitespace-nowrap">
                                     Inscríbete al club
                                 </Link>
                             </li>
@@ -155,7 +155,7 @@ export default function Nav() {
                             </Link>
                         </li>
                         <li>
-                            <Link href="/new-account" className="block px-4 py-3 text-center text-white bg-gradient-to-b from-[#7C31CF] to-[#731BD1] rounded-xl font-semibold hover:opacity-90 transition-opacity" onClick={handleNavClick}>
+                            <Link href="/new-account" className="block px-4 py-3 text-center text-white bg-linear-to-b from-[#7C31CF] to-[#731BD1] rounded-xl font-semibold hover:opacity-90 transition-opacity" onClick={handleNavClick}>
                                 Inscríbete al club
                             </Link>
                         </li>

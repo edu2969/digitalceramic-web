@@ -88,7 +88,7 @@ async function patchProfile(payload: Record<string, unknown>) {
   return res.json() as Promise<ProfileResponse>
 }
 
-export default function AccountSettingsPage() {
+export default function Profile() {
   const fileInputRef = useRef<HTMLInputElement | null>(null)
   const supabase = createClient()
   const queryClient = useQueryClient()

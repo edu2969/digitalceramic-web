@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation"
 import { FiUpload } from "react-icons/fi"
 
 import { Estado, ESTADO_LABEL, ESTADO_BADGE } from "@/lib/estado"
+import { FaEdit } from "react-icons/fa"
 
 interface DentistWorkPiece {
   tooth: string
@@ -47,6 +48,30 @@ export default function DentistDashboard() {
   const isAdmin = data?.isAdmin ?? false
   const columnCount = isAdmin ? 5 : 4
 
+  const handleCrearBorrador = async () => {
+    const response = await fetch("/api/caso/borrador", {
+      method: "POST",
+    });
+
+    const result = await response.json();
+
+    console.log("RESUTL", result);
+
+    if (result.ok) {
+      router.push(`/nuevo-caso/${result.id}`);
+    } else {
+      console.log("Error: ", result.error);
+    }
+  }
+
+  const handleEditWork = (
+    e: React.MouseEvent<HTMLButtonElement>,
+    id: string
+  ) => {
+    e.preventDefault();
+    router.push(`/nuevo-caso/${id}`);
+  };
+
   return (
     <div className="min-h-screen bg-[#F5F7FA] p-6">
       <div className="max-w-6xl mx-auto space-y-6">
@@ -65,7 +90,7 @@ export default function DentistDashboard() {
           {!isAdmin && (
             <button
               type="button"
-              onClick={() => router.push("/upload")}
+              onClick={() => handleCrearBorrador()}
               className="
                 inline-flex items-center gap-2
                 px-5 py-3 rounded-xl
@@ -140,7 +165,12 @@ export default function DentistDashboard() {
                 {works.map((work) => (
                   <tr
                     key={work.id}
-                    onClick={() => router.push(`/work/${work.id}?view=dentist`)}
+                    onClick={() => {
+                      if(work.estado === "BORRADOR") {
+                        return false;
+                      }
+                      router.push(`/caso/${work.id}?view=dentist`);
+                    }}
                     className="border-b border-gray-100 hover:bg-gray-50 transition cursor-pointer"
                   >
                     <td className="px-6 py-4 text-sm font-semibold text-gray-900">
@@ -186,9 +216,15 @@ export default function DentistDashboard() {
 
                     <td className="px-4 py-4">
                       <span
-                        className={`inline-flex items-center px-2 py-1 rounded-lg border text-xs font-bold ${ESTADO_BADGE[work.estado]}`}
+                        className={`inline-flex items-center space-x-4`}
                       >
-                        {ESTADO_LABEL[work.estado]}
+                        <span className={` px-2 py-1 rounded-lg border text-xs font-bold ${ESTADO_BADGE[work.estado]}`}>
+                          {ESTADO_LABEL[work.estado]}
+                        </span>
+                        <button className={`inline-flex items-center bg-[#1C4880] text-white font-semibold px-2 py-1 rounded-lg border text-xs`}
+                        onClick={(e) => handleEditWork(e, work.id)}>
+                          <FaEdit size={25} />&nbsp;<span>Editar</span>
+                        </button>
                       </span>
                     </td>
                   </tr>

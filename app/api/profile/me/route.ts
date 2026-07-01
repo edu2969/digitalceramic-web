@@ -44,6 +44,7 @@ function serializeProfile(
     centro_medico: string | null
     direccion: string | null
     numero_registro: string | null
+    rut: string | null
     avatar_url: string | null
     user_role: string | null
   },
@@ -64,13 +65,14 @@ function serializeProfile(
     centroMedico: row.centro_medico,
     direccion: row.direccion,
     numeroRegistro: row.numero_registro,
+    rut: row.rut,
     avatarUrl,
     userRole: role,
   }
 }
 
 const PROFILE_COLUMNS =
-  "id, user_id, nombre, apellido, telefono, centro_medico, direccion, numero_registro, avatar_url, user_role"
+  "id, user_id, nombre, apellido, telefono, centro_medico, direccion, numero_registro, rut, avatar_url, user_role"
 
 export async function GET() {
   const user = await requireUser()

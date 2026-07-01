@@ -12,7 +12,7 @@ export function dashboardPathFor(role: UserRole | null | undefined): string {
   // El odontólogo ve su propia lista; el administrador ve la lista de trabajos
   // de TODOS los odontólogos (misma vista, con la columna "Doctor").
   if (role === "ODONTOLOGO" || role === "ADMINISTRADOR") {
-    return "/dashboard-odontologo"
+    return "/panel/odontologo"
   }
-  return "/dashboard"
+  return "/panel/laboratorio"
 }

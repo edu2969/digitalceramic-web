@@ -1,4 +1,4 @@
-import Dashboard from "@/components/Dashboard";
+import Dashboard from "@/components/DashboardLaboratorio";
 import QueryProvider from "../../../(public)/providers/QueryProvider";
 
 export default function DashboardPage() {

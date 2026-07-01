@@ -35,7 +35,7 @@ export default function Login() {
       return
     }
 
-    let target = "/dashboard"
+    let target = "/panel"
     try {
       const res = await fetch("/api/profile/me")
       if (res.ok) {
@@ -72,7 +72,7 @@ export default function Login() {
           {/* Logo */}
           <div className="flex justify-center mb-6 space-x-6">
             <Image
-              src="/logo.png"
+              src="/logo_02.png"
               alt="Digital Ceramic"
               width={64}
               height={64}
@@ -196,7 +196,7 @@ export default function Login() {
               <span>
                 ¿Aún no tienes cuenta?{" "}
                 <Link
-                  href="/new-account"
+                  href="/cuenta"
                   className="text-[#269FD0] hover:underline font-semibold"
                 >
                   Crear cuenta
