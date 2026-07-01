@@ -87,7 +87,7 @@ function buildObject(path: string, value: unknown) {
 
         current[key] = {};
 
-        current = current[key];
+        current = current[key] as Record<string, unknown>;
 
     });
 
@@ -113,11 +113,8 @@ export default function AutoField<T extends FieldValues>({
     const id = useId();
 
     const value = useWatch({
-
-        name,
-
+        name: name as any,
         defaultValue
-
     });
 
     register(name, rules);
@@ -130,7 +127,7 @@ export default function AutoField<T extends FieldValues>({
 
         for (const p of parts) {
 
-            current = current?.[p];
+            current = current?.[p] as Record<string, unknown>;
 
         }
 
@@ -164,7 +161,7 @@ export default function AutoField<T extends FieldValues>({
 
             name,
 
-            value,
+            value as any,
 
             {
 

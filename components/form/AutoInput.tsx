@@ -65,7 +65,7 @@ export default function AutoInput<T extends FieldValues>({
 
                         <input
                             type={type}
-                            value={value ?? ""}
+                            value={value as number}
                             placeholder={placeholder}
                             min={min}
                             max={max}

@@ -41,7 +41,7 @@ export default function AutoTextarea<T extends FieldValues>({
                     )}
 
                     <textarea
-                        value={value ?? ""}
+                        value={value as string}
                         placeholder={placeholder}
                         rows={rows}
                         disabled={disabled}

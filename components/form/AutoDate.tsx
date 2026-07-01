@@ -53,7 +53,7 @@ export default function AutoDate<T extends FieldValues>({
 
                         <input
                             type="date"
-                            value={value ?? ""}
+                            value={value as string}
                             min={min}
                             max={max}
                             onChange={(e) => onChange(e.target.value)}
