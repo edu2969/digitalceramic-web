@@ -1,14 +1,14 @@
 import Image from "next/image";
 
 export default function Services() {
-  const titulos = ["Restauraciones digitales", "Arriendos de box Digital", 
+  const titulos = ["Restauraciones digitales", "Arriendos de box Digital",
     "Planificación y diseño CAD/CAM", "Escaneo digital de modelos"];
-  
-    const descripciones = ["Carillas, coronas sobre implante, coronas cementadas e incrustaciones Onlay e Inlay. Excelente estética, máxima naturalidad y durabilidad garantizada.", 
-      "Boxes equipados con escáner intraoral y flujo digital completo para planificación y rehabilitación de casos clínicos",
-      "Diseño digital de restauraciones, análisis de casos y planificación precisa para resultados predecibles",
-      "Digitalización de impresiones y modelos físicos para integrar casos analógicos al flujo digital"
-    ]
+
+  const descripciones = ["Carillas, coronas sobre implante, coronas cementadas e incrustaciones Onlay e Inlay. Excelente estética, máxima naturalidad y durabilidad garantizada.",
+    "Boxes equipados con escáner intraoral y flujo digital completo para planificación y rehabilitación de casos clínicos",
+    "Diseño digital de restauraciones, análisis de casos y planificación precisa para resultados predecibles",
+    "Digitalización de impresiones y modelos físicos para integrar casos analógicos al flujo digital"
+  ]
 
   return (<section id="servicios" className="pb-6 px-6 text-[#24335D]">
     <div className="mx-auto text-center">
@@ -39,7 +39,7 @@ export default function Services() {
               {/* Imagen */}
               <div className="relative h-64 w-full overflow-hidden">
                 <Image
-                  src={`/soluciones/solucion_0${[2, 1, 5, 4][index]}.png`}
+                  src={`/soluciones/solucion_0${[2, 1, 5, 6][index]}.png`}
                   alt={`service ${index}`}
                   fill
                   className="
@@ -49,7 +49,7 @@ export default function Services() {
             transition-transform
             duration-500
           "
-      sizes="
+                  sizes="
     (max-width: 639px) 100vw,
     (max-width: 1279px) 50vw,
     25vw

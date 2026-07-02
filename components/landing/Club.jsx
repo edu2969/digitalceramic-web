@@ -39,29 +39,30 @@ export default function Club() {
         {/* Grid de tarjetas: 1 columna móvil, 2 tablet, 3 desktop */}
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 md:gap-6 py-6 md:py-8">
           {[{
-            nombre: "RUTA 1 • con escáner",
+            nombre: "Corona y diseño",
             antes: 95000,
             ahora: 71250,
-            discount: "-25% • corona unitaria $59.090"
+            discount: "-25% • descuento permanente"
           }, {
-            nombre: "RUTA 2 • impresión análoga",
+            nombre: "Impresión de molde y fabricación de corona",
             antes: 120000,
             ahora: 84000,
             discount: "-30% descuento permanente"
           }, {
-            nombre: "RUTA 3 • flujo completo",
+            nombre: "Sillón de preparación dental + escáner digital + fabricación de corona + box de cementación",
             antes: 140000,
             ahora: 98000,
-            discount: "-30% • arriendo de sillón incl."
+            discount: "-30% • descuento permanente"
           }].map((elem, index) => (
             <div 
               key={`ruta_${index}`} 
-              className="border-2 border-white/20 rounded-2xl p-4 sm:p-6 space-y-2 hover:border-[#F4C20D]/50 transition-all duration-300 hover:shadow-xl hover:shadow-[#F4C20D]/5"
+              className="relative border-2 border-white/20 rounded-2xl p-4 sm:p-6 space-y-2 hover:border-[#F4C20D]/50 transition-all duration-300 hover:shadow-xl hover:shadow-[#F4C20D]/5"
             >
-              <div className="text-white/40 text-xs sm:text-sm font-medium">{elem.nombre}</div>
-              <div className="line-through text-white/40 text-sm sm:text-base">${elem.antes.toLocaleString('es-CL')}</div>
-              <div className="text-xl sm:text-2xl md:text-3xl font-bold text-white">${elem.ahora.toLocaleString('es-CL')}</div>
-              <div className={`text-sm sm:text-base ${index === 0 ? 'text-[#F4C20D] font-bold' : 'text-white/60'}`}>
+              <div className="text-white/40 text-3xl sm:text-2xl font-medium">RUTA {index + 1}</div>
+              <div className="text-white/80 text-md sm:text-sm font-medium mb-8">{elem.nombre}</div>
+              {/*<div className="line-through text-white/40 text-sm sm:text-base">${elem.antes.toLocaleString('es-CL')}</div>
+              <div className="text-xl sm:text-2xl md:text-3xl font-bold text-white">${elem.ahora.toLocaleString('es-CL')}</div>*/}
+              <div className={`absolute bottom-4 text-sm sm:text-base ${index === 0 ? 'text-[#F4C20D] font-bold' : 'text-white/60'}`}>
                 {elem.discount}
               </div>
             </div>
@@ -79,7 +80,7 @@ export default function Club() {
           </button>
           
           <p className="text-white/60 text-xs sm:text-sm md:text-base">
-            10 coronas de bienvenida a <span className="font-semibold text-white">$59.000 c/u</span> para quienes tienen escáner.
+            Todas incluyen diseño + 10 coronas de bienvenida a <span className="font-semibold text-white">$59.000 c/u</span>
           </p>
         </div>
       </div>
