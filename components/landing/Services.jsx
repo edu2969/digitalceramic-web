@@ -39,7 +39,7 @@ export default function Services() {
               {/* Imagen */}
               <div className="relative h-64 w-full overflow-hidden">
                 <Image
-                  src={`/soluciones/solucion_0${[2, 1, 5, 6][index]}.png`}
+                  src={`/soluciones/solucion_0${[6, 1, 8, 7][index]}.png`}
                   alt={`service ${index}`}
                   fill
                   className="

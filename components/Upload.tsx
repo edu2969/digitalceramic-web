@@ -332,7 +332,7 @@ export default function UploadWizard({ trabajoId }: { trabajoId?: string }) {
     { id: 1, title: "Especificación de pieza", completed: piecesComplete },
     { id: 2, title: "Archivos 3D", completed: filesComplete },
     { id: 3, title: "Fotos y Notas (opcional)", completed: true },
-    { id: 4, title: "Envío", completed: false },
+    { id: 4, title: "Pago / Envío", completed: false },
   ];
 
   const handleNextStep = () => {

@@ -204,17 +204,17 @@ function UploadProgress({
 
       {/* Detalles compactos */}
       {isUploading && (
-        <div className="mt-1.5 flex justify-between text-xs text-gray-600">
-          <span>
+        <div className="mt-1.5 text-xs text-gray-600">
+          <p>
             <span className="text-gray-400">Subido:</span>
             <span className="ml-1 font-medium">
               {formatSize(uploadedSize)} / {formatSize(totalSize)}
             </span>
-          </span>
-          <span>
+          </p>
+          <p>
             <span className="text-gray-400">Tiempo:</span>
             <span className="ml-1 font-medium">{estimatedTime}</span>
-          </span>
+          </p>
         </div>
       )}
     </div>
