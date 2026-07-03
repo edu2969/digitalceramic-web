@@ -101,7 +101,7 @@ export async function POST(request: Request) {
   const confirmUrl =
     `${origin}/api/auth/confirm` +
     `?token_hash=${encodeURIComponent(tokenHash)}` +
-    `&type=signup&next=${encodeURIComponent("/dashboard-odontologo")}`
+    `&type=signup&next=${encodeURIComponent("/panel/odontologo")}`
 
   const { error: emailError } = await resend.emails.send({
     from: process.env.RESEND_FROM!,
@@ -134,5 +134,5 @@ export async function POST(request: Request) {
     )
   }
 
-  return NextResponse.json({ success: true })
+  return NextResponse.json({ ok: true })
 }

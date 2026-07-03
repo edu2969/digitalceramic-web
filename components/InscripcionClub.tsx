@@ -4,6 +4,7 @@ import Image from "next/image"
 import Link from "next/link"
 import { useForm, Controller } from "react-hook-form"
 import InputRut from "./prefabs/RutInput"
+import { useState } from "react"
 
 type FormState = {
   nombre: string
@@ -29,12 +30,16 @@ const errorInputClass = `
 `
 
 export default function NewAccount() {
+  const [error, setError] = useState<null | string>(null)
+  const [loading, setLoading] = useState(false)
+  const [sent, setSent] = useState<null | string>(null)
+
   const {
     register,
     handleSubmit,
     watch,
     control,
-    formState: { errors, isValid, isSubmitting },
+    formState: { errors, isValid, isSubmitting }    
   } = useForm<FormState>({
     mode: "onChange",
     defaultValues: {
@@ -53,25 +58,45 @@ export default function NewAccount() {
 
   const password = watch("password")
 
-  const onSubmit = async (data: FormState) => {
-    // Aquí va la lógica de envío
-    console.log("Formulario válido:", data)
+   const onSubmit = async (form: FormState) => {
+    setError(null)
+
+    if (form.password.length < 8) {
+      setError("La contraseña debe tener al menos 8 caracteres")
+      return
+    }
+
+    if (form.password !== form.passwordConfirm) {
+      setError("Las contraseñas no coinciden")
+      return
+    }
+
+    setLoading(true)
 
     const res = await fetch("/api/auth/signup", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({
-        email: data.email,
-        rut: data.rut,
-        password: data.password,
-        nombre: data.nombre,
-        apellido: data.apellido,
-        telefono: data.telefono ? Number(data.telefono) : null,
-        centro_medico: data.centro_medico || null,
-        direccion: data.direccion || null,
-        numero_registro: data.numero_registro || null,
+        email: form.email,
+        password: form.password,
+        nombre: form.nombre,
+        apellido: form.apellido,
+        telefono: form.telefono ? Number(form.telefono) : null,
+        centro_medico: form.centro_medico || null,
+        direccion: form.direccion || null,
+        numero_registro: form.numero_registro || null,
       }),
     })
+
+    setLoading(false)
+
+    if (!res.ok) {
+      const body = await res.json().catch(() => ({}))
+      setError(body?.error ?? "No se pudo crear la cuenta")
+      return
+    }
+
+    setSent(form.email)
   }
 
   return (
@@ -107,15 +132,33 @@ export default function NewAccount() {
             />
           </div>
 
-          <div className="text-center mb-8">
+          {!sent && <div className="text-center mb-8">
             <h1 className="text-xl font-bold text-[#1C4880]">
               Crear cuenta
             </h1>
             <p className="text-gray-600 mt-3">
               Completa tus datos para acceder a la plataforma.
             </p>
-          </div>
+          </div>}
 
+          {sent ? (
+            <div className="text-center py-8 space-y-4">
+              <h1 className="text-2xl font-bold text-[#1C4880]">
+                Revisa tu correo
+              </h1>
+              <p className="text-gray-600">
+                Te enviamos un enlace a <strong>{sent}</strong> para
+                confirmar tu cuenta. Una vez confirmado podrás iniciar sesión.
+              </p>
+              <Link
+                href="/login"
+                className="inline-block text-sm text-[#269FD0] hover:underline"
+              >
+                Volver a iniciar sesión
+              </Link>
+            </div>
+          ) : (
+            <>
           <form onSubmit={handleSubmit(onSubmit)} className="space-y-5">
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div>
@@ -327,8 +370,12 @@ export default function NewAccount() {
               {isSubmitting ? "Creando cuenta…" : "Crear cuenta"}
             </button>
           </form>
+            </>
+          )}
 
-          <div className="mt-6 text-center text-sm text-gray-500">
+
+
+          {!sent && <div className="mt-6 text-center text-sm text-gray-500">
             <span>
               ¿Ya tienes cuenta?{" "}
               <Link
@@ -338,7 +385,7 @@ export default function NewAccount() {
                 Iniciar sesión
               </Link>
             </span>
-          </div>
+          </div>}
         </div>
       </div>
     </section>
