@@ -2,12 +2,14 @@
 
 import Image from "next/image"
 import Link from "next/link"
-import { useState } from "react"
+import { useForm, Controller } from "react-hook-form"
+import InputRut from "./prefabs/RutInput"
 
 type FormState = {
   nombre: string
   apellido: string
   email: string
+  rut: string;
   password: string
   passwordConfirm: string
   telefono: string
@@ -16,75 +18,62 @@ type FormState = {
   numero_registro: string
 }
 
-const INITIAL: FormState = {
-  nombre: "",
-  apellido: "",
-  email: "",
-  password: "",
-  passwordConfirm: "",
-  telefono: "",
-  centro_medico: "",
-  direccion: "",
-  numero_registro: "",
-}
-
 const inputClass = `
   w-full px-4 py-3 rounded-xl border-2 border-gray-200
   focus:border-[#1C4880] focus:outline-none transition text-gray-700
 `
 
+const errorInputClass = `
+  w-full px-4 py-3 rounded-xl border-2 border-red-500
+  focus:border-red-500 focus:outline-none transition text-gray-700
+`
+
 export default function NewAccount() {
-  const [form, setForm] = useState<FormState>(INITIAL)
-  const [loading, setLoading] = useState(false)
-  const [error, setError] = useState<string | null>(null)
-  const [sent, setSent] = useState(false)
+  const {
+    register,
+    handleSubmit,
+    watch,
+    control,
+    formState: { errors, isValid, isSubmitting },
+  } = useForm<FormState>({
+    mode: "onChange",
+    defaultValues: {
+      nombre: "",
+      apellido: "",
+      email: "",
+      rut: "",
+      password: "",
+      passwordConfirm: "",
+      telefono: "",
+      centro_medico: "",
+      direccion: "",
+      numero_registro: "",
+    },
+  })
 
-  const handleChange = (
-    e: React.ChangeEvent<HTMLInputElement>
-  ) => {
-    setForm((prev) => ({ ...prev, [e.target.name]: e.target.value }))
-  }
+  const password = watch("password")
 
-  const handleSubmit = async (e: React.SubmitEvent<HTMLFormElement>) => {
-    e.preventDefault()
-    setError(null)
-
-    if (form.password.length < 8) {
-      setError("La contraseña debe tener al menos 8 caracteres")
-      return
-    }
-
-    if (form.password !== form.passwordConfirm) {
-      setError("Las contraseñas no coinciden")
-      return
-    }
-
-    setLoading(true)
-
+  const onSubmit = async (data: FormState) => {
+    // Aquí va la lógica de envío
+    console.log("Formulario válido:", data)
+    
+    // Tu código existente de fetch...
+    /*
     const res = await fetch("/api/auth/signup", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({
-        email: form.email,
-        password: form.password,
-        nombre: form.nombre,
-        apellido: form.apellido,
-        telefono: form.telefono ? Number(form.telefono) : null,
-        centro_medico: form.centro_medico || null,
-        direccion: form.direccion || null,
-        numero_registro: form.numero_registro || null,
+        email: data.email,
+        password: data.password,
+        nombre: data.nombre,
+        apellido: data.apellido,
+        telefono: data.telefono ? Number(data.telefono) : null,
+        centro_medico: data.centro_medico || null,
+        direccion: data.direccion || null,
+        numero_registro: data.numero_registro || null,
       }),
     })
-
-    setLoading(false)
-
-    if (!res.ok) {
-      const body = await res.json().catch(() => ({}))
-      setError(body?.error ?? "No se pudo crear la cuenta")
-      return
-    }
-
-    setSent(true)
+    */
   }
 
   return (
@@ -104,8 +93,8 @@ export default function NewAccount() {
         <div className="bg-white/95 backdrop-blur-sm border border-[#D7E6F5] shadow-2xl rounded-3xl p-8">
           <div className="flex justify-center mb-6 space-x-6">
             <Image
-              src="/logo.png"
-              alt="Digital Ceramic"
+              src="/logo_02.png"
+              alt="DigitalCeramic"
               width={64}
               height={64}
               priority
@@ -120,200 +109,239 @@ export default function NewAccount() {
             />
           </div>
 
-          {sent ? (
-            <div className="text-center py-8 space-y-4">
-              <h1 className="text-2xl font-bold text-[#1C4880]">
-                Revisa tu correo
-              </h1>
-              <p className="text-gray-600">
-                Te enviamos un enlace a <strong>{form.email}</strong> para
-                confirmar tu cuenta. Una vez confirmado podrás iniciar sesión.
-              </p>
-              <Link
-                href="/login"
-                className="inline-block text-sm text-[#269FD0] hover:underline"
-              >
-                Volver a iniciar sesión
-              </Link>
-            </div>
-          ) : (
-            <>
-              <div className="text-center mb-8">
-                <h1 className="text-xl font-bold text-[#1C4880]">
-                  Crear cuenta
-                </h1>
-                <p className="text-gray-600 mt-3">
-                  Completa tus datos para acceder a la plataforma.
-                </p>
-              </div>
+          <div className="text-center mb-8">
+            <h1 className="text-xl font-bold text-[#1C4880]">
+              Crear cuenta
+            </h1>
+            <p className="text-gray-600 mt-3">
+              Completa tus datos para acceder a la plataforma.
+            </p>
+          </div>
 
-              <form onSubmit={handleSubmit} className="space-y-5">
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                  <div>
-                    <label className="block text-sm font-semibold text-[#1C4880] mb-2">
-                      Nombre
-                    </label>
-                    <input
-                      name="nombre"
-                      value={form.nombre}
-                      onChange={handleChange}
-                      className={inputClass}
-                      required
-                    />
-                  </div>
-
-                  <div>
-                    <label className="block text-sm font-semibold text-[#1C4880] mb-2">
-                      Apellido
-                    </label>
-                    <input
-                      name="apellido"
-                      value={form.apellido}
-                      onChange={handleChange}
-                      className={inputClass}
-                      required
-                    />
-                  </div>
-                </div>
-
-                <div>
-                  <label className="block text-sm font-semibold text-[#1C4880] mb-2">
-                    Correo electrónico
-                  </label>
-                  <input
-                    type="email"
-                    name="email"
-                    value={form.email}
-                    onChange={handleChange}
-                    placeholder="correo@empresa.cl"
-                    className={inputClass}
-                    required
-                  />
-                </div>
-
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                  <div>
-                    <label className="block text-sm font-semibold text-[#1C4880] mb-2">
-                      Contraseña
-                    </label>
-                    <input
-                      type="password"
-                      name="password"
-                      value={form.password}
-                      onChange={handleChange}
-                      placeholder="••••••••"
-                      className={inputClass}
-                      minLength={8}
-                      required
-                    />
-                  </div>
-
-                  <div>
-                    <label className="block text-sm font-semibold text-[#1C4880] mb-2">
-                      Confirmar contraseña
-                    </label>
-                    <input
-                      type="password"
-                      name="passwordConfirm"
-                      value={form.passwordConfirm}
-                      onChange={handleChange}
-                      placeholder="••••••••"
-                      className={inputClass}
-                      minLength={8}
-                      required
-                    />
-                  </div>
-                </div>
-
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                  <div>
-                    <label className="block text-sm font-semibold text-[#1C4880] mb-2">
-                      Teléfono
-                    </label>
-                    <input
-                      type="tel"
-                      name="telefono"
-                      value={form.telefono}
-                      onChange={handleChange}
-                      placeholder="56912345678"
-                      className={inputClass}
-                      inputMode="numeric"
-                      pattern="[0-9]*"
-                    />
-                  </div>
-
-                  <div>
-                    <label className="block text-sm font-semibold text-[#1C4880] mb-2">
-                      Centro médico
-                    </label>
-                    <input
-                      name="centro_medico"
-                      value={form.centro_medico}
-                      onChange={handleChange}
-                      className={inputClass}
-                    />
-                  </div>
-                </div>
-
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                  <div>
-                    <label className="block text-sm font-semibold text-[#1C4880] mb-2">
-                      Dirección
-                    </label>
-                    <input
-                      name="direccion"
-                      value={form.direccion}
-                      onChange={handleChange}
-                      className={inputClass}
-                    />
-                  </div>
-
-                  <div>
-                    <label className="block text-sm font-semibold text-[#1C4880] mb-2">
-                      Número de registro
-                    </label>
-                    <input
-                      name="numero_registro"
-                      value={form.numero_registro}
-                      onChange={handleChange}
-                      placeholder="Registro odontológico"
-                      className={inputClass}
-                    />
-                  </div>
-                </div>
-
-                <button
-                  type="submit"
-                  disabled={loading}
-                  className="
-                    w-full bg-[#1C4880] hover:opacity-90 disabled:opacity-60
-                    text-white font-semibold py-3 rounded-xl transition
-                    shadow-lg shadow-[#1C4880]/20
-                  "
-                >
-                  {loading ? "Creando cuenta…" : "Crear cuenta"}
-                </button>
-              </form>
-
-              <div
-                className={`mt-6 text-center text-sm ${
-                  error ? "text-red-500" : "text-gray-500"
-                }`}
-              >
-                {error || (
-                  <span>
-                    ¿Ya tienes cuenta?{" "}
-                    <Link
-                      href="/login"
-                      className="text-[#269FD0] hover:underline"
-                    >
-                      Iniciar sesión
-                    </Link>
+          <form onSubmit={handleSubmit(onSubmit)} className="space-y-5">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div>
+                <label className="block text-sm font-semibold text-[#1C4880] mb-2">
+                  Nombres
+                </label>
+                <input
+                  {...register("nombre", {
+                    required: "El nombre es requerido",
+                    minLength: { value: 2, message: "Mínimo 2 caracteres" },
+                  })}
+                  className={errors.nombre ? errorInputClass : inputClass}
+                />
+                {errors.nombre && (
+                  <span className="text-red-500 text-xs mt-1">
+                    {errors.nombre.message}
                   </span>
                 )}
               </div>
-            </>
-          )}
+
+              <div>
+                <label className="block text-sm font-semibold text-[#1C4880] mb-2">
+                  Apellidos
+                </label>
+                <input
+                  {...register("apellido", {
+                    required: "El apellido es requerido",
+                    minLength: { value: 2, message: "Mínimo 2 caracteres" },
+                  })}
+                  className={errors.apellido ? errorInputClass : inputClass}
+                />
+                {errors.apellido && (
+                  <span className="text-red-500 text-xs mt-1">
+                    {errors.apellido.message}
+                  </span>
+                )}
+              </div>
+            </div>
+
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div>
+              <div>
+                                <label className="block text-sm font-medium text-gray-700">RUT</label>
+                                <Controller
+                                    name="rut"
+                                    control={control}
+                                    rules={{ required: "RUT es requerido" }}
+                                    render={({ field }) => (
+                                        <InputRut
+                                            className={inputClass}
+                                            value={field.value || ''}
+                                            onChange={field.onChange}
+                                        />
+                                    )}
+                                />
+                            </div>
+            </div>
+            <div>
+              <label className="text-sm font-semibold text-[#1C4880] mb-2">
+                Correo electrónico
+              </label>
+              <input
+                type="email"
+                {...register("email", {
+                  required: "El email es requerido",
+                  pattern: {
+                    value: /^[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}$/i,
+                    message: "Email inválido",
+                  },
+                })}
+                placeholder="correo@empresa.cl"
+                className={errors.email ? errorInputClass : inputClass}
+              />
+              {errors.email && (
+                <span className="text-red-500 text-xs mt-1">
+                  {errors.email.message}
+                </span>
+              )}
+            </div>
+            </div>
+
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div>
+                <label className="block text-sm font-semibold text-[#1C4880] mb-2">
+                  Contraseña
+                </label>
+                <input
+                  type="password"
+                  {...register("password", {
+                    required: "La contraseña es requerida",
+                    minLength: {
+                      value: 8,
+                      message: "Mínimo 8 caracteres",
+                    },
+                    pattern: {
+                      value: /^(?=.*[A-Za-z])(?=.*\d)[A-Za-z\d]{8,}$/,
+                      message: "Debe combinar letras y números",
+                    },
+                  })}
+                  placeholder="••••••••"
+                  className={errors.password ? errorInputClass : inputClass}
+                />
+                {!errors.password && <span className="text-gray-500 text-xs ml-2">
+                  mínimo 8 caracteres, letras y números
+                </span>}
+                {errors.password && (
+                  <span className="text-red-500 text-xs mt-1 block">
+                    {errors.password.message}
+                  </span>
+                )}
+              </div>
+
+              <div>
+                <label className="block text-sm font-semibold text-[#1C4880] mb-2">
+                  Confirmar contraseña
+                </label>
+                <input
+                  type="password"
+                  {...register("passwordConfirm", {
+                    required: "Confirma tu contraseña",
+                    validate: (value) =>
+                      value === password || "Las contraseñas no coinciden",
+                  })}
+                  placeholder="••••••••"
+                  className={errors.passwordConfirm ? errorInputClass : inputClass}
+                />
+                {errors.passwordConfirm && (
+                  <span className="text-red-500 text-xs mt-1">
+                    {errors.passwordConfirm.message}
+                  </span>
+                )}
+              </div>
+            </div>
+
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div>
+                <label className="block text-sm font-semibold text-[#1C4880] mb-2">
+                  Teléfono
+                </label>
+                <div className="relative">
+                  <input
+                    type="tel"
+                    {...register("telefono", {
+                      pattern: {
+                        value: /^[0-9]{9}$/,
+                        message: "Debe tener 9 dígitos",
+                      },
+                    })}
+                    placeholder="Número"
+                    className={`${errors.telefono ? errorInputClass : inputClass} pl-11`}
+                    inputMode="numeric"
+                  />
+                  <span className="text-gray-400 absolute left-2 top-3.5">
+                    +56
+                  </span>
+                </div>
+                {errors.telefono && (
+                  <span className="text-red-500 text-xs mt-1">
+                    {errors.telefono.message}
+                  </span>
+                )}
+              </div>
+
+              <div>
+                <label className="block text-sm font-semibold text-[#1C4880] mb-2">
+                  Centro médico
+                </label>
+                <input
+                  {...register("centro_medico")}
+                  className={inputClass}
+                />
+              </div>
+            </div>
+
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div>
+                <label className="block text-sm font-semibold text-[#1C4880] mb-2">
+                  Dirección
+                </label>
+                <input
+                  {...register("direccion")}
+                  className={inputClass}
+                />
+              </div>
+
+              <div>
+                <label className="block text-sm font-semibold text-[#1C4880] mb-2">
+                  Número de registro <small>(opcional)</small>
+                </label>
+                <input
+                  {...register("numero_registro")}
+                  placeholder="Registro odontológico"
+                  className={inputClass}
+                />
+              </div>
+            </div>
+
+            <button
+              type="submit"
+              disabled={!isValid || isSubmitting}
+              className={`
+                w-full text-white font-semibold py-3 rounded-xl transition
+                ${
+                  !isValid || isSubmitting
+                    ? "bg-gray-400 cursor-not-allowed"
+                    : "bg-[#1C4880] hover:opacity-90 shadow-lg shadow-[#1C4880]/20"
+                }
+              `}
+            >
+              {isSubmitting ? "Creando cuenta…" : "Crear cuenta"}
+            </button>
+          </form>
+
+          <div className="mt-6 text-center text-sm text-gray-500">
+            <span>
+              ¿Ya tienes cuenta?{" "}
+              <Link
+                href="/login"
+                className="text-[#269FD0] hover:underline"
+              >
+                Iniciar sesión
+              </Link>
+            </span>
+          </div>
         </div>
       </div>
     </section>

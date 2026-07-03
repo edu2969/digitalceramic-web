@@ -39,7 +39,7 @@ export default function Club() {
         {/* Grid de tarjetas: 1 columna móvil, 2 tablet, 3 desktop */}
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 md:gap-6 py-6 md:py-8">
           {[{
-            nombre: "Corona y diseño",
+            nombre: "Corona digital",
             antes: 95000,
             ahora: 71250,
             discount: "-25% • descuento permanente"
@@ -62,7 +62,7 @@ export default function Club() {
               <div className="text-white/80 text-md sm:text-sm font-medium mb-8">{elem.nombre}</div>
               {/*<div className="line-through text-white/40 text-sm sm:text-base">${elem.antes.toLocaleString('es-CL')}</div>
               <div className="text-xl sm:text-2xl md:text-3xl font-bold text-white">${elem.ahora.toLocaleString('es-CL')}</div>*/}
-              <div className={`absolute bottom-4 text-sm sm:text-base ${index === 0 ? 'text-[#F4C20D] font-bold' : 'text-white/60'}`}>
+              <div className={`absolute bottom-4 text-sm sm:text-base text-white/60'}`}>
                 {elem.discount}
               </div>
             </div>
