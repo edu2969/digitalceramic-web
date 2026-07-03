@@ -14,6 +14,7 @@ const resend = new Resend(process.env.RESEND_APIKEY)
 type SignupBody = {
   email?: string
   password?: string
+  rut?: string;
   nombre?: string
   apellido?: string
   telefono?: number | null
@@ -30,7 +31,7 @@ export async function POST(request: Request) {
     return NextResponse.json({ error: "Cuerpo inválido" }, { status: 400 })
   }
 
-  const { email, password, nombre, apellido } = body
+  const { email, rut, password, nombre, apellido } = body
 
   if (!email || !password || !nombre || !apellido) {
     return NextResponse.json(
@@ -79,6 +80,7 @@ export async function POST(request: Request) {
     user_id: userId,
     nombre,
     apellido,
+    rut: body.rut,
     telefono: body.telefono ?? null,
     centro_medico: body.centro_medico ?? null,
     direccion: body.direccion ?? null,

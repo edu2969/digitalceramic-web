@@ -56,14 +56,13 @@ export default function NewAccount() {
   const onSubmit = async (data: FormState) => {
     // Aquí va la lógica de envío
     console.log("Formulario válido:", data)
-    
-    // Tu código existente de fetch...
-    /*
+
     const res = await fetch("/api/auth/signup", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({
         email: data.email,
+        rut: data.rut,
         password: data.password,
         nombre: data.nombre,
         apellido: data.apellido,
@@ -73,7 +72,6 @@ export default function NewAccount() {
         numero_registro: data.numero_registro || null,
       }),
     })
-    */
   }
 
   return (
@@ -157,46 +155,46 @@ export default function NewAccount() {
               </div>
             </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <div>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div>
-                                <label className="block text-sm font-medium text-gray-700">RUT</label>
-                                <Controller
-                                    name="rut"
-                                    control={control}
-                                    rules={{ required: "RUT es requerido" }}
-                                    render={({ field }) => (
-                                        <InputRut
-                                            className={inputClass}
-                                            value={field.value || ''}
-                                            onChange={field.onChange}
-                                        />
-                                    )}
-                                />
-                            </div>
-            </div>
-            <div>
-              <label className="text-sm font-semibold text-[#1C4880] mb-2">
-                Correo electrónico
-              </label>
-              <input
-                type="email"
-                {...register("email", {
-                  required: "El email es requerido",
-                  pattern: {
-                    value: /^[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}$/i,
-                    message: "Email inválido",
-                  },
-                })}
-                placeholder="correo@empresa.cl"
-                className={errors.email ? errorInputClass : inputClass}
-              />
-              {errors.email && (
-                <span className="text-red-500 text-xs mt-1">
-                  {errors.email.message}
-                </span>
-              )}
-            </div>
+                <div>
+                  <label className="block text-sm font-medium text-gray-700">RUT</label>
+                  <Controller
+                    name="rut"
+                    control={control}
+                    rules={{ required: "RUT es requerido" }}
+                    render={({ field }) => (
+                      <InputRut
+                        className={inputClass}
+                        value={field.value || ''}
+                        onChange={field.onChange}
+                      />
+                    )}
+                  />
+                </div>
+              </div>
+              <div>
+                <label className="text-sm font-semibold text-[#1C4880] mb-2">
+                  Correo electrónico
+                </label>
+                <input
+                  type="email"
+                  {...register("email", {
+                    required: "El email es requerido",
+                    pattern: {
+                      value: /^[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}$/i,
+                      message: "Email inválido",
+                    },
+                  })}
+                  placeholder="correo@empresa.cl"
+                  className={errors.email ? errorInputClass : inputClass}
+                />
+                {errors.email && (
+                  <span className="text-red-500 text-xs mt-1">
+                    {errors.email.message}
+                  </span>
+                )}
+              </div>
             </div>
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -320,10 +318,9 @@ export default function NewAccount() {
               disabled={!isValid || isSubmitting}
               className={`
                 w-full text-white font-semibold py-3 rounded-xl transition
-                ${
-                  !isValid || isSubmitting
-                    ? "bg-gray-400 cursor-not-allowed"
-                    : "bg-[#1C4880] hover:opacity-90 shadow-lg shadow-[#1C4880]/20"
+                ${!isValid || isSubmitting
+                  ? "bg-gray-400 cursor-not-allowed"
+                  : "bg-[#1C4880] hover:opacity-90 shadow-lg shadow-[#1C4880]/20"
                 }
               `}
             >
