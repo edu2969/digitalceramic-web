@@ -51,13 +51,13 @@ type WorkDetailsResponse = {
   } | null;
   fecha_envio?: string | null;
   fecha_entrega?: string | null;
-  enviadoPor?: string | null;
+  enviado_por?: string | null;
   draft?: {
     piezas: UploadFormValues["piezas"];
     notes: string;
     fecha_envio?: string | null;
     fecha_entrega?: string | null;
-    enviadoPor?: string | null;
+    enviado_por?: string | null;
     urls?: {
       superior?: string | null;
       inferior?: string | null;
@@ -179,14 +179,12 @@ export default function UploadWizard({ trabajoId }: { trabajoId?: string }) {
       gingival: workData.draft?.urls?.gingival ?? null,
     };
     const clinicName = workData.clinic?.name ?? profile?.centroMedico ?? "";
-
     methods.reset({
       ...defaults,
-      enviado_por: workData.enviadoPor ?? workData.draft?.enviadoPor ?? defaults.enviado_por,
-      fecha_envio:
-        workData.fecha_envio ?? workData.draft?.fecha_envio ?? defaults.fecha_envio,
-      fecha_entrega:
-        workData.fecha_entrega ?? workData.draft?.fecha_entrega ?? defaults.fecha_entrega,
+      enviado_por: workData.enviado_por ?? workData.draft?.enviado_por ?? defaults.enviado_por,
+      yo_mismo: (workData.enviado_por === (profileData?.profile?.nombre + " " + profileData?.profile?.apellido)),
+      fecha_envio: workData.fecha_envio ?? workData.draft?.fecha_envio ?? defaults.fecha_envio,
+      fecha_entrega: workData.fecha_entrega ?? workData.draft?.fecha_entrega ?? defaults.fecha_entrega,
       paciente: {
         ...defaults.paciente,
         nombre: workData.patient?.firstName ?? "",

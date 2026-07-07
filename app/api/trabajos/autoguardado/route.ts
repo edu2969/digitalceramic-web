@@ -32,15 +32,6 @@ type PieceDraftInput = {
     } | null;
 };
 
-function splitFullName(fullName: string) {
-    const parts = fullName.trim().split(/\s+/);
-
-    return {
-        nombre: parts.shift() ?? "",
-        apellido: parts.join(" "),
-    };
-}
-
 function birthDateFromAge(age: number) {
     const today = new Date();
 
@@ -221,7 +212,7 @@ export async function POST(req: NextRequest) {
             );
         }
 
-                /****************************************
+        /****************************************
          * TRABAJO
          ****************************************/
 
@@ -344,13 +335,13 @@ export async function POST(req: NextRequest) {
                     subTipo === "ATORNILLADA"
                         ? "ATORNILLADA"
                         : subTipo === "CEMENTADA"
-                        ? "CEMENTADA"
-                        : pieza?.tipo === "CORONA_IMPLANTE" &&
-                          (pieza?.tiBase?.platformHeight != null ||
-                            pieza?.tiBase?.diameter != null ||
-                            pieza?.tiBase?.gingivalHeight != null)
-                        ? "ATORNILLADA"
-                        : "NONE";
+                            ? "CEMENTADA"
+                            : pieza?.tipo === "CORONA_IMPLANTE" &&
+                                (pieza?.tiBase?.platformHeight != null ||
+                                    pieza?.tiBase?.diameter != null ||
+                                    pieza?.tiBase?.gingivalHeight != null)
+                                ? "ATORNILLADA"
+                                : "NONE";
 
                 return {
                     numero: pieza?.numero ?? null,
@@ -367,39 +358,7 @@ export async function POST(req: NextRequest) {
             await replaceTrabajoPiezas(trabajo.id, rows);
         }
 
-        /****************************************
-         * PROFILE
-         ****************************************/
-
-        if (changes.profile) {
-
-            const profileUpdate = { ...changes.profile };
-
-            delete profileUpdate.id;
-
-            if (profileUpdate.nombre) {
-
-                const nombre = splitFullName(profileUpdate.nombre);
-
-                profileUpdate.nombre = nombre.nombre;
-                profileUpdate.apellido = nombre.apellido;
-
-            }
-
-            if (Object.keys(profileUpdate).length) {
-
-                const { error } = await adminSupabase
-                    .from("profiles")
-                    .update(profileUpdate)
-                    .eq("id", trabajo.profile_id);
-
-                if (error) throw error;
-
-            }
-
-        }
-
-                return NextResponse.json({
+        return NextResponse.json({
             ok: true,
         });
 

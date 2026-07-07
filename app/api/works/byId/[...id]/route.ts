@@ -325,7 +325,7 @@ export async function GET(
         registry: trabajo.profiles?.numero_registro ?? null,
         rut: trabajo.profiles?.rut ?? null,
       },
-      sentBy: { name: dentistName, email: sentByEmail },
+      enviado_por: trabajo.enviado_por ?? null,
       issueDate: formatDateLong(trabajo.fecha_envio),
       dueDate: formatDateLong(trabajo.fecha_entrega),
       pieces,
@@ -338,7 +338,7 @@ export async function GET(
         notes: trabajo.notas ?? "",
         fecha_envio: trabajo.fecha_envio ?? null,
         fecha_entrega: trabajo.fecha_entrega ?? null,
-        enviadoPor: trabajo.enviado_por ?? null,
+        enviado_por: trabajo.enviado_por ?? null,
         urls: {
           superior: trabajo.url_superior ?? null,
           inferior: trabajo.url_inferior ?? null,

@@ -74,6 +74,7 @@ export default function StepBasicInformation({
   const receptionDate = useWatch({ control, name: "fecha_envio" })
   const watchedPatientId = useWatch({ control, name: "paciente.id" })
   const enviadoPorCheckbox = useWatch({ control, name: "yo_mismo" })
+  const enviadoPor = useWatch({ control, name: "enviado_por" })
   const minDelivery = minDeliveryDate(receptionDate)
   const errors = formState.errors
   const creatingPatientRef = useRef<string | null>(null)
@@ -82,6 +83,7 @@ export default function StepBasicInformation({
     String(watchedPatientId).trim() &&
     !String(watchedPatientId).startsWith("temp_")
   )
+  const yoMismoField = register("yo_mismo");
 
   const savePatientState = useCallback(
     (overrides: Partial<UploadFormValues["paciente"]> = {}) => {
@@ -154,6 +156,7 @@ export default function StepBasicInformation({
     },
     [savePatientState, setValue]
   );
+
   const createClinicFromName = useCallback(async (value: string) => {
     const trimmed = value.trim();
     if (!trimmed) return null;
@@ -315,46 +318,45 @@ export default function StepBasicInformation({
   };
 
   const handleToggleSoyYo = (e: ChangeEvent<HTMLInputElement>) => {
-    const soyYo = e.currentTarget.checked;
+  const checked = e.currentTarget.checked;
 
-    if (soyYo && odontologo?.profile) {
-      const nombre = `${odontologo.profile.nombre} ${odontologo.profile.apellido}`;
+  if (!odontologo?.profile) return;
 
-      setValue("enviado_por", nombre, {
-        shouldDirty: true,
-        shouldValidate: true,
-      });
+  const nombre =
+    `${odontologo.profile.nombre ?? ""} ${odontologo.profile.apellido ?? ""}`.trim();
 
-      saveField("enviado_por", nombre);
-    } else {
-      setValue("enviado_por", "", {
-        shouldDirty: true,
-        shouldValidate: true,
-      });
+  const valor = checked ? nombre : "";
 
-      saveField("enviado_por", "");
-    }
-  };
+  setValue("enviado_por", valor, {
+    shouldDirty: true,
+    shouldValidate: true,
+  });
 
-  useEffect(() => {
-    if (enviadoPorCheckbox && odontologo?.profile) {
-      const nombre = `${odontologo.profile.nombre} ${odontologo.profile.apellido}`;
+  handleAutoSave("enviado_por", valor);
+};
 
-      setValue("enviado_por", nombre, {
-        shouldDirty: true,
-        shouldValidate: true,
-      });
+useEffect(() => {
+  if (!odontologo?.profile) return;
 
-      saveField("enviado_por", nombre);
-    } else {
-      setValue("enviado_por", "", {
-        shouldDirty: true,
-        shouldValidate: true,
-      });
+  const nombrePerfil =
+    `${odontologo.profile.nombre ?? ""} ${odontologo.profile.apellido ?? ""}`.trim();
 
-      saveField("enviado_por", "");
-    }
-  }, [enviadoPorCheckbox, odontologo, setValue]);
+  const coincide =
+    (enviadoPor ?? "").trim().toLowerCase() ===
+    nombrePerfil.toLowerCase();
+
+  if (coincide !== enviadoPorCheckbox) {
+    setValue("yo_mismo", coincide, {
+      shouldDirty: false,
+      shouldValidate: false,
+    });
+  }
+}, [
+  enviadoPor,
+  enviadoPorCheckbox,
+  odontologo,
+  setValue,
+]);
 
   return (
     <div className="space-y-6">
@@ -496,11 +498,15 @@ export default function StepBasicInformation({
           />
         </div>
         <div className="mt-14 ml-4">
-          <input
-            type="checkbox"
-            {...register("yo_mismo")}
-            className="w-6 h-6 mr-2"
-          />
+<input
+  type="checkbox"
+  {...yoMismoField}
+  className="w-6 h-6 mr-2"
+  onChange={(e) => {
+    yoMismoField.onChange(e);
+    handleToggleSoyYo(e);
+  }}
+/>
           <span className="relative -top-1.5">Enviado por mí</span>
 
 
