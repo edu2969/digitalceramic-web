@@ -51,15 +51,10 @@ export type UploadFormValues = {
     apellido: string | null
     edad: string | null
   },
-  enviadoPor: string
+  enviado_por: string
+  yo_mismo: boolean
   fecha_envio: string
   fecha_entrega: string
-  profile: {
-    id: string | null,
-    nombre: string | null,
-    rut: string | null,
-    numero_registro: string | null
-  },
   clinica: {
     id: string | null,
     nombre: string | null

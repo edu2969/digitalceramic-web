@@ -90,17 +90,11 @@ function defaultValues(): UploadFormValues {
       edad: "",
     },
 
-    enviadoPor: "",
+    enviado_por: "",
+    yo_mismo: false,
 
     fecha_envio: reception,
     fecha_entrega: minDeliveryDate(reception),
-
-    profile: {
-      id: null,
-      nombre: "",
-      rut: "",
-      numero_registro: "",
-    },
 
     clinica: {
       id: null,
@@ -159,36 +153,6 @@ export default function UploadWizard({ trabajoId }: { trabajoId?: string }) {
 
     profilePrefilledRef.current = true;
 
-    const fullName = [profile.nombre, profile.apellido]
-      .filter(Boolean)
-      .join(" ")
-      .trim();
-
-    if (fullName) {
-      methods.setValue("profile.nombre", fullName, {
-        shouldDirty: false,
-        shouldValidate: false,
-      });
-    }
-
-    if (profile.numeroRegistro) {
-      methods.setValue(
-        "profile.numero_registro",
-        profile.numeroRegistro,
-        {
-          shouldDirty: false,
-          shouldValidate: false,
-        }
-      );
-    }
-
-    if (profile.rut) {
-      methods.setValue("profile.rut", profile.rut, {
-        shouldDirty: false,
-        shouldValidate: false,
-      });
-    }
-
     if (profile.centroMedico) {
       methods.setValue(
         "clinica.nombre",
@@ -214,16 +178,11 @@ export default function UploadWizard({ trabajoId }: { trabajoId?: string }) {
       mordida: workData.draft?.urls?.mordida ?? null,
       gingival: workData.draft?.urls?.gingival ?? null,
     };
-    const fullDentistName =
-      workData.dentist?.name ??
-      [profile?.nombre, profile?.apellido].filter(Boolean).join(" ").trim();
-    const dentistRegistry = workData.dentist?.registry ?? profile?.numeroRegistro ?? "";
-    const dentistRut = workData.dentist?.rut ?? profile?.rut ?? "";
     const clinicName = workData.clinic?.name ?? profile?.centroMedico ?? "";
 
     methods.reset({
       ...defaults,
-      enviadoPor: workData.enviadoPor ?? workData.draft?.enviadoPor ?? defaults.enviadoPor,
+      enviado_por: workData.enviadoPor ?? workData.draft?.enviadoPor ?? defaults.enviado_por,
       fecha_envio:
         workData.fecha_envio ?? workData.draft?.fecha_envio ?? defaults.fecha_envio,
       fecha_entrega:
@@ -233,12 +192,6 @@ export default function UploadWizard({ trabajoId }: { trabajoId?: string }) {
         nombre: workData.patient?.firstName ?? "",
         apellido: workData.patient?.surname ?? "",
         edad: workData.patient?.age != null ? String(workData.patient.age) : "",
-      },
-      profile: {
-        ...defaults.profile,
-        nombre: fullDentistName ?? "",
-        rut: dentistRut,
-        numero_registro: dentistRegistry,
       },
       clinica: {
         ...defaults.clinica,
@@ -293,9 +246,6 @@ export default function UploadWizard({ trabajoId }: { trabajoId?: string }) {
     !!values?.paciente?.nombre?.trim() &&
     !!values?.paciente?.apellido?.trim() &&
     !!values?.paciente?.edad?.toString().trim() &&
-    !!values?.profile?.nombre?.trim() &&
-    !!values?.profile?.rut?.trim() &&
-    !!values?.profile?.numero_registro?.trim() &&
     !!values?.clinica?.nombre?.trim() &&
     !!values?.fecha_envio &&
     !!values?.fecha_entrega &&

@@ -1,8 +1,7 @@
 "use client"
 
-import { useCallback, useEffect, useRef } from "react"
+import { ChangeEvent, useCallback, useEffect, useRef, useState } from "react"
 import { Controller, useFormContext, useWatch } from "react-hook-form"
-import { useQuery } from "@tanstack/react-query"
 import Autocomplete from "@/components/prefabs/Autocomplete"
 import {
   AutocompleteOption,
@@ -10,6 +9,7 @@ import {
   minDeliveryDate,
 } from "@/components/upload-steps/types"
 import { useAutoSaveContext } from "../form/provider/AutoSaveProvider"
+import { useQuery } from "@tanstack/react-query"
 
 const inputClass =
   "w-full px-4 py-3 border-2 border-gray-300 rounded-lg focus:border-[#1C4880] focus:outline-none transition"
@@ -21,14 +21,13 @@ type ProfileResponse = {
     apellido: string | null
     centroMedico: string | null
     numeroRegistro: string | null
-    rut: string | null
   } | null
 }
 
 async function fetchProfile(): Promise<ProfileResponse> {
   const res = await fetch("/api/profile/me")
   if (!res.ok) throw new Error("Error cargando perfil")
-  return res.json()
+  return await res.json();
 }
 
 async function searchPacientes(q: string) {
@@ -44,7 +43,6 @@ async function searchPacientes(q: string) {
     sublabel: undefined,
   }))
 }
-
 async function searchClinicas(q: string) {
   const url = q ? `/api/clinicas?q=${encodeURIComponent(q)}` : "/api/clinicas"
   const res = await fetch(url)
@@ -75,46 +73,15 @@ export default function StepBasicInformation({
   const { saveField, flush } = useAutoSaveContext()
   const receptionDate = useWatch({ control, name: "fecha_envio" })
   const watchedPatientId = useWatch({ control, name: "paciente.id" })
+  const enviadoPorCheckbox = useWatch({ control, name: "yo_mismo" })
   const minDelivery = minDeliveryDate(receptionDate)
   const errors = formState.errors
   const creatingPatientRef = useRef<string | null>(null)
   const hasConfirmedPatient = Boolean(
     watchedPatientId &&
-      String(watchedPatientId).trim() &&
-      !String(watchedPatientId).startsWith("temp_")
+    String(watchedPatientId).trim() &&
+    !String(watchedPatientId).startsWith("temp_")
   )
-
-  const { data: profileData } = useQuery({
-    queryKey: ["profile-me"],
-    queryFn: fetchProfile,
-    staleTime: 5 * 60 * 1000,
-  })
-
-  const profile = profileData?.profile
-
-  useEffect(() => {
-    if (!profile) return
-    if (profile.nombre || profile.apellido) {
-      const full = `${profile.nombre ?? ""} ${profile.apellido ?? ""}`.trim()
-      setValue("profile.nombre", full, { shouldValidate: true })
-    }
-    if (profile.numeroRegistro) {
-      setValue("profile.numero_registro", profile.numeroRegistro, {
-        shouldValidate: true,
-      })
-    }
-    if (profile.rut) {
-      setValue("profile.rut", profile.rut, {
-        shouldValidate: true,
-      })
-      saveField("profile.rut", profile.rut)
-    }
-    if (profile.centroMedico) {
-      setValue("clinica.nombre", profile.centroMedico, {
-        shouldValidate: true,
-      })
-    }
-  }, [profile, setValue])
 
   const savePatientState = useCallback(
     (overrides: Partial<UploadFormValues["paciente"]> = {}) => {
@@ -129,7 +96,6 @@ export default function StepBasicInformation({
     },
     [getValues, saveField]
   )
-
   const saveClinicState = useCallback(
     (overrides: Partial<UploadFormValues["clinica"]> = {}) => {
       const currentClinic = getValues("clinica")
@@ -141,27 +107,20 @@ export default function StepBasicInformation({
     },
     [getValues, saveField]
   )
-
-  const saveProfileState = useCallback(
-    (overrides: Partial<UploadFormValues["profile"]> = {}) => {
-      const currentProfile = getValues("profile")
-      saveField("profile", {
-        id: currentProfile?.id ?? null,
-        nombre: currentProfile?.nombre ?? null,
-        rut: currentProfile?.rut ?? null,
-        numero_registro: currentProfile?.numero_registro ?? null,
-        ...overrides,
-      })
-    },
-    [getValues, saveField]
-  )
-
   const handlePatientSelect = useCallback(
     (option: AutocompleteOption | null, searchText?: string) => {
       if (option) {
         const patientId = option.id;
+        const nombreCompleto = option.label.split(" ");
+        const nombres = nombreCompleto.slice(0, 1).join(" ");
+        const apellidos = nombreCompleto.slice(2).join(" ");
 
-        setValue("paciente.nombre", option.label, {
+        setValue("paciente.nombre", nombres, {
+          shouldDirty: true,
+          shouldValidate: true,
+        });
+
+        setValue("paciente.apellido", apellidos, {
           shouldDirty: true,
           shouldValidate: true,
         });
@@ -195,7 +154,6 @@ export default function StepBasicInformation({
     },
     [savePatientState, setValue]
   );
-
   const createClinicFromName = useCallback(async (value: string) => {
     const trimmed = value.trim();
     if (!trimmed) return null;
@@ -274,7 +232,7 @@ export default function StepBasicInformation({
       if (searchRes.ok) {
         const existing = await searchRes.json() as { pacientes?: Array<{ id: string; nombre: string; apellido?: string | null }> };
         const match = existing.pacientes?.find((patient) => {
-          const fullName = `${patient.nombre ?? ""} ${patient.apellido ?? ""}`.trim().toLowerCase();
+          const fullName = `${patient.nombre ?? ""}`.trim().toLowerCase();
           return fullName === trimmed.toLowerCase();
         });
 
@@ -325,6 +283,11 @@ export default function StepBasicInformation({
     return null;
   }, [flush, getValues, savePatientState, setValue]);
 
+  const { data: odontologo, isLoading: isProfileLoading } = useQuery<ProfileResponse, Error>({
+    queryKey: ["profile"],
+    queryFn: fetchProfile
+  });
+
   // ✅ AGREGAR función helper para auto-guardado
   const handleAutoSave = (fieldName: string, value: string | number) => {
     const nextValue = String(value)
@@ -348,25 +311,50 @@ export default function StepBasicInformation({
       void flush()
       return
     }
-
-    if (fieldName === "profile.nombre") {
-      saveProfileState({ nombre: nextValue })
-      saveField("enviado_por", nextValue)
-      return
-    }
-
-    if (fieldName === "profile.rut") {
-      saveProfileState({ rut: nextValue })
-      return
-    }
-
-    if (fieldName === "profile.numero_registro") {
-      saveProfileState({ numero_registro: nextValue })
-      return
-    }
-
     saveField(fieldName, value);
   };
+
+  const handleToggleSoyYo = (e: ChangeEvent<HTMLInputElement>) => {
+    const soyYo = e.currentTarget.checked;
+
+    if (soyYo && odontologo?.profile) {
+      const nombre = `${odontologo.profile.nombre} ${odontologo.profile.apellido}`;
+
+      setValue("enviado_por", nombre, {
+        shouldDirty: true,
+        shouldValidate: true,
+      });
+
+      saveField("enviado_por", nombre);
+    } else {
+      setValue("enviado_por", "", {
+        shouldDirty: true,
+        shouldValidate: true,
+      });
+
+      saveField("enviado_por", "");
+    }
+  };
+
+  useEffect(() => {
+    if (enviadoPorCheckbox && odontologo?.profile) {
+      const nombre = `${odontologo.profile.nombre} ${odontologo.profile.apellido}`;
+
+      setValue("enviado_por", nombre, {
+        shouldDirty: true,
+        shouldValidate: true,
+      });
+
+      saveField("enviado_por", nombre);
+    } else {
+      setValue("enviado_por", "", {
+        shouldDirty: true,
+        shouldValidate: true,
+      });
+
+      saveField("enviado_por", "");
+    }
+  }, [enviadoPorCheckbox, odontologo, setValue]);
 
   return (
     <div className="space-y-6">
@@ -495,47 +483,27 @@ export default function StepBasicInformation({
         </div>
       </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
         <div>
-          <label className={labelClass}>Nombre del odontólogo</label>
+          <label className={labelClass}>Enviado por</label>
           <input
             type="text"
             placeholder="Ej: Dra. María González"
             className={inputClass}
-            {...register("profile.nombre", { required: true })}
-            onBlur={(e) => handleAutoSave("profile.nombre", e.target.value)}
+            {...register("enviado_por", { required: true })}
+            onBlur={(e) => handleAutoSave("enviado_por", e.target.value)}
+            disabled={enviadoPorCheckbox}
           />
         </div>
-
-        <div>
-          <label className={labelClass}>RUT del odontólogo</label>
+        <div className="mt-14 ml-4">
           <input
-            type="text"
-            placeholder="Ej: 12.345.678-9"
-            className={inputClass}
-            {...register("profile.rut", { required: true })}
-            onChange={(e) => handleAutoSave("profile.rut", e.target.value)}
-            onBlur={(e) => handleAutoSave("profile.rut", e.target.value)}
+            type="checkbox"
+            {...register("yo_mismo")}
+            className="w-6 h-6 mr-2"
           />
-        </div>
-      </div>
+          <span className="relative -top-1.5">Enviado por mí</span>
 
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-        <div>
-          <label className={labelClass}>Número de registro</label>
-          <input
-            type="text"
-            placeholder="Tu número de registro"
-            className={inputClass}
-            {...register("profile.numero_registro", { required: true })}
-            readOnly={!!profile?.numeroRegistro}
-            onBlur={(e) => handleAutoSave("profile.numero_registro", e.target.value)}
-          />
-          {!profile?.numeroRegistro && (
-            <p className="text-xs text-gray-500 mt-1">
-              Se guardará en tu perfil al enviar el caso.
-            </p>
-          )}
+
         </div>
 
         <div>
