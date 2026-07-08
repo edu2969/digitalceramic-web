@@ -22,13 +22,13 @@ export default function StepSend({
         </p>
         <p className="w-xl grid grid-cols-3 gap-x-4 border-2 border-[#1C4880]/30 bg-[#1C4880]/10 rounded-lg mx-auto my-4 p-4 text-left">
           <span className="font-semibold text-[#1C4880]">Banco</span>
-          <span className="col-span-2 font-bold text-[#1C4880]">: Banco de Chile</span>
+          <span className="col-span-2 font-bold text-[#1C4880]">: Banco Itaú</span>
           <span className="font-semibold text-[#1C4880]">Tipo de cuenta</span>
-          <span className="col-span-2 font-bold text-[#1C4880]">: Cuenta Vista</span>
+          <span className="col-span-2 font-bold text-[#1C4880]">: Cuenta Corriente</span>
           <span className="font-semibold text-[#1C4880]">Número de cuenta</span>
-          <span className="col-span-2 font-bold text-[#1C4880]">: 123456789</span>
+          <span className="col-span-2 font-bold text-[#1C4880]">: 0214175664</span>
           <span className="font-semibold text-[#1C4880]">Rut</span>
-          <span className="col-span-2 font-bold text-[#1C4880]">: 12.345.678-9</span>
+          <span className="col-span-2 font-bold text-[#1C4880]">: 76.809.468-3</span>
           <span className="font-semibold text-[#1C4880]">e-mail comprobante</span>
           <span className="col-span-2 font-bold text-[#1C4880]">: facturacion@digitalceramic.cl</span>
         </p>        

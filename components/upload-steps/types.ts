@@ -13,6 +13,8 @@ export type PiezaType =
   | "CARILLA"
   | "CORONA"
   | "CORONA_IMPLANTE"
+  | "PONTICO"
+  | "CANTILEVER"
 export type PiezaSubType = "" | "CEMENTADA" | "ATORNILLADA"
 
 export const PIECE_TYPE_OPTIONS: { value: Exclude<PiezaType, "">; label: string }[] = [
@@ -21,6 +23,8 @@ export const PIECE_TYPE_OPTIONS: { value: Exclude<PiezaType, "">; label: string 
   { value: "CARILLA", label: "Carilla" },
   { value: "CORONA", label: "Corona" },
   { value: "CORONA_IMPLANTE", label: "Corona sobre implante" },
+  { value: "PONTICO", label: "Póntico" },
+  { value: "CANTILEVER", label: "Cantiléver" }
 ]
 
 export function materialForPieceType(type: PiezaType): string {

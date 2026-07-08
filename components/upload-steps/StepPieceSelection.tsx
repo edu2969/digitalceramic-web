@@ -202,7 +202,7 @@ function PieceCard({
   return (
     <div className="border-2 border-gray-200 rounded-xl p-5 space-y-5">
       <h4 className="text-lg font-bold text-[#1C4880]">
-        Pieza FDI {piece.id}
+        Pieza FDI {getFdiForGridIndex(piece.numero)}
       </h4>
 
       <div>
