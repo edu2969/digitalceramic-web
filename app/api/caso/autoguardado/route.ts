@@ -32,31 +32,8 @@ export async function POST(req: NextRequest) {
             return NextResponse.json({ error: "pacienteId y changes requeridos" }, { status: 400 });
         }
 
-        // Buscar ficha aktiva        
-        const { data: caso } = await supabase
-            .from("trabajos")
-            .select("id, paciente_id, higiene_id")
-            .eq("id", id)
-            .single();
-
         // Categorizar y aplicar cambios
         const casoUpdates = {};
-        const pacienteUpdates = {};
-        const clinicaUpdates = {};
-        
-        const casoFields = [
-            'profile_id', 'paciente_id', 'clinica_id', 'enviado_por', 'fecha_envio', 'fecha_entrega', 
-            'monto', 'notas', 'url_superior', 'url_inferior', 'url_mordida', 'url_gingival', 
-            'estado'
-        ];
-
-        const pacienteFields = [
-            'nombre', 'apellido', 'edad'
-        ];
-
-        const clinicaFields = [
-            'nombre'
-        ];
 
         const updatePromises = [];
 

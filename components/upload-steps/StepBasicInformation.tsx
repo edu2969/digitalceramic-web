@@ -1,12 +1,11 @@
 "use client"
 
-import { ChangeEvent, useCallback, useEffect, useRef, useState } from "react"
+import { ChangeEvent, useCallback, useEffect, useRef } from "react"
 import { Controller, useFormContext, useWatch } from "react-hook-form"
 import Autocomplete from "@/components/prefabs/Autocomplete"
 import {
   AutocompleteOption,
-  UploadFormValues,
-  minDeliveryDate,
+  UploadFormValues
 } from "@/components/upload-steps/types"
 import { useAutoSaveContext } from "../form/provider/AutoSaveProvider"
 import { useQuery } from "@tanstack/react-query"
@@ -57,26 +56,18 @@ async function searchClinicas(q: string) {
   }))
 }
 
-export default function StepBasicInformation({
-  id
-}: {
-  id?: string
-}) {
+export default function StepBasicInformation() {
   const {
     getValues,
     register,
     control,
-    setValue,
-    formState
+    setValue
   } = useFormContext<UploadFormValues>();
 
   const { saveField, flush } = useAutoSaveContext()
-  const receptionDate = useWatch({ control, name: "fecha_envio" })
   const watchedPatientId = useWatch({ control, name: "paciente.id" })
   const enviadoPorCheckbox = useWatch({ control, name: "yo_mismo" })
   const enviadoPor = useWatch({ control, name: "enviado_por" })
-  const minDelivery = minDeliveryDate(receptionDate)
-  const errors = formState.errors
   const creatingPatientRef = useRef<string | null>(null)
   const hasConfirmedPatient = Boolean(
     watchedPatientId &&
@@ -318,50 +309,50 @@ export default function StepBasicInformation({
   };
 
   const handleToggleSoyYo = (e: ChangeEvent<HTMLInputElement>) => {
-  const checked = e.currentTarget.checked;
+    const checked = e.currentTarget.checked;
 
-  if (!odontologo?.profile) return;
+    if (!odontologo?.profile) return;
 
-  const nombre =
-    `${odontologo.profile.nombre ?? ""} ${odontologo.profile.apellido ?? ""}`.trim();
+    const nombre =
+      `${odontologo.profile.nombre ?? ""} ${odontologo.profile.apellido ?? ""}`.trim();
 
-  const valor = checked ? nombre : "";
+    const valor = checked ? nombre : "";
 
-  setValue("enviado_por", valor, {
-    shouldDirty: true,
-    shouldValidate: true,
-  });
-
-  handleAutoSave("enviado_por", valor);
-};
-
-useEffect(() => {
-  if (!odontologo?.profile) return;
-
-  const nombrePerfil =
-    `${odontologo.profile.nombre ?? ""} ${odontologo.profile.apellido ?? ""}`.trim();
-
-  const coincide =
-    (enviadoPor ?? "").trim().toLowerCase() ===
-    nombrePerfil.toLowerCase();
-
-  if (coincide !== enviadoPorCheckbox) {
-    setValue("yo_mismo", coincide, {
-      shouldDirty: false,
-      shouldValidate: false,
+    setValue("enviado_por", valor, {
+      shouldDirty: true,
+      shouldValidate: true,
     });
-  }
-}, [
-  enviadoPor,
-  enviadoPorCheckbox,
-  odontologo,
-  setValue,
-]);
+
+    handleAutoSave("enviado_por", valor);
+  };
+
+  useEffect(() => {
+    if (!odontologo?.profile) return;
+
+    const nombrePerfil =
+      `${odontologo.profile.nombre ?? ""} ${odontologo.profile.apellido ?? ""}`.trim();
+
+    const coincide =
+      (enviadoPor ?? "").trim().toLowerCase() ===
+      nombrePerfil.toLowerCase();
+
+    if (coincide !== enviadoPorCheckbox) {
+      setValue("yo_mismo", coincide, {
+        shouldDirty: false,
+        shouldValidate: false,
+      });
+    }
+  }, [
+    enviadoPor,
+    enviadoPorCheckbox,
+    odontologo,
+    setValue,
+  ]);
 
   return (
     <div className="space-y-6">
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-        <div>
+      <div className="grid grid-cols-1 md:grid-cols-8 gap-4">
+        <div className="md:col-span-3">
           <label className={labelClass}>Nombre del paciente</label>
           <Controller
             control={control}
@@ -391,6 +382,7 @@ useEffect(() => {
                     void createPatientFromName(value);
                   }}
                   fetchOptions={searchPacientes}
+                  placeholder="Ej. Andrea María"
                   className="w-full px-4 py-3 border-2 border-gray-300 rounded-lg focus:border-[#1C4880] focus:outline-none transition"
                 />
                 {fieldState.error && (
@@ -406,11 +398,11 @@ useEffect(() => {
           </p>
         </div>
 
-        <div>
+        <div className="md:col-span-3">
           <label className={labelClass}>Apellido del paciente</label>
           <input
             type="text"
-            placeholder="Ej: Pérez"
+            placeholder="Ej: Pérez Sañartu"
             className={inputClass}
             disabled={!hasConfirmedPatient}
             {...register("paciente.apellido")}
@@ -422,10 +414,7 @@ useEffect(() => {
             onBlur={(e) => handleAutoSave("paciente.apellido", e.target.value)}
           />
         </div>
-      </div>
-
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-        <div>
+        <div className="md:col-span-2 col-span-1">
           <label className={labelClass}>Edad del paciente</label>
           <input
             type="number"
@@ -433,7 +422,6 @@ useEffect(() => {
             max={120}
             placeholder="Ej: 35"
             className={inputClass}
-            disabled={!hasConfirmedPatient}
             {...register("paciente.edad", {
               required: true,
               min: 0,
@@ -446,42 +434,6 @@ useEffect(() => {
             }}
             onBlur={(e) => handleAutoSave("paciente.edad", e.target.value)}
           />
-        </div>
-
-        <div>
-          <label className={labelClass}>Fecha de recepción</label>
-          <input
-            type="date"
-            className={inputClass}
-            {...register("fecha_envio", { required: true })}
-            onBlur={(e) => handleAutoSave("fecha_envio", e.target.value)}
-          />
-        </div>
-
-        <div>
-          <label className={labelClass}>Fecha de entrega</label>
-          <input
-            type="date"
-            min={minDelivery}
-            className={inputClass}
-            {...register("fecha_entrega", {
-              required: true,
-              validate: (value) =>
-                !receptionDate ||
-                new Date(value) >= new Date(minDelivery) ||
-                "La entrega debe ser al menos 7 días después de la recepción",
-            })}
-            onBlur={(e) => handleAutoSave("fecha_entrega", e.target.value)}
-          />
-          {errors.fecha_entrega && (
-            <p className="text-sm text-red-600 mt-1">
-              {errors.fecha_entrega.message?.toString() ||
-                "Fecha de entrega inválida"}
-            </p>
-          )}
-          <p className="text-xs text-gray-500 mt-1">
-            Mínimo: {minDelivery || "selecciona recepción primero"}
-          </p>
         </div>
       </div>
 
@@ -498,18 +450,16 @@ useEffect(() => {
           />
         </div>
         <div className="mt-14 ml-4">
-<input
-  type="checkbox"
-  {...yoMismoField}
-  className="w-6 h-6 mr-2"
-  onChange={(e) => {
-    yoMismoField.onChange(e);
-    handleToggleSoyYo(e);
-  }}
-/>
+          <input
+            type="checkbox"
+            {...yoMismoField}
+            className="w-6 h-6 mr-2"
+            onChange={(e) => {
+              yoMismoField.onChange(e);
+              handleToggleSoyYo(e);
+            }}
+          />
           <span className="relative -top-1.5">Enviado por mí</span>
-
-
         </div>
 
         <div>

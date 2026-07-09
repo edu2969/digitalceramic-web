@@ -72,6 +72,12 @@ export type UploadFormValues = {
     mordida: string | null
     gingival: string | null
   }
+  fileNames: {
+    superior: string | null
+    inferior: string | null
+    mordida: string | null
+    gingival: string | null
+  }
   fileSuperior: File | null
   fileInferior: File | null
   fileMordida: File | null

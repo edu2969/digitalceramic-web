@@ -16,6 +16,13 @@ const SLOT_TO_URL_FIELD: Record<"fileSuperior" | "fileInferior" | "fileMordida" 
   fileGingival: "url_gingival",
 }
 
+const SLOT_TO_PATH_FIELD: Record<"fileSuperior" | "fileInferior" | "fileMordida" | "fileGingival", string> = {
+  fileSuperior: "archivo_superior",
+  fileInferior: "archivo_inferior",
+  fileMordida: "archivo_mordida",
+  fileGingival: "archivo_gingival",
+}
+
 const SLOT_TO_FORM_URL_FIELD: Record<"fileSuperior" | "fileInferior" | "fileMordida" | "fileGingival", `fileUrls.${"superior" | "inferior" | "mordida" | "gingival"}`> = {
   fileSuperior: "fileUrls.superior",
   fileInferior: "fileUrls.inferior",
@@ -221,11 +228,7 @@ function UploadProgress({
   )
 }
 
-export default function StepFiles({
-  id
-}: {
-  id?: string;
-}) {
+export default function StepFiles() {
   return (
     <div className="space-y-6">
       <h3 className="text-xl font-semibold text-[#1C4880]">
@@ -251,6 +254,18 @@ function FileSlot({ slot }: { slot: Slot }) {
   const [error, setError] = useState("")
   const [currentFileName, setCurrentFileName] = useState("")
   const inputRef = useRef<HTMLInputElement>(null)
+
+  const SLOT_TO_FORM_NAME_FIELD = {
+    fileSuperior: "fileNames.superior",
+    fileInferior: "fileNames.inferior",
+    fileMordida: "fileNames.mordida",
+    fileGingival: "fileNames.gingival",
+  } as const;
+
+  const fileName = useWatch({
+    control,
+    name: SLOT_TO_FORM_NAME_FIELD[slot.name],
+  });
   
   // Estado de progreso
   const {
@@ -276,6 +291,7 @@ function FileSlot({ slot }: { slot: Slot }) {
       setValue(slot.name, null, { shouldDirty: true, shouldValidate: true })
       setValue(SLOT_TO_FORM_URL_FIELD[slot.name], null, { shouldDirty: true, shouldValidate: true })
       saveField(SLOT_TO_URL_FIELD[slot.name], null)
+      saveField(SLOT_TO_PATH_FIELD[slot.name], null)
       return
     }
 
@@ -371,6 +387,16 @@ function FileSlot({ slot }: { slot: Slot }) {
       setValue(slot.name, next, { shouldDirty: true, shouldValidate: true })
       setValue(SLOT_TO_FORM_URL_FIELD[slot.name], downloadJson.signedUrl, { shouldDirty: true, shouldValidate: true })
       saveField(SLOT_TO_URL_FIELD[slot.name], downloadJson.signedUrl)
+      saveField(SLOT_TO_PATH_FIELD[slot.name], next.name)
+
+      setValue(
+        SLOT_TO_FORM_NAME_FIELD[slot.name],
+        next.name,
+        {
+          shouldDirty: true,
+          shouldValidate: true,
+        }
+      )
 
       // Resetear progreso después de 2 segundos
       setTimeout(reset, 2000)
@@ -382,6 +408,7 @@ function FileSlot({ slot }: { slot: Slot }) {
       setValue(slot.name, null, { shouldDirty: true, shouldValidate: true })
       setValue(SLOT_TO_FORM_URL_FIELD[slot.name], null, { shouldDirty: true, shouldValidate: true })
       saveField(SLOT_TO_URL_FIELD[slot.name], null)
+      saveField(SLOT_TO_PATH_FIELD[slot.name], null)
     } finally {
       if (inputRef.current) {
         inputRef.current.value = ""
@@ -396,7 +423,17 @@ function FileSlot({ slot }: { slot: Slot }) {
     reset()
     setValue(slot.name, null, { shouldDirty: true, shouldValidate: true })
     setValue(SLOT_TO_FORM_URL_FIELD[slot.name], null, { shouldDirty: true, shouldValidate: true })
+    setValue(
+      SLOT_TO_FORM_NAME_FIELD[slot.name],
+      null,
+      {
+        shouldDirty: true,
+        shouldValidate: true,
+      }
+    )
     saveField(SLOT_TO_URL_FIELD[slot.name], null)
+    saveField(SLOT_TO_PATH_FIELD[slot.name], null)
+
     if (inputRef.current) inputRef.current.value = ""
   }
 
@@ -438,7 +475,7 @@ function FileSlot({ slot }: { slot: Slot }) {
         </p>
         {hasFile && !error && !isUploading ? (
           <div className="text-xs text-green-600 font-medium truncate max-w-full">
-            {file?.name || 'Archivo cargado'}
+            {file?.name ?? fileName ?? "Archivo cargado"}
           </div>
         ) : (
           <>
@@ -478,7 +515,9 @@ function FileSlot({ slot }: { slot: Slot }) {
       {/* Detalles del archivo cargado (desde backend) */}
       {!file && uploadedUrl && !error && !isUploading && (
         <div className="mt-3 p-2 bg-blue-50 border border-blue-200 rounded text-xs">
-          <p className="text-blue-700 font-medium">Archivo cargado</p>
+          <p className="text-blue-700 font-medium">
+              {fileName ?? "Archivo cargado"}
+          </p>
           <a
             href={uploadedUrl}
             target="_blank"

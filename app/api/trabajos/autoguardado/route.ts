@@ -244,6 +244,10 @@ export async function POST(req: NextRequest) {
             ["fileInferior", "url_inferior"],
             ["fileMordida", "url_mordida"],
             ["fileGingival", "url_gingival"],
+            ["archivo_superior", "archivo_superior"],
+            ["archivo_inferior", "archivo_inferior"],
+            ["archivo_mordida", "archivo_mordida"],
+            ["archivo_gingival", "archivo_gingival"],
             ["notas", "notas"],
             ["notes", "notas"],
         ] as const) {

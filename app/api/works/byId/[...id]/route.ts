@@ -154,6 +154,10 @@ type TrabajoRow = {
   url_inferior: string | null
   url_mordida: string | null
   url_gingival: string | null
+  archivo_superior: string | null
+  archivo_inferior: string | null
+  archivo_mordida: string | null
+  archivo_gingival: string | null
   pacientes: {
     nombre: string | null
     apellido: string | null
@@ -199,7 +203,7 @@ export async function GET(
     const { data: trabajoData, error: trabajoError } = await supabase
       .from("trabajos")
       .select(
-        "id, fecha_envio, fecha_entrega, monto, notas, estado, enviado_por, url_superior, url_inferior, url_mordida, url_gingival, pacientes (nombre, apellido, fecha_nacimiento), clinica (nombre), profiles (user_id, nombre, apellido, numero_registro, rut), piezas (numero, paleta, colores, tipo, tibase_cementado, tibase_plataforma, tibase_gingival, conexion)"
+        "id, fecha_envio, fecha_entrega, monto, notas, estado, enviado_por, url_superior, url_inferior, url_mordida, url_gingival, archivo_superior, archivo_inferior, archivo_mordida, archivo_gingival, pacientes (nombre, apellido, fecha_nacimiento), clinica (nombre), profiles (user_id, nombre, apellido, numero_registro, rut), piezas (numero, paleta, colores, tipo, tibase_cementado, tibase_plataforma, tibase_gingival, conexion)"
       )
       .eq("id", trabajoId)
       .maybeSingle()
@@ -212,16 +216,6 @@ export async function GET(
     }
 
     const trabajo = trabajoData as unknown as TrabajoRow
-
-    let sentByEmail: string | null = null
-    const ownerUserId = trabajo.profiles?.user_id ?? null
-    if (ownerUserId) {
-      const { data: ownerData } = await supabase.auth.admin.getUserById(
-        ownerUserId
-      )
-      sentByEmail = ownerData?.user?.email ?? null
-    }
-
     const estado: Estado = isEstado(trabajo.estado) ? trabajo.estado : "CREADO"
     // Solo los trabajos aún en curso (en espera o en proceso) pueden estar
     // atrasados. Una vez terminados/enviados/recibidos/anulados ya no se marcan
@@ -283,11 +277,11 @@ export async function GET(
     })
 
     const files = [
-      { name: "Superior", href: trabajo.url_superior },
-      { name: "Inferior", href: trabajo.url_inferior },
-      { name: "Mordida", href: trabajo.url_mordida },
-      { name: "Gingival", href: trabajo.url_gingival },
-    ].filter((f): f is { name: string; href: string } => !!f.href)
+      { name: "Superior", href: trabajo.url_superior, path: trabajo.archivo_superior },
+      { name: "Inferior", href: trabajo.url_inferior, path: trabajo.archivo_inferior },
+      { name: "Mordida", href: trabajo.url_mordida, path: trabajo.archivo_mordida },
+      { name: "Gingival", href: trabajo.url_gingival, path: trabajo.archivo_gingival },
+    ].filter((f): f is { name: string; href: string; path: string | null } => !!f.href)
 
     const profileName = [
       trabajo.profiles?.nombre,
@@ -345,6 +339,12 @@ export async function GET(
           mordida: trabajo.url_mordida ?? null,
           gingival: trabajo.url_gingival ?? null,
         },
+        archivos: {
+          superior: trabajo.archivo_superior ?? null,
+          inferior: trabajo.archivo_inferior ?? null,
+          mordida: trabajo.archivo_mordida ?? null,
+          gingival: trabajo.archivo_gingival ?? null,
+        }
       },
     })
   } catch (error) {
@@ -357,9 +357,10 @@ export async function GET(
 }
 
 const ALLOWED_TRANSITIONS: Record<Estado, Estado[]> = {
-  // El borrador pasa a CREADO al enviarse el caso (vía /api/nuevo-caso), no
+  // El borrador pasa a PENDIENTE_PAGO al enviarse el caso (vía /api/nuevo-caso), no
   // mediante esta máquina de transiciones del laboratorio.
-  BORRADOR: [],
+  BORRADOR: ["PENDIENTE_PAGO"],
+  PENDIENTE_PAGO: ["INICIADO", "ANULADO"],
   CREADO: ["INICIADO", "ANULADO"],
   INICIADO: ["FINALIZADO", "ANULADO"],
   FINALIZADO: ["TRA"],

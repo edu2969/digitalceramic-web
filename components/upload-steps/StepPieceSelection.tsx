@@ -26,11 +26,7 @@ const SECTION_LABELS: Record<number, string[]> = {
   3: ["Incisal", "Medio", "Cervical"],
 }
 
-export default function StepPieceSelection({
-  id
-}: {
-  id?: string;
-}) {
+export default function StepPieceSelection() {
   const { control, register, setValue, getValues } = useFormContext<UploadFormValues>()
   const { saveField, saveFieldImmediate } = usePieceAutoSave(300)
   

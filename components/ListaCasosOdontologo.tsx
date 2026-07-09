@@ -96,6 +96,7 @@ export default function DentistDashboard() {
                 px-5 py-3 rounded-xl
                 bg-[#1C4880] text-white font-semibold
                 hover:opacity-90 transition shadow-lg
+                cursor-pointer
               "
             >
               <FiUpload className="w-5 h-5" />
@@ -221,10 +222,10 @@ export default function DentistDashboard() {
                         <span className={` px-2 py-1 rounded-lg border text-xs font-bold ${ESTADO_BADGE[work.estado]}`}>
                           {ESTADO_LABEL[work.estado]}
                         </span>
-                        <button className={`inline-flex items-center bg-[#1C4880] text-white font-semibold px-2 py-1 rounded-lg border text-xs`}
+                        {work.estado === "BORRADOR" && <button className={`inline-flex items-center bg-[#1C4880] text-white font-semibold px-2 py-1 rounded-lg border text-xs`}
                         onClick={(e) => handleEditWork(e, work.id)}>
                           <FaEdit size={25} />&nbsp;<span>Editar</span>
-                        </button>
+                        </button>}
                       </span>
                     </td>
                   </tr>

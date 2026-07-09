@@ -180,12 +180,12 @@ export default function SidebarLayout({
             "
             onClick={() => {
                 setOpen(false);
-                router.push('/cuenta')
+                router.push('/perfil')
             }}
           >
             <FiUser className="w-5 h-5" />
 
-            <span>Cuenta</span>
+            <span>Mi perfil</span>
           </button>
 
           <button

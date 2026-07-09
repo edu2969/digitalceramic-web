@@ -284,8 +284,8 @@ export default function WorkPagePage({
             <InfoCard
               icon={<FiUser className="w-5 h-5" />}
               title="Enviado por"
-              value={data.sentBy.name ?? data.sentBy.email ?? "—"}
-              subtitle={data.sentBy.name ? data.sentBy.email ?? "" : ""}
+              value={data.sentBy?.name ?? data.sentBy?.email ?? "—"}
+              subtitle={data.sentBy?.email ? data.sentBy?.email ?? "" : ""}
             />
           </div>
         </div>

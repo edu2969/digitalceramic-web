@@ -49,8 +49,6 @@ type WorkDetailsResponse = {
     registry: string | null;
     rut: string | null;
   } | null;
-  fecha_envio?: string | null;
-  fecha_entrega?: string | null;
   enviado_por?: string | null;
   draft?: {
     piezas: UploadFormValues["piezas"];
@@ -64,6 +62,12 @@ type WorkDetailsResponse = {
       mordida?: string | null;
       gingival?: string | null;
     };
+    archivos?: {
+      superior?: string | null;
+      inferior?: string | null;
+      mordida?: string | null;
+      gingival?: string | null;
+    }
   } | null;
 };
 
@@ -112,6 +116,13 @@ function defaultValues(): UploadFormValues {
       inferior: null,
       mordida: null,
       gingival: null,
+    },
+
+    fileNames: {
+      superior: null,
+      inferior: null,
+      mordida: null,
+      gingival: null
     },
 
     fileSuperior: null,
@@ -178,13 +189,17 @@ export default function UploadWizard({ trabajoId }: { trabajoId?: string }) {
       mordida: workData.draft?.urls?.mordida ?? null,
       gingival: workData.draft?.urls?.gingival ?? null,
     };
+    const fileNames = {
+      superior: workData.draft?.archivos?.superior ?? null,
+      inferior: workData.draft?.archivos?.inferior ?? null,
+      mordida: workData.draft?.archivos?.mordida ?? null,
+      gingival: workData.draft?.archivos?.gingival ?? null,
+    };
     const clinicName = workData.clinic?.name ?? profile?.centroMedico ?? "";
     methods.reset({
       ...defaults,
       enviado_por: workData.enviado_por ?? workData.draft?.enviado_por ?? defaults.enviado_por,
       yo_mismo: (workData.enviado_por === (profileData?.profile?.nombre + " " + profileData?.profile?.apellido)),
-      fecha_envio: workData.fecha_envio ?? workData.draft?.fecha_envio ?? defaults.fecha_envio,
-      fecha_entrega: workData.fecha_entrega ?? workData.draft?.fecha_entrega ?? defaults.fecha_entrega,
       paciente: {
         ...defaults.paciente,
         nombre: workData.patient?.firstName ?? "",
@@ -198,18 +213,18 @@ export default function UploadWizard({ trabajoId }: { trabajoId?: string }) {
       piezas: workData.draft?.piezas ?? defaults.piezas,
       notes: workData.draft?.notes ?? defaults.notes,
       fileUrls,
+      fileNames
     });
   }, [trabajoId, workData, profileData, methods]);
 
   const mutation = useMutation({
     mutationFn: async () => {
       // Solo cambiamos el estado del trabajo a CREADO
-      const response = await fetch("/api/caso/nuevo", {
+      const response = await fetch("/api/orders/commit", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
-          trabajoId: trabajoId,
-          action: "CREADO",
+          trabajoId: trabajoId
         }),
       });
 
@@ -355,8 +370,8 @@ export default function UploadWizard({ trabajoId }: { trabajoId?: string }) {
 
                     {isOpen && (
                       <div className="px-6 py-8 bg-white border-t border-gray-200">
-                        {step.id === 0 && <StepBasicInformation id={trabajoId} />}
-                        {step.id === 1 && <StepPieceSelection id={trabajoId} />}
+                        {step.id === 0 && <StepBasicInformation />}
+                        {step.id === 1 && <StepPieceSelection />}
                         {step.id === 2 && <StepFiles />}
                         {step.id === 3 && <StepAditionalInformation />}
                         {step.id === 4 && (
