@@ -6,6 +6,8 @@ type Option = {
   id: string
   label: string
   sublabel?: string
+  /** Dato de paso opcional que el consumidor puede leer en onSelect. */
+  fechaNacimiento?: string | null
 }
 
 type Props = {
@@ -16,6 +18,7 @@ type Props = {
   fetchOptions: (q: string) => Promise<Option[]>
   placeholder?: string
   className?: string
+  tabIndex?: number
 }
 
 export default function Autocomplete({
@@ -26,6 +29,7 @@ export default function Autocomplete({
   fetchOptions,
   placeholder,
   className,
+  tabIndex
 }: Props) {
   const [options, setOptions] = useState<Option[]>([])
   const [open, setOpen] = useState(false)
@@ -67,6 +71,7 @@ export default function Autocomplete({
       <input
         type="text"
         value={value}
+        tabIndex={tabIndex}
         onChange={(e) => {
           const newValue = e.target.value
           onChange(newValue)
@@ -94,10 +99,11 @@ export default function Autocomplete({
                 key={o.id}
                 onMouseDown={(e) => e.preventDefault()}
                 onClick={() => {
-                  const nextValue = o.label
+                  // El valor del campo lo fija el consumidor en onSelect (para
+                  // el paciente, solo el nombre; para la clínica, la etiqueta).
+                  // No forzamos onChange aquí para no sobreescribir ese valor.
                   isSelectingRef.current = true
                   onSelect(o)
-                  onChange(nextValue)
                   setOpen(false)
                   setTimeout(() => {
                     isSelectingRef.current = false

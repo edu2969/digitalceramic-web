@@ -74,10 +74,10 @@ function fullName(
 }
 
 export async function GET() {
-  const sessionClient = await createSessionClient()
+  const supabase = await createSessionClient()
   const {
     data: { user },
-  } = await sessionClient.auth.getUser()
+  } = await supabase.auth.getUser()
 
   if (!user) {
     return NextResponse.json(
@@ -112,7 +112,7 @@ export async function GET() {
     )
 
   const filteredQuery = isAdmin
-    ? baseQuery
+    ? baseQuery.neq("estado", "BORRADOR")
     : baseQuery.eq("profile_id", profile.id)
 
   const { data, error } = await filteredQuery.order("fecha_envio", {

@@ -215,6 +215,7 @@ export default function SidebarLayout({
             <div
               className="
                 w-14 h-14
+                shrink-0
                 rounded-full
                 overflow-hidden
                 bg-[#1C4880]

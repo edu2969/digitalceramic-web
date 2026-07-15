@@ -1,0 +1,1022 @@
+{
+  ".claude/settings.local.json": {
+    "mtime": 1780327351.819496,
+    "ast_hash": "04fa33d6a16e70f5351b17e95f2cb3c2",
+    "semantic_hash": ""
+  },
+  "app/(auth)/caso/[...id]/page.tsx": {
+    "mtime": 1782690005.0756981,
+    "ast_hash": "93d275f6b9585a206491b96a77f4c681",
+    "semantic_hash": ""
+  },
+  "app/(auth)/client/page.tsx": {
+    "mtime": 1779294473.8622134,
+    "ast_hash": "3e08fb90a548669d507b85044865f57e",
+    "semantic_hash": ""
+  },
+  "app/(auth)/layout.tsx": {
+    "mtime": 1781048416.6161232,
+    "ast_hash": "21c007b197a648fbb800819ab0fad439",
+    "semantic_hash": ""
+  },
+  "app/(auth)/nuevo-caso/[...id]/page.tsx": {
+    "mtime": 1783956549.6490111,
+    "ast_hash": "6add208494e2bdc845af7debed3a5a65",
+    "semantic_hash": ""
+  },
+  "app/(auth)/panel/laboratorio/page.tsx": {
+    "mtime": 1782690062.0272527,
+    "ast_hash": "704b1bd5103c0977dc42c424ad2c1656",
+    "semantic_hash": ""
+  },
+  "app/(auth)/panel/odontologo/page.tsx": {
+    "mtime": 1782607684.5579605,
+    "ast_hash": "45bc1e9599520a6334e8b41c88af82e4",
+    "semantic_hash": ""
+  },
+  "app/(auth)/perfil/page.tsx": {
+    "mtime": 1782690081.8624485,
+    "ast_hash": "4641d950831b96e9f6cfc46d461ae277",
+    "semantic_hash": ""
+  },
+  "app/(auth)/upload/page.tsx": {
+    "mtime": 1783957569.4154239,
+    "ast_hash": "f3bedf9c824a4f114a546255da9ead48",
+    "semantic_hash": ""
+  },
+  "app/(public)/contacto/page.tsx": {
+    "mtime": 1781058681.3238769,
+    "ast_hash": "5c2ae68bf1bcd9330f5ba7c13f40cb75",
+    "semantic_hash": ""
+  },
+  "app/(public)/cuenta/page.tsx": {
+    "mtime": 1782690109.112401,
+    "ast_hash": "f7c3428c36f86bc737ed486c7d53e416",
+    "semantic_hash": ""
+  },
+  "app/(public)/forgot-password/page.tsx": {
+    "mtime": 1780346069.7580962,
+    "ast_hash": "5ecda593789923d6f9819984673eb2aa",
+    "semantic_hash": ""
+  },
+  "app/(public)/layout.tsx": {
+    "mtime": 1781729182.2513428,
+    "ast_hash": "4ecb00070472253cc3c698c87b01b42d",
+    "semantic_hash": ""
+  },
+  "app/(public)/page.tsx": {
+    "mtime": 1782533241.1833127,
+    "ast_hash": "7b00316680fb444d5ee8dcceb8872de5",
+    "semantic_hash": ""
+  },
+  "app/(public)/providers/QueryProvider.tsx": {
+    "mtime": 1778516885.540634,
+    "ast_hash": "454cbfa57fde4479e679366ff3b3043a",
+    "semantic_hash": ""
+  },
+  "app/(public)/quienes-somos/page.tsx": {
+    "mtime": 1781639268.3095994,
+    "ast_hash": "37ede1ceac9d10d0b9f52a5d3aa5e00e",
+    "semantic_hash": ""
+  },
+  "app/(public)/reset-password/page.tsx": {
+    "mtime": 1780346076.198952,
+    "ast_hash": "38084c81637cba94f5ab1e0f2a7468c2",
+    "semantic_hash": ""
+  },
+  "app/api/auth/confirm/route.ts": {
+    "mtime": 1780346085.3732002,
+    "ast_hash": "e6bfa2e0007275a5f44d916a6656e6c2",
+    "semantic_hash": ""
+  },
+  "app/api/auth/signup/route.ts": {
+    "mtime": 1783112689.8785555,
+    "ast_hash": "89a99dcbd52ce31c0168cd2691ccb0ea",
+    "semantic_hash": ""
+  },
+  "app/api/caso/autoguardado/route.ts": {
+    "mtime": 1783547150.3466878,
+    "ast_hash": "859f52139011eb0ca006bd701a44f3ef",
+    "semantic_hash": ""
+  },
+  "app/api/caso/borrador/route.ts": {
+    "mtime": 1782674678.6771443,
+    "ast_hash": "bdd195794c1dd3c8bd07ec5440af19ce",
+    "semantic_hash": ""
+  },
+  "app/api/caso/nuevo/route.ts": {
+    "mtime": 1782938301.500819,
+    "ast_hash": "ef738a69fcff3ec2645936ae8ef533a5",
+    "semantic_hash": ""
+  },
+  "app/api/clinicas/route.ts": {
+    "mtime": 1780087765.4131856,
+    "ast_hash": "d97ffd18b67ea9defbffea5176b96583",
+    "semantic_hash": ""
+  },
+  "app/api/contact/route.js": {
+    "mtime": 1780435415.1937628,
+    "ast_hash": "e7dea720692ee5df332df3815d78dd42",
+    "semantic_hash": ""
+  },
+  "app/api/dashboard/route.ts": {
+    "mtime": 1782684770.3449533,
+    "ast_hash": "1804bd56ba68a49f03dad2974bfc9875",
+    "semantic_hash": ""
+  },
+  "app/api/dentist/dashboard/route.ts": {
+    "mtime": 1784057148.9578404,
+    "ast_hash": "a84370213d30c96b25bcacdbe89d758e",
+    "semantic_hash": ""
+  },
+  "app/api/orders/commit/route.ts": {
+    "mtime": 1784062601.2583323,
+    "ast_hash": "71d49bf3714dbb17038dfd23cc94ee4b",
+    "semantic_hash": ""
+  },
+  "app/api/pacientes/route.ts": {
+    "mtime": 1780087754.0254498,
+    "ast_hash": "25f03700ecfe0a3dac11c4997796a8d9",
+    "semantic_hash": ""
+  },
+  "app/api/profile/avatar/sign/route.ts": {
+    "mtime": 1780364295.6548252,
+    "ast_hash": "c95c397bb644cdee659544cdd50aa7ab",
+    "semantic_hash": ""
+  },
+  "app/api/profile/me/route.ts": {
+    "mtime": 1782932420.5599043,
+    "ast_hash": "6da132fac72beb0efb1e4d8f1445b310",
+    "semantic_hash": ""
+  },
+  "app/api/trabajos/autoguardado/route.ts": {
+    "mtime": 1783918366.1897483,
+    "ast_hash": "b6ef9c0aea7cebb5268264f9a30c2f1a",
+    "semantic_hash": ""
+  },
+  "app/api/trabajos/byId/[...id]/route.ts": {
+    "mtime": 1784063223.0135128,
+    "ast_hash": "464dc74ac14355bba91b743906094989",
+    "semantic_hash": ""
+  },
+  "app/api/trabajos/marcarPago/[...id]/route.ts": {
+    "mtime": 1784063261.3404968,
+    "ast_hash": "7ed559adc480f4c39d0b4ab8f231b23e",
+    "semantic_hash": ""
+  },
+  "app/api/upload-case/download-url/route.ts": {
+    "mtime": 1782936658.3760166,
+    "ast_hash": "c158287be5866c0ea400533b0811c4dc",
+    "semantic_hash": ""
+  },
+  "app/api/upload-case/route.ts": {
+    "mtime": 1782675093.8394735,
+    "ast_hash": "ead8f9319971d73d6598d2ef6f245a0a",
+    "semantic_hash": ""
+  },
+  "app/api/upload-case/sign/route.ts": {
+    "mtime": 1782936669.0216098,
+    "ast_hash": "dbc26163e4e9dd1cadf3c1dd2bcb28dc",
+    "semantic_hash": ""
+  },
+  "app/api/upload-file/route.ts": {
+    "mtime": 1780366722.6753354,
+    "ast_hash": "a288adf2f4c44fd5583a31d24e1bcef4",
+    "semantic_hash": ""
+  },
+  "app/layout.tsx": {
+    "mtime": 1781049058.837887,
+    "ast_hash": "278a2935b81b6f5e454beb48db64756d",
+    "semantic_hash": ""
+  },
+  "app/login/page.tsx": {
+    "mtime": 1780001819.6101067,
+    "ast_hash": "e372eab912633867e474675bfb21721e",
+    "semantic_hash": ""
+  },
+  "components/Caso.tsx": {
+    "mtime": 1784063089.3293536,
+    "ast_hash": "98cdadf124f0a7043e6b29e93c54c2e0",
+    "semantic_hash": ""
+  },
+  "components/CheckOut.jsx": {
+    "mtime": 1778185458.001383,
+    "ast_hash": "e98931464e554a800389d35e954181ed",
+    "semantic_hash": ""
+  },
+  "components/ClientJobs.tsx": {
+    "mtime": 1779294508.0248833,
+    "ast_hash": "06be3dbe3e626e550cbf25980e893e65",
+    "semantic_hash": ""
+  },
+  "components/DashboardLaboratorio.tsx": {
+    "mtime": 1782684708.9287655,
+    "ast_hash": "2a376ca45445a88eac57f3fbbbdd701a",
+    "semantic_hash": ""
+  },
+  "components/ForgotPassword.tsx": {
+    "mtime": 1783957824.2939577,
+    "ast_hash": "f7820b764f35732f0a808628fe838e39",
+    "semantic_hash": ""
+  },
+  "components/InscripcionClub.tsx": {
+    "mtime": 1783112510.7030082,
+    "ast_hash": "a7026d51fefad0bcb379f27a1118f205",
+    "semantic_hash": ""
+  },
+  "components/ListaCasosOdontologo.tsx": {
+    "mtime": 1783544474.0237203,
+    "ast_hash": "fc4ce235320e2acaf8100861b06b5bce",
+    "semantic_hash": ""
+  },
+  "components/Login.tsx": {
+    "mtime": 1782607289.6325078,
+    "ast_hash": "0dd0bd2ae94031030349a608e93773ef",
+    "semantic_hash": ""
+  },
+  "components/MenuBar.tsx": {
+    "mtime": 1784060875.1083515,
+    "ast_hash": "264c7f1e33f87b12ca963a2dba337b63",
+    "semantic_hash": ""
+  },
+  "components/Nav.tsx": {
+    "mtime": 1782596739.8864033,
+    "ast_hash": "680a3365fc3ecb1b4789558d6dc1b34a",
+    "semantic_hash": ""
+  },
+  "components/Perfil.tsx": {
+    "mtime": 1782596384.5132315,
+    "ast_hash": "8a9351e5c0318a47a22c61060ae390f9",
+    "semantic_hash": ""
+  },
+  "components/ResetPassword.tsx": {
+    "mtime": 1783957828.4307954,
+    "ast_hash": "d5cc05463d1d821d28fadc150cdf6134",
+    "semantic_hash": ""
+  },
+  "components/UploadWizard.tsx": {
+    "mtime": 1784062715.7829585,
+    "ast_hash": "68547a093aecd98021a6248464a7ee14",
+    "semantic_hash": ""
+  },
+  "components/Whatsapp.jsx": {
+    "mtime": 1782591145.779051,
+    "ast_hash": "5566e1c9e9c23c770d51f92280730f0b",
+    "semantic_hash": ""
+  },
+  "components/WhoWeAre.jsx": {
+    "mtime": 1778510214.5888681,
+    "ast_hash": "4541deaa2c0349079fd5f4e58a1ae4dc",
+    "semantic_hash": ""
+  },
+  "components/form/AutoTextarea.tsx": {
+    "mtime": 1784054999.963683,
+    "ast_hash": "5db1317d187cf1ff7a36d3e2a9314607",
+    "semantic_hash": ""
+  },
+  "components/form/context/AutoSaveContext.tsx": {
+    "mtime": 1783957473.6678226,
+    "ast_hash": "dd59c10713e5c2f826173b9e9a4608a5",
+    "semantic_hash": ""
+  },
+  "components/form/hooks/useAutoSaveEngine.ts": {
+    "mtime": 1784055443.6651225,
+    "ast_hash": "2bf545deeffe48e77cca64d6746e6573",
+    "semantic_hash": ""
+  },
+  "components/form/hooks/usePieceAutoSave.ts": {
+    "mtime": 1784055474.1008172,
+    "ast_hash": "1083f405ebe0b62aecc8837b7b682596",
+    "semantic_hash": ""
+  },
+  "components/form/index.ts": {
+    "mtime": 1784054791.8092144,
+    "ast_hash": "ff3d52f823722f78426e3a487d864217",
+    "semantic_hash": ""
+  },
+  "components/form/provider/AutoSaveProvider.tsx": {
+    "mtime": 1784056253.2125823,
+    "ast_hash": "e50730e4e7be540d2821b94ca88066e5",
+    "semantic_hash": ""
+  },
+  "components/form/types.ts": {
+    "mtime": 1782843358.5581775,
+    "ast_hash": "7df5a2f0cdcd8dfc2f774feed8f12466",
+    "semantic_hash": ""
+  },
+  "components/landing/Club.jsx": {
+    "mtime": 1783035526.7415175,
+    "ast_hash": "ea4fa278fca2a64674ee84f1f20b715e",
+    "semantic_hash": ""
+  },
+  "components/landing/Contact.jsx": {
+    "mtime": 1781113904.1395714,
+    "ast_hash": "bfb805b64e515093853e4484ff192d8a",
+    "semantic_hash": ""
+  },
+  "components/landing/Footer.jsx": {
+    "mtime": 1782591028.9705653,
+    "ast_hash": "a225a144c90e79fbf055effcc4744209",
+    "semantic_hash": ""
+  },
+  "components/landing/Hero.tsx": {
+    "mtime": 1782596674.9247694,
+    "ast_hash": "7944efbb2183e6c0cb8d16ebe46d4200",
+    "semantic_hash": ""
+  },
+  "components/landing/HowWorks.jsx": {
+    "mtime": 1782590582.1495926,
+    "ast_hash": "2a81f960c2012d00c588628b861212cb",
+    "semantic_hash": ""
+  },
+  "components/landing/Landing.tsx": {
+    "mtime": 1782533236.7850926,
+    "ast_hash": "399cae7112fb6b69fc85c5a9c42a6b38",
+    "semantic_hash": ""
+  },
+  "components/landing/Services.jsx": {
+    "mtime": 1783017738.6706748,
+    "ast_hash": "772498d98e9ec6f96995684b1c7f88f4",
+    "semantic_hash": ""
+  },
+  "components/prefabs/Autocomplete.tsx": {
+    "mtime": 1784058701.5908346,
+    "ast_hash": "c1c0768aea26d735097f4941554ea62b",
+    "semantic_hash": ""
+  },
+  "components/prefabs/Countdown.tsx": {
+    "mtime": 1782591408.2290246,
+    "ast_hash": "e349242a7ea7a909969047f5476f68c4",
+    "semantic_hash": ""
+  },
+  "components/prefabs/RutInput.tsx": {
+    "mtime": 1783107014.1196744,
+    "ast_hash": "77a496ccbfc384f3de638e792d80c818",
+    "semantic_hash": ""
+  },
+  "components/upload-steps/StepAditionalInformation.tsx": {
+    "mtime": 1783958658.2883158,
+    "ast_hash": "9d62a2addebcf7f0ee6c5fe10d8ee018",
+    "semantic_hash": ""
+  },
+  "components/upload-steps/StepBasicInformation.tsx": {
+    "mtime": 1784058738.5354793,
+    "ast_hash": "8670af9c107ead13b3fad69db3d897cc",
+    "semantic_hash": ""
+  },
+  "components/upload-steps/StepFiles.tsx": {
+    "mtime": 1783919260.925663,
+    "ast_hash": "4288133fb71ec09f8a0e6508d62bfd73",
+    "semantic_hash": ""
+  },
+  "components/upload-steps/StepPieceSelection.tsx": {
+    "mtime": 1784054890.4471967,
+    "ast_hash": "102345efec14248be2ffad0b6c87ae0e",
+    "semantic_hash": ""
+  },
+  "components/upload-steps/StepSend.tsx": {
+    "mtime": 1784059357.7625804,
+    "ast_hash": "96fb155cccf6b6b7212540f5f329fe74",
+    "semantic_hash": ""
+  },
+  "components/upload-steps/pieces/ColorSectionEditor.tsx": {
+    "mtime": 1784054843.7213871,
+    "ast_hash": "150f87479b3f25df3e8c6077b27fa1f3",
+    "semantic_hash": ""
+  },
+  "components/upload-steps/pieces/PieceCard.tsx": {
+    "mtime": 1784054875.0159445,
+    "ast_hash": "4b999a0db23c0deb9aa089f6de7aeed5",
+    "semantic_hash": ""
+  },
+  "components/upload-steps/pieces/TiBaseTable.tsx": {
+    "mtime": 1784054856.3173864,
+    "ast_hash": "7e290bcff0a1969544abb42d466c7539",
+    "semantic_hash": ""
+  },
+  "components/upload-steps/pieces/types.ts": {
+    "mtime": 1784054825.2582028,
+    "ast_hash": "c84bb6e1ea82d066ed9fc5ccc91a1f60",
+    "semantic_hash": ""
+  },
+  "components/upload-steps/types.ts": {
+    "mtime": 1784058696.4991145,
+    "ast_hash": "933439ac78d9641cf0882f710ee3f628",
+    "semantic_hash": ""
+  },
+  "docs/db_enums.json": {
+    "mtime": 1780085603.988138,
+    "ast_hash": "6a53bf38b20a34915c20896755c08d7e",
+    "semantic_hash": ""
+  },
+  "docs/db_rls.sql": {
+    "mtime": 1782934386.7833192,
+    "ast_hash": "c2c3198463180b613cda188fd2c9cbdc",
+    "semantic_hash": ""
+  },
+  "docs/db_schema.sql": {
+    "mtime": 1780364271.2843442,
+    "ast_hash": "7a3a4cba506fd487acd196340ec22ace",
+    "semantic_hash": ""
+  },
+  "eslint.config.mjs": {
+    "mtime": 1777482374.2331672,
+    "ast_hash": "dfa1f5f6a7037bf39dc510f30b180002",
+    "semantic_hash": ""
+  },
+  "lib/calculos.ts": {
+    "mtime": 1784063213.0081139,
+    "ast_hash": "a10b48762a99b974b397e975a34bfba5",
+    "semantic_hash": ""
+  },
+  "lib/estado.ts": {
+    "mtime": 1783540173.2903821,
+    "ast_hash": "89df991599012ee96d3239ae6f084cec",
+    "semantic_hash": ""
+  },
+  "lib/orders/sendOrderEmail.ts": {
+    "mtime": 1784004320.8446865,
+    "ast_hash": "afc1c441997bfd98e9702539acb1a959",
+    "semantic_hash": ""
+  },
+  "lib/orders/updateTrabajoEstado.ts": {
+    "mtime": 1783529541.2100203,
+    "ast_hash": "4532d2c8d800710f63b9c8be3bfb47da",
+    "semantic_hash": ""
+  },
+  "lib/orders/validateTrabajo.ts": {
+    "mtime": 1784062299.771224,
+    "ast_hash": "afb3fa2ffe31f236b56c3500c6bd8e3c",
+    "semantic_hash": ""
+  },
+  "lib/supabase/client.ts": {
+    "mtime": 1778878274.4974227,
+    "ast_hash": "e62c8eb1c9fdd8910e6be6901d179b7b",
+    "semantic_hash": ""
+  },
+  "lib/supabase/middleware.ts": {
+    "mtime": 1778878289.8471463,
+    "ast_hash": "3c69d56d02f00ad6439fd6b3c3854e59",
+    "semantic_hash": ""
+  },
+  "lib/supabase/server.ts": {
+    "mtime": 1783529534.0439541,
+    "ast_hash": "612319edab69e47a15d9c21c02c74a37",
+    "semantic_hash": ""
+  },
+  "lib/userRole.ts": {
+    "mtime": 1782597048.040906,
+    "ast_hash": "725063e6af1699e12e6075c187ef9308",
+    "semantic_hash": ""
+  },
+  "next.config.ts": {
+    "mtime": 1779808428.9083107,
+    "ast_hash": "4d20a7c8dedd2af1588506f9fb3b1d41",
+    "semantic_hash": ""
+  },
+  "package.json": {
+    "mtime": 1783797586.4969437,
+    "ast_hash": "a8bbfb57d54ae677b54da04210a56e3f",
+    "semantic_hash": ""
+  },
+  "postcss.config.mjs": {
+    "mtime": 1777482374.2573347,
+    "ast_hash": "239f3ebf717465dc636818a1a619398d",
+    "semantic_hash": ""
+  },
+  "proxy.ts": {
+    "mtime": 1782777605.197391,
+    "ast_hash": "e119579664b456c55f99cbfa5bcc85d7",
+    "semantic_hash": ""
+  },
+  "tsconfig.json": {
+    "mtime": 1782528106.0562873,
+    "ast_hash": "223183763dd0d47c97ef9b4925704d35",
+    "semantic_hash": ""
+  },
+  "AGENTS.md": {
+    "mtime": 1784053309.9749765,
+    "ast_hash": "90d3c4d79543f8a52d4303170227d042",
+    "semantic_hash": ""
+  },
+  "CLAUDE.md": {
+    "mtime": 1784052660.1896067,
+    "ast_hash": "1d8f0066d4e766103098e0ff51b41a6d",
+    "semantic_hash": ""
+  },
+  "README.md": {
+    "mtime": 1777482374.2102575,
+    "ast_hash": "f15aaa42d5d299d091b1171097ea56ad",
+    "semantic_hash": ""
+  },
+  "pnpm-workspace.yaml": {
+    "mtime": 1779158799.8558733,
+    "ast_hash": "c3dd7262847d512cf502a50accad8a9e",
+    "semantic_hash": ""
+  },
+  "public/comofunciona/ChatGPT Image 27 jun 2026, 13_40_57.png": {
+    "mtime": 1782582061.6579936,
+    "ast_hash": "6028b0a96012e2ac66714d5ff2496a78",
+    "semantic_hash": ""
+  },
+  "public/comofunciona/paso_01.png": {
+    "mtime": 1782584658.3294165,
+    "ast_hash": "3edde388abb39c891a710619ad44c054",
+    "semantic_hash": ""
+  },
+  "public/comofunciona/paso_02.png": {
+    "mtime": 1782584702.6940336,
+    "ast_hash": "6289d2c8745dc8c488f9695531485852",
+    "semantic_hash": ""
+  },
+  "public/comofunciona/paso_03.png": {
+    "mtime": 1782584732.1601944,
+    "ast_hash": "ee46955b48a1111486897f5102dee98e",
+    "semantic_hash": ""
+  },
+  "public/comofunciona/paso_04.png": {
+    "mtime": 1782584759.4866364,
+    "ast_hash": "1e37fdd6c353dd7edb2ef642a0f354fa",
+    "semantic_hash": ""
+  },
+  "public/comofunciona/paso_05.png": {
+    "mtime": 1782584789.5970154,
+    "ast_hash": "57450ae243fa6c09816720861668ce48",
+    "semantic_hash": ""
+  },
+  "public/dent_set_v1.1.png": {
+    "mtime": 1783899279.8624709,
+    "ast_hash": "11ad03dd5619217a6760d6d091176ea7",
+    "semantic_hash": ""
+  },
+  "public/dent_set_v1.png": {
+    "mtime": 1783896829.0083287,
+    "ast_hash": "cf2d28d2f36744780c6d92af53382c77",
+    "semantic_hash": ""
+  },
+  "public/dental_layout/row-1-column-10_2.png": {
+    "mtime": 1783900004.2415185,
+    "ast_hash": "08b827c0498164ba63a7a74c41b27d4c",
+    "semantic_hash": ""
+  },
+  "public/dental_layout/row-1-column-10_2_on.png": {
+    "mtime": 1783900906.8040237,
+    "ast_hash": "a97128cea4d5d588ea8535c9360dc695",
+    "semantic_hash": ""
+  },
+  "public/dental_layout/row-1-column-11_2.png": {
+    "mtime": 1783900025.2657914,
+    "ast_hash": "b2ac4d823e991cdb9465097f9c857b35",
+    "semantic_hash": ""
+  },
+  "public/dental_layout/row-1-column-11_2_on.png": {
+    "mtime": 1783900922.1511996,
+    "ast_hash": "107f2712850fce5a187a482c5515d709",
+    "semantic_hash": ""
+  },
+  "public/dental_layout/row-1-column-12_2.png": {
+    "mtime": 1783900046.0229037,
+    "ast_hash": "019fdab169108c924ceb4f1156f0b650",
+    "semantic_hash": ""
+  },
+  "public/dental_layout/row-1-column-12_2_on.png": {
+    "mtime": 1783900936.0189006,
+    "ast_hash": "17ecd78e8f5a8dc80ac0e953c3ccda1d",
+    "semantic_hash": ""
+  },
+  "public/dental_layout/row-1-column-13_2.png": {
+    "mtime": 1783900071.1967914,
+    "ast_hash": "dc34ca01da4b7fed352e24bf1a528ce2",
+    "semantic_hash": ""
+  },
+  "public/dental_layout/row-1-column-13_2_on.png": {
+    "mtime": 1783900951.0205543,
+    "ast_hash": "e7fb9d3f295cd11ac74c0ed1349d3b1a",
+    "semantic_hash": ""
+  },
+  "public/dental_layout/row-1-column-14_2.png": {
+    "mtime": 1783900093.0118432,
+    "ast_hash": "eb241075b01cbd2931c4f113a012571d",
+    "semantic_hash": ""
+  },
+  "public/dental_layout/row-1-column-14_2_on.png": {
+    "mtime": 1783900972.357577,
+    "ast_hash": "8092fed362620332fa9f5cf56f68749b",
+    "semantic_hash": ""
+  },
+  "public/dental_layout/row-1-column-15_2.png": {
+    "mtime": 1783900115.6409295,
+    "ast_hash": "b77e3fd5c4a958c69523cba4723d529a",
+    "semantic_hash": ""
+  },
+  "public/dental_layout/row-1-column-15_2_on.png": {
+    "mtime": 1783901021.5382342,
+    "ast_hash": "d8b50b2dc166c6c471a6b710b0b5a3ce",
+    "semantic_hash": ""
+  },
+  "public/dental_layout/row-1-column-16_2.png": {
+    "mtime": 1783900134.9197588,
+    "ast_hash": "8027679312615c95588f5c53254cefdd",
+    "semantic_hash": ""
+  },
+  "public/dental_layout/row-1-column-16_2_on.png": {
+    "mtime": 1783901042.5889542,
+    "ast_hash": "d81ee1769bdc40a5a6944ea16ea7dd0e",
+    "semantic_hash": ""
+  },
+  "public/dental_layout/row-1-column-1_2.png": {
+    "mtime": 1783899751.6902132,
+    "ast_hash": "3df2e1e4a739a0043ea76fcd3b9e3b6b",
+    "semantic_hash": ""
+  },
+  "public/dental_layout/row-1-column-1_2_on.png": {
+    "mtime": 1783906954.070858,
+    "ast_hash": "73e6475877a40af7cf43d9da8fcbaeef",
+    "semantic_hash": ""
+  },
+  "public/dental_layout/row-1-column-2_2.png": {
+    "mtime": 1783899781.8649597,
+    "ast_hash": "6005ea9d9ec506b7533a1d8332ba5fb9",
+    "semantic_hash": ""
+  },
+  "public/dental_layout/row-1-column-2_2_on.png": {
+    "mtime": 1783900655.9671936,
+    "ast_hash": "592f38647d72f59c07a1d6522c166a03",
+    "semantic_hash": ""
+  },
+  "public/dental_layout/row-1-column-3_2.png": {
+    "mtime": 1783899809.8061464,
+    "ast_hash": "4d14f61a35638f8fe156a6dd4aee78da",
+    "semantic_hash": ""
+  },
+  "public/dental_layout/row-1-column-3_2_on.png": {
+    "mtime": 1783900706.1416109,
+    "ast_hash": "d387807b24b7d394bf42340b726d6afc",
+    "semantic_hash": ""
+  },
+  "public/dental_layout/row-1-column-4_2.png": {
+    "mtime": 1783899850.5110452,
+    "ast_hash": "25db06664eaefe5248a4040ba07e661b",
+    "semantic_hash": ""
+  },
+  "public/dental_layout/row-1-column-4_2_on.png": {
+    "mtime": 1783900735.2199452,
+    "ast_hash": "90ca1eb506aabd108f372b8d5065604f",
+    "semantic_hash": ""
+  },
+  "public/dental_layout/row-1-column-5_2.png": {
+    "mtime": 1783899878.3528783,
+    "ast_hash": "6acf4fbf27705d0ebaf7253273b40037",
+    "semantic_hash": ""
+  },
+  "public/dental_layout/row-1-column-5_2_on.png": {
+    "mtime": 1783900752.0086262,
+    "ast_hash": "1a5d20aa91997b69d7630df09b0cddb5",
+    "semantic_hash": ""
+  },
+  "public/dental_layout/row-1-column-6_2.png": {
+    "mtime": 1783899898.3979983,
+    "ast_hash": "79439fbc61e1ed856abd999f5f0b647a",
+    "semantic_hash": ""
+  },
+  "public/dental_layout/row-1-column-6_2_on.png": {
+    "mtime": 1783900769.9772446,
+    "ast_hash": "2a22923ee88cbb4b99e1918766ef4d45",
+    "semantic_hash": ""
+  },
+  "public/dental_layout/row-1-column-7_2.png": {
+    "mtime": 1783899923.0698545,
+    "ast_hash": "30deffe069ed03a92a317c95f6e0c078",
+    "semantic_hash": ""
+  },
+  "public/dental_layout/row-1-column-7_2_on.png": {
+    "mtime": 1783900851.6214707,
+    "ast_hash": "fe68ed78f9e51a4b169400d691261238",
+    "semantic_hash": ""
+  },
+  "public/dental_layout/row-1-column-8_2.png": {
+    "mtime": 1783899957.5434847,
+    "ast_hash": "9f737dc5be6c10ae44802be67fa37632",
+    "semantic_hash": ""
+  },
+  "public/dental_layout/row-1-column-8_2_on.png": {
+    "mtime": 1783900868.4852748,
+    "ast_hash": "3e841d71d45a182207ed2fc40ef72ce2",
+    "semantic_hash": ""
+  },
+  "public/dental_layout/row-1-column-9_2.png": {
+    "mtime": 1783899983.3818524,
+    "ast_hash": "379bbaf60f6910c8589e7d1031cb1354",
+    "semantic_hash": ""
+  },
+  "public/dental_layout/row-1-column-9_2_on.png": {
+    "mtime": 1783900887.0794735,
+    "ast_hash": "ff5352ca17de5ed2d67f751760023bf7",
+    "semantic_hash": ""
+  },
+  "public/dental_layout/row-2-column-10_2.png": {
+    "mtime": 1783900353.7415328,
+    "ast_hash": "5fde28e9f1a17bf632f2a6000770b818",
+    "semantic_hash": ""
+  },
+  "public/dental_layout/row-2-column-10_2_on.png": {
+    "mtime": 1783904393.307679,
+    "ast_hash": "456e1d81849078b4bbceb973fc77facf",
+    "semantic_hash": ""
+  },
+  "public/dental_layout/row-2-column-11_2.png": {
+    "mtime": 1783900369.7194438,
+    "ast_hash": "fe233edc449ad8500c70a120fbee9645",
+    "semantic_hash": ""
+  },
+  "public/dental_layout/row-2-column-11_2_on.png": {
+    "mtime": 1783904407.8783045,
+    "ast_hash": "ce4672e34dcd1b00e724464f273e4ee2",
+    "semantic_hash": ""
+  },
+  "public/dental_layout/row-2-column-12_2.png": {
+    "mtime": 1783900386.5668678,
+    "ast_hash": "7b8e9d57c5c822415ebd06c95f397c6f",
+    "semantic_hash": ""
+  },
+  "public/dental_layout/row-2-column-12_2_on.png": {
+    "mtime": 1783904423.9023209,
+    "ast_hash": "0565051e222f37da83731f45b7e02a32",
+    "semantic_hash": ""
+  },
+  "public/dental_layout/row-2-column-13_2.png": {
+    "mtime": 1783900404.539261,
+    "ast_hash": "4cb1563a191f9fce9c8e1e750425ef43",
+    "semantic_hash": ""
+  },
+  "public/dental_layout/row-2-column-13_2_on.png": {
+    "mtime": 1783904437.4851797,
+    "ast_hash": "f705420a55e61eacf68bfbfe8560b20c",
+    "semantic_hash": ""
+  },
+  "public/dental_layout/row-2-column-14_2.png": {
+    "mtime": 1783900420.4514937,
+    "ast_hash": "1ba6813e30cc93c9f86f8f83bac81198",
+    "semantic_hash": ""
+  },
+  "public/dental_layout/row-2-column-14_2_on.png": {
+    "mtime": 1783904462.4052155,
+    "ast_hash": "6146e28f82b29370a7fa1ae08d3c6ae0",
+    "semantic_hash": ""
+  },
+  "public/dental_layout/row-2-column-15_2.png": {
+    "mtime": 1783900439.334704,
+    "ast_hash": "85f25d9632cfdccc5778d08dd8d1bd77",
+    "semantic_hash": ""
+  },
+  "public/dental_layout/row-2-column-15_2_on.png": {
+    "mtime": 1783904483.4684732,
+    "ast_hash": "ca8a22e0f519c2b0ccb2ca38340069bb",
+    "semantic_hash": ""
+  },
+  "public/dental_layout/row-2-column-16_2.png": {
+    "mtime": 1783900455.381153,
+    "ast_hash": "15296658f23e6880680f7a0703897f08",
+    "semantic_hash": ""
+  },
+  "public/dental_layout/row-2-column-16_2_on.png": {
+    "mtime": 1783904500.0328484,
+    "ast_hash": "fd360b7361499bc64ff84b4e4d2bb437",
+    "semantic_hash": ""
+  },
+  "public/dental_layout/row-2-column-1_2.png": {
+    "mtime": 1783900168.5893006,
+    "ast_hash": "8e513d179fd77517b4ccf9250d65dc57",
+    "semantic_hash": ""
+  },
+  "public/dental_layout/row-2-column-1_2_on.png": {
+    "mtime": 1783907528.0928948,
+    "ast_hash": "b244e911e7e6fee6c7ce3e9cf39c670c",
+    "semantic_hash": ""
+  },
+  "public/dental_layout/row-2-column-2_2.png": {
+    "mtime": 1783900186.9389877,
+    "ast_hash": "02a7cd5536c014846ec3b16dcbb1edfc",
+    "semantic_hash": ""
+  },
+  "public/dental_layout/row-2-column-2_2_on.png": {
+    "mtime": 1783904158.6279993,
+    "ast_hash": "2639b704396a28f15d9c9205dd68c63b",
+    "semantic_hash": ""
+  },
+  "public/dental_layout/row-2-column-3_2.png": {
+    "mtime": 1783900206.4852643,
+    "ast_hash": "cfd622e2f977e2d7d56268a328a19c32",
+    "semantic_hash": ""
+  },
+  "public/dental_layout/row-2-column-3_2_on.png": {
+    "mtime": 1783904257.6263146,
+    "ast_hash": "d47c09f1080042e9f292a8ae9f54bccf",
+    "semantic_hash": ""
+  },
+  "public/dental_layout/row-2-column-4_2.png": {
+    "mtime": 1783900235.5776923,
+    "ast_hash": "0db98d8b2dc6a85b11af9975926335e6",
+    "semantic_hash": ""
+  },
+  "public/dental_layout/row-2-column-4_2_on.png": {
+    "mtime": 1783904278.081669,
+    "ast_hash": "56b32006e5512f22eb3e02e3139cab9a",
+    "semantic_hash": ""
+  },
+  "public/dental_layout/row-2-column-5_2.png": {
+    "mtime": 1783900254.4264865,
+    "ast_hash": "f76ac60a495e7c085ff7ebd4d69e08c5",
+    "semantic_hash": ""
+  },
+  "public/dental_layout/row-2-column-5_2_on.png": {
+    "mtime": 1783904292.6272235,
+    "ast_hash": "2644799ff33ed7894435314917fabc2e",
+    "semantic_hash": ""
+  },
+  "public/dental_layout/row-2-column-6_2.png": {
+    "mtime": 1783900273.8280609,
+    "ast_hash": "caf63fbb8d242e92f5eb0b9713d38679",
+    "semantic_hash": ""
+  },
+  "public/dental_layout/row-2-column-6_2_on.png": {
+    "mtime": 1783904311.0186563,
+    "ast_hash": "b31dd194e6a35bb137aa6a8de2744a1b",
+    "semantic_hash": ""
+  },
+  "public/dental_layout/row-2-column-7_2.png": {
+    "mtime": 1783900291.377021,
+    "ast_hash": "59d59900928ead48d3a42e39fbeed64c",
+    "semantic_hash": ""
+  },
+  "public/dental_layout/row-2-column-7_2_on.png": {
+    "mtime": 1783904330.925837,
+    "ast_hash": "15c16c56ded331b99d419cac57d638cf",
+    "semantic_hash": ""
+  },
+  "public/dental_layout/row-2-column-8_2.png": {
+    "mtime": 1783900310.2241955,
+    "ast_hash": "a22d5b8b1cbf9db4aede111a6045ec54",
+    "semantic_hash": ""
+  },
+  "public/dental_layout/row-2-column-8_2_on.png": {
+    "mtime": 1783904358.349672,
+    "ast_hash": "dc7799426aeb99bc671ff80a2db4e373",
+    "semantic_hash": ""
+  },
+  "public/dental_layout/row-2-column-9_2.png": {
+    "mtime": 1783900335.5310562,
+    "ast_hash": "dc63210ebd2122840d6c4d27a7f04f1b",
+    "semantic_hash": ""
+  },
+  "public/dental_layout/row-2-column-9_2_on.png": {
+    "mtime": 1783904376.3083398,
+    "ast_hash": "740614aada90e79a780f94d00f57cd87",
+    "semantic_hash": ""
+  },
+  "public/logo_02.png": {
+    "mtime": 1782417131.9582422,
+    "ast_hash": "e76279e712063bafd07b41128af5c699",
+    "semantic_hash": ""
+  },
+  "public/resources/box_01.jpeg": {
+    "mtime": 1781279553.7611465,
+    "ast_hash": "0201eb63d30c4884925ef9cd504a5dd2",
+    "semantic_hash": ""
+  },
+  "public/resources/box_02.png": {
+    "mtime": 1781211800.1750543,
+    "ast_hash": "c9b1af69c514eebd386997ffd1c8e4fa",
+    "semantic_hash": ""
+  },
+  "public/resources/box_03.jpeg": {
+    "mtime": 1781279557.6956167,
+    "ast_hash": "45a25cd8111f5cc2c650535e2585e4cb",
+    "semantic_hash": ""
+  },
+  "public/resources/design_001.png": {
+    "mtime": 1781210571.7252624,
+    "ast_hash": "a6e04c8483166bfa5636285197f5242e",
+    "semantic_hash": ""
+  },
+  "public/resources/design_002.png": {
+    "mtime": 1781211352.0580978,
+    "ast_hash": "39d9892b80346a345f895e416f374579",
+    "semantic_hash": ""
+  },
+  "public/resources/machine_01.png": {
+    "mtime": 1781282678.3627434,
+    "ast_hash": "010cb296b6da82712b364c929bc67115",
+    "semantic_hash": ""
+  },
+  "public/resources/machine_02.png": {
+    "mtime": 1781282805.6014147,
+    "ast_hash": "f82699cec44107f5629e862144bcf343",
+    "semantic_hash": ""
+  },
+  "public/resources/machine_03.png": {
+    "mtime": 1781282866.4267526,
+    "ast_hash": "acc39d451e688e3a665f662153bf2f40",
+    "semantic_hash": ""
+  },
+  "public/resources/scanner_01.png": {
+    "mtime": 1781283340.704214,
+    "ast_hash": "bc8f858ec4bfb416951c7c3e79eac5c0",
+    "semantic_hash": ""
+  },
+  "public/serv_diseno_3d.png": {
+    "mtime": 1777903346.969425,
+    "ast_hash": "5d601a6061347ec420f1d896e502774a",
+    "semantic_hash": ""
+  },
+  "public/serv_escaner_inal.png": {
+    "mtime": 1778509957.0854087,
+    "ast_hash": "e2519212f420b1e302f4d4456729462f",
+    "semantic_hash": ""
+  },
+  "public/services/service_1.png": {
+    "mtime": 1781304160.7141657,
+    "ast_hash": "376cf42faeb4118965f12f49df82923a",
+    "semantic_hash": ""
+  },
+  "public/services/service_2.png": {
+    "mtime": 1781304278.1405623,
+    "ast_hash": "edd0a5124d9441efd3468fb315f74fb9",
+    "semantic_hash": ""
+  },
+  "public/services/service_3.png": {
+    "mtime": 1781304291.9548285,
+    "ast_hash": "6960e0f8ec22c714e9b1c29d345c9de9",
+    "semantic_hash": ""
+  },
+  "public/services/service_4.png": {
+    "mtime": 1781304285.854944,
+    "ast_hash": "d956767119dfe60097095c2e088af0e5",
+    "semantic_hash": ""
+  },
+  "public/smile.png": {
+    "mtime": 1781039163.6907797,
+    "ast_hash": "a2891be39abd6a25cc010a27c9e12a11",
+    "semantic_hash": ""
+  },
+  "public/soluciones/solucion_01.png": {
+    "mtime": 1782441592.8200345,
+    "ast_hash": "d0aead33c28f831542c3c960f94a760c",
+    "semantic_hash": ""
+  },
+  "public/soluciones/solucion_02.png": {
+    "mtime": 1782441592.7234616,
+    "ast_hash": "64ec246774227a0f44ce7c89df6927ff",
+    "semantic_hash": ""
+  },
+  "public/soluciones/solucion_03.png": {
+    "mtime": 1782441593.1004574,
+    "ast_hash": "e7e1d2f4c249df73668a84447d18d8ca",
+    "semantic_hash": ""
+  },
+  "public/soluciones/solucion_04.png": {
+    "mtime": 1782441592.9295833,
+    "ast_hash": "e099b0543ed7abb8530ec764ef52a99e",
+    "semantic_hash": ""
+  },
+  "public/soluciones/solucion_05.png": {
+    "mtime": 1782441592.6148825,
+    "ast_hash": "67b6e18b958c5df41c5f7f6599e9a045",
+    "semantic_hash": ""
+  },
+  "public/soluciones/solucion_06.png": {
+    "mtime": 1781304160.7141657,
+    "ast_hash": "376cf42faeb4118965f12f49df82923a",
+    "semantic_hash": ""
+  },
+  "public/soluciones/solucion_07.png": {
+    "mtime": 1781304285.854944,
+    "ast_hash": "d956767119dfe60097095c2e088af0e5",
+    "semantic_hash": ""
+  },
+  "public/soluciones/solucion_08.png": {
+    "mtime": 1781304291.9548285,
+    "ast_hash": "6960e0f8ec22c714e9b1c29d345c9de9",
+    "semantic_hash": ""
+  },
+  "public/todo_4_servicios.png": {
+    "mtime": 1778510101.6599793,
+    "ast_hash": "74afa7f0877fd2937bc8c6b8e5b05ebd",
+    "semantic_hash": ""
+  },
+  ".claude/settings.json": {
+    "mtime": 1784053169.7072885,
+    "ast_hash": "5b06f228b08bd35fb2c2492c01f348ed",
+    "semantic_hash": ""
+  },
+  ".github/copilot-instructions.md": {
+    "mtime": 1784047175.5091484,
+    "ast_hash": "2b23503628bf2ec71d067a85ca8948ab",
+    "semantic_hash": ""
+  },
+  "lib/names.ts": {
+    "mtime": 1784057717.780154,
+    "ast_hash": "af1ccb5afc7ef86eca9b9c646283ed0f",
+    "semantic_hash": ""
+  }
+}

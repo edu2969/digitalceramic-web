@@ -84,7 +84,7 @@ export default function ResetPassword() {
           {/* Logo */}
           <div className="flex justify-center mb-6 space-x-6">
             <Image
-              src="/logo.png"
+              src="/logo_02.png"
               alt="Digital Ceramic"
               width={64}
               height={64}

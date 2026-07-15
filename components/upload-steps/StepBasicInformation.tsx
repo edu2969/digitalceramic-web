@@ -9,10 +9,25 @@ import {
 } from "@/components/upload-steps/types"
 import { useAutoSaveContext } from "../form/provider/AutoSaveProvider"
 import { useQuery } from "@tanstack/react-query"
+import { splitFullName } from "@/lib/names"
 
 const inputClass =
   "w-full px-4 py-3 border-2 border-gray-300 rounded-lg focus:border-[#1C4880] focus:outline-none transition"
 const labelClass = "block text-lg font-semibold text-[#1C4880] mb-3"
+
+/** Calcula la edad (años) a partir de una fecha de nacimiento ISO. */
+function ageFromBirthDate(fechaNacimiento?: string | null): string {
+  if (!fechaNacimiento) return ""
+  const birth = new Date(fechaNacimiento)
+  if (Number.isNaN(birth.getTime())) return ""
+  const today = new Date()
+  let age = today.getFullYear() - birth.getFullYear()
+  const monthDiff = today.getMonth() - birth.getMonth()
+  if (monthDiff < 0 || (monthDiff === 0 && today.getDate() < birth.getDate())) {
+    age--
+  }
+  return age >= 0 && age <= 120 ? String(age) : ""
+}
 
 type ProfileResponse = {
   profile: {
@@ -34,25 +49,13 @@ async function searchPacientes(q: string) {
   const res = await fetch(url)
   if (!res.ok) return []
   const json = (await res.json()) as {
-    pacientes: { id: string; nombre: string; apellido: string | null }[]
+    pacientes: { id: string; nombre: string; apellido: string | null; fecha_nacimiento: string | null }[]
   }
   return json.pacientes.map((p) => ({
     id: p.id,
     label: `${p.nombre} ${p.apellido ?? ""}`.trim(),
     sublabel: undefined,
-  }))
-}
-async function searchClinicas(q: string) {
-  const url = q ? `/api/clinicas?q=${encodeURIComponent(q)}` : "/api/clinicas"
-  const res = await fetch(url)
-  if (!res.ok) return []
-  const json = (await res.json()) as {
-    clinicas: { id: string; nombre: string; direccion: string | null }[]
-  }
-  return json.clinicas.map((c) => ({
-    id: c.id,
-    label: c.nombre,
-    sublabel: c.direccion ?? undefined,
+    fechaNacimiento: p.fecha_nacimiento,
   }))
 }
 
@@ -89,24 +92,15 @@ export default function StepBasicInformation() {
     },
     [getValues, saveField]
   )
-  const saveClinicState = useCallback(
-    (overrides: Partial<UploadFormValues["clinica"]> = {}) => {
-      const currentClinic = getValues("clinica")
-      saveField("clinica", {
-        id: currentClinic?.id ?? null,
-        nombre: currentClinic?.nombre ?? null,
-        ...overrides,
-      })
-    },
-    [getValues, saveField]
-  )
+
   const handlePatientSelect = useCallback(
     (option: AutocompleteOption | null, searchText?: string) => {
       if (option) {
         const patientId = option.id;
-        const nombreCompleto = option.label.split(" ");
-        const nombres = nombreCompleto.slice(0, 1).join(" ");
-        const apellidos = nombreCompleto.slice(2).join(" ");
+        const nombreCompleto = splitFullName(option.label);
+        const nombres = nombreCompleto.nombre;
+        const apellidos = nombreCompleto.apellido;
+        const edad = ageFromBirthDate(option.fechaNacimiento);
 
         setValue("paciente.nombre", nombres, {
           shouldDirty: true,
@@ -118,12 +112,17 @@ export default function StepBasicInformation() {
           shouldValidate: true,
         });
 
+        setValue("paciente.edad", edad, {
+          shouldDirty: true,
+          shouldValidate: true,
+        });
+
         setValue("paciente.id", patientId as never, {
           shouldDirty: true,
           shouldValidate: true,
         });
 
-        savePatientState({ id: patientId, nombre: option.label })
+        savePatientState({ id: patientId })
         void flush()
         return;
       }
@@ -148,63 +147,12 @@ export default function StepBasicInformation() {
     [savePatientState, setValue]
   );
 
-  const createClinicFromName = useCallback(async (value: string) => {
-    const trimmed = value.trim();
-    if (!trimmed) return null;
-
-    const currentId = getValues("clinica.id");
-    if (currentId && !String(currentId).startsWith("temp_")) {
-      return null;
+  const handleBlur = async () => {
+    const name = getValues("paciente.nombre");
+    if (name?.trim()) {
+      await createPatientFromName(name);
     }
-
-    if (creatingPatientRef.current === trimmed) {
-      return null;
-    }
-
-    creatingPatientRef.current = trimmed;
-
-    try {
-      const searchRes = await fetch(`/api/clinicas?q=${encodeURIComponent(trimmed)}&limit=5`);
-      if (searchRes.ok) {
-        const existing = await searchRes.json() as { clinicas?: Array<{ id: string; nombre: string; direccion?: string | null }> };
-        const match = existing.clinicas?.find((clinic) => clinic.nombre?.toLowerCase() === trimmed.toLowerCase());
-
-        if (match?.id) {
-          setValue("clinica.id", match.id, { shouldDirty: true, shouldValidate: true });
-          setValue("clinica.nombre", match.nombre, { shouldDirty: true, shouldValidate: true });
-          saveClinicState({ id: match.id, nombre: match.nombre })
-          return match;
-        }
-      }
-
-      const res = await fetch("/api/clinicas", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ nombre: trimmed }),
-      });
-
-      if (!res.ok) {
-        throw new Error("No se pudo crear la clínica");
-      }
-
-      const json = await res.json() as { clinica?: { id: string; nombre: string; direccion?: string | null } };
-      const createdClinic = json.clinica;
-
-      if (createdClinic?.id) {
-        setValue("clinica.id", createdClinic.id, { shouldDirty: true, shouldValidate: true });
-        setValue("clinica.nombre", createdClinic.nombre ?? trimmed, { shouldDirty: true, shouldValidate: true });
-        saveClinicState({ id: createdClinic.id, nombre: createdClinic.nombre ?? trimmed })
-        return createdClinic;
-      }
-    } catch (error) {
-      console.error("Error creando clínica desde autocompletado", error);
-      saveClinicState({ nombre: trimmed })
-    } finally {
-      creatingPatientRef.current = null;
-    }
-
-    return null;
-  }, [getValues, saveClinicState, setValue]);
+  };
 
   const createPatientFromName = useCallback(async (value: string) => {
     const trimmed = value.trim();
@@ -215,6 +163,7 @@ export default function StepBasicInformation() {
       return null;
     }
 
+    // Evitar duplicados en creación
     if (creatingPatientRef.current === trimmed) {
       return null;
     }
@@ -222,25 +171,35 @@ export default function StepBasicInformation() {
     creatingPatientRef.current = trimmed;
 
     try {
+      // 1. Buscar paciente existente
       const searchRes = await fetch(`/api/pacientes?q=${encodeURIComponent(trimmed)}&limit=5`);
       if (searchRes.ok) {
-        const existing = await searchRes.json() as { pacientes?: Array<{ id: string; nombre: string; apellido?: string | null }> };
+        const existing = await searchRes.json() as { pacientes?: Array<{ id: string; nombre: string; apellido?: string | null; fecha_nacimiento?: string | null }> };
         const match = existing.pacientes?.find((patient) => {
           const fullName = `${patient.nombre ?? ""}`.trim().toLowerCase();
           return fullName === trimmed.toLowerCase();
         });
 
         if (match?.id) {
+          // Paciente encontrado - actualizar formulario y estado
           setValue("paciente.id", match.id, {
             shouldDirty: true,
             shouldValidate: true,
           });
-          savePatientState({ id: match.id, nombre: trimmed })
-          void flush()
+          const edad = ageFromBirthDate(match.fecha_nacimiento);
+          if (edad) {
+            setValue("paciente.edad", edad, {
+              shouldDirty: true,
+              shouldValidate: true,
+            });
+          }
+          savePatientState({ id: match.id, nombre: trimmed });
+          await flush();
           return match;
         }
       }
 
+      // 2. Crear nuevo paciente
       const res = await fetch("/api/pacientes", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -255,6 +214,7 @@ export default function StepBasicInformation() {
       const createdPatient = json.paciente;
 
       if (createdPatient?.id) {
+        // Paciente creado exitosamente - actualizar formulario y estado
         setValue("paciente.id", createdPatient.id, {
           shouldDirty: true,
           shouldValidate: true,
@@ -263,18 +223,24 @@ export default function StepBasicInformation() {
           shouldDirty: true,
           shouldValidate: true,
         });
-        savePatientState({ id: createdPatient.id, nombre: createdPatient.nombre ?? trimmed })
-        void flush()
+        savePatientState({ id: createdPatient.id, nombre: createdPatient.nombre ?? trimmed });
+        await flush();
         return createdPatient;
+      } else {
+        // Error: no se recibió ID - guardar solo nombre sin ID
+        savePatientState({ nombre: trimmed });
+        await flush();
+        return null;
       }
     } catch (error) {
       console.error("Error creando paciente desde autocompletado", error);
-      savePatientState({ nombre: trimmed })
+      // Solo guardar nombre en caso de error, sin ID
+      savePatientState({ nombre: trimmed });
+      await flush();
+      return null;
     } finally {
       creatingPatientRef.current = null;
     }
-
-    return null;
   }, [flush, getValues, savePatientState, setValue]);
 
   const { data: odontologo, isLoading: isProfileLoading } = useQuery<ProfileResponse, Error>({
@@ -362,6 +328,7 @@ export default function StepBasicInformation() {
               <>
                 <Autocomplete
                   value={field.value ?? ""}
+                  tabIndex={1}
                   onChange={(value) => {
                     field.onChange(value);
 
@@ -378,9 +345,7 @@ export default function StepBasicInformation() {
                   onSelect={(option) => {
                     handlePatientSelect(option, field.value ?? undefined);
                   }}
-                  onBlur={(value) => {
-                    void createPatientFromName(value);
-                  }}
+                  onBlur={handleBlur}
                   fetchOptions={searchPacientes}
                   placeholder="Ej. Andrea María"
                   className="w-full px-4 py-3 border-2 border-gray-300 rounded-lg focus:border-[#1C4880] focus:outline-none transition"
@@ -412,6 +377,7 @@ export default function StepBasicInformation() {
               handleAutoSave("paciente.apellido", e.target.value)
             }}
             onBlur={(e) => handleAutoSave("paciente.apellido", e.target.value)}
+            tabIndex={2}
           />
         </div>
         <div className="md:col-span-2 col-span-1">
@@ -433,7 +399,41 @@ export default function StepBasicInformation() {
               handleAutoSave("paciente.edad", e.target.value)
             }}
             onBlur={(e) => handleAutoSave("paciente.edad", e.target.value)}
+            tabIndex={3}
           />
+        </div>
+      </div>
+
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+        <div>
+          <label className={labelClass}>Nombre del centro médico</label>
+          <input
+            type="text"
+            placeholder="Ej: Clínica del Oeste"
+            className={inputClass}
+            disabled={!hasConfirmedPatient}
+            {...register("centro_medico")}
+            onBlur={(e) => handleAutoSave("centro_medico", e.target.value)}
+            tabIndex={2}
+          />
+
+        </div>
+        <div className="col-span-2">
+          <div>
+            <label className={labelClass}>Dirección de despacho</label>
+            <input
+              type="text"
+              placeholder="Ej: Alameda 5678, Santiago"
+              className={inputClass}
+              disabled={!hasConfirmedPatient}
+              {...register("direccion")}
+              onBlur={(e) => handleAutoSave("direccion", e.target.value)}
+              tabIndex={2}
+            />
+          </div>
+          <p className="text-xs text-gray-500 mt-1">
+            Selecciona una existente o se creará una nueva al salir del campo.
+          </p>
         </div>
       </div>
 
@@ -444,12 +444,14 @@ export default function StepBasicInformation() {
             type="text"
             placeholder="Ej: Dra. María González"
             className={inputClass}
+            required
             {...register("enviado_por", { required: true })}
             onBlur={(e) => handleAutoSave("enviado_por", e.target.value)}
             disabled={enviadoPorCheckbox}
+            tabIndex={4}
           />
         </div>
-        <div className="mt-14 ml-4">
+        <div className="mt-14 ml-4 col-span-2">
           <input
             type="checkbox"
             {...yoMismoField}
@@ -458,58 +460,9 @@ export default function StepBasicInformation() {
               yoMismoField.onChange(e);
               handleToggleSoyYo(e);
             }}
+            tabIndex={5}
           />
           <span className="relative -top-1.5">Enviado por mí</span>
-        </div>
-
-        <div>
-          <label className={labelClass}>Nombre del centro médico</label>
-          <Controller
-            control={control}
-            name="clinica.nombre"
-            render={({ field, fieldState }) => (
-              <>
-                <Autocomplete
-                  value={field.value ?? ""}
-                  onChange={(value) => {
-                    field.onChange(value)
-                    saveClinicState({ nombre: value })
-
-                    const currentId = getValues("clinica.id")
-                    if (currentId && !String(currentId).startsWith("temp_")) {
-                      setValue("clinica.id", null, { shouldDirty: true, shouldValidate: true })
-                    }
-                  }}
-                  onSelect={(option) => {
-                    if (option) {
-                      field.onChange(option.label)
-                      setValue("clinica.id", option.id, { shouldDirty: true, shouldValidate: true })
-                      setValue("clinica.nombre", option.label, { shouldDirty: true, shouldValidate: true })
-                      saveClinicState({ id: option.id, nombre: option.label })
-                      return
-                    }
-
-                    const currentValue = field.value ?? ""
-                    if (currentValue.trim()) {
-                      setValue("clinica.id", `temp_${Date.now()}`, { shouldDirty: true, shouldValidate: true })
-                      saveClinicState({ id: `temp_${Date.now()}` })
-                    }
-                  }}
-                  onBlur={(value) => {
-                    void createClinicFromName(value)
-                  }}
-                  fetchOptions={searchClinicas}
-                  className="w-full px-4 py-3 border-2 border-gray-300 rounded-lg focus:border-[#1C4880] focus:outline-none transition"
-                />
-                {fieldState.error && (
-                  <p className="text-sm text-red-600 mt-1">{fieldState.error.message}</p>
-                )}
-              </>
-            )}
-          />
-          <p className="text-xs text-gray-500 mt-1">
-            Selecciona una existente o se creará una nueva al salir del campo.
-          </p>
         </div>
       </div>
     </div>

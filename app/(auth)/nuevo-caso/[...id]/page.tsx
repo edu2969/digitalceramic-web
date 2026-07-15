@@ -1,4 +1,4 @@
-import UploadWizard from "@/components/Upload"
+import UploadWizard from "@/components/UploadWizard"
 import QueryProvider from "../../../(public)/providers/QueryProvider"
 
 export default async function UploadCasePage({

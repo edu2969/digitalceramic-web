@@ -1,6 +1,6 @@
 "use client"
 
-import { useState } from "react"
+import { useEffect, useState } from "react"
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query"
 import { useRouter } from "next/navigation"
 import { toast } from "sonner"
@@ -14,8 +14,11 @@ import {
   FiBriefcase,
   FiLoader,
   FiArrowLeft,
+  FiCreditCard,
+  FiBell,
 } from "react-icons/fi"
 import { Estado, ESTADO_LABEL, ESTADO_BADGE } from "@/lib/estado"
+import { getFdiForGridIndex } from "./upload-steps/types"
 
 type Transition = {
   target: Estado
@@ -57,6 +60,22 @@ function transitionFor(estado: Estado): Transition | null {
   return null
 }
 
+function transitionPagoFor(estado: Estado): Transition | null {
+  if (estado === "PENDIENTE_PAGO") {
+    return {
+      target: "INICIADO",
+      buttonLabel: "Marcar como pagado",
+      buttonIcon: <FiCreditCard className="w-5 h-5" />,
+      dialogTitle: "¿Confirmar pago?",
+      dialogText: "El trabajo pasará a estado pagado y se podrá iniciar.",
+      confirmLabel: "Confirmar pago",
+      toastLoading: "Confirmando pago…",
+      toastSuccess: "Pago confirmado",
+    }
+  }
+  return null
+}
+
 interface WorkColor {
   label: string
   value: string
@@ -86,7 +105,8 @@ interface WorkDetail {
   overdue: boolean
   overdueDays: number
   patient: { name: string; age: number | null }
-  clinic: { name: string }
+  centro_medico: string;
+  direccion: string;
   dentist: { name: string; registry: string | null }
   sentBy: { name: string | null; email: string | null }
   issueDate: string
@@ -95,11 +115,12 @@ interface WorkDetail {
   files: WorkFile[]
   notes: string
   monto: number | null
-  estado: Estado
+  estado: Estado,
+  enviado_por: string
 }
 
 async function fetchWork(id: string): Promise<WorkDetail> {
-  const res = await fetch(`/api/works/byId/${id}`)
+  const res = await fetch(`/api/trabajos/byId/${id}`)
   if (!res.ok) throw new Error("Error cargando trabajo")
   return res.json()
 }
@@ -114,18 +135,52 @@ export default function WorkPagePage({
   const [openDialog, setOpenDialog] = useState(false)
   const queryClient = useQueryClient()
   const router = useRouter()
+  const [esAdmin, setEsAdmin] = useState(false);
 
   const { data, isLoading, isError } = useQuery<WorkDetail>({
     queryKey: ["work", id],
     queryFn: () => fetchWork(id),
   })
 
+  const { data: perfilData } = useQuery({
+    queryKey: ["perfil", id],
+    queryFn: async () => {
+      const res = await fetch("/api/profile/me")
+      if (!res.ok) return null
+      return res.json()
+    }
+  })
+
+  useEffect(() => {
+    if (!perfilData) return;
+    console.log("PERFIL DATA", perfilData, perfilData?.profile?.userRole === "ADMINISTRADOR")
+    setEsAdmin(perfilData?.profile?.userRole === "ADMINISTRADOR")
+  }, [perfilData])
+
   const mutation = useMutation({
     mutationFn: async (target: Estado) => {
-      const res = await fetch(`/api/works/byId/${id}`, {
+      const res = await fetch(`/api/trabajos/byId/${id}`, {
         method: "PATCH",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ to: target }),
+      })
+      if (!res.ok) {
+        const err = await res.json().catch(() => ({}))
+        throw new Error(err?.error || "No se pudo cambiar el estado")
+      }
+      return res.json() as Promise<{ success: true; estado: Estado }>
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["work", id] })
+      setOpenDialog(false)
+    },
+  })
+
+  const marcarPagado = useMutation({
+    mutationFn: async (target: Estado) => {
+      const res = await fetch(`/api/trabajos/marcarPago/${id}`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" }
       })
       if (!res.ok) {
         const err = await res.json().catch(() => ({}))
@@ -167,19 +222,20 @@ export default function WorkPagePage({
     data.status === "Atrasado"
       ? "bg-red-50 border-red-200 text-red-600"
       : data.status === "Urgente"
-      ? "bg-amber-50 border-amber-200 text-amber-700"
-      : "bg-emerald-50 border-emerald-200 text-emerald-700"
+        ? "bg-amber-50 border-amber-200 text-amber-700"
+        : "bg-emerald-50 border-emerald-200 text-emerald-700"
 
   const statusIconColor =
     data.status === "Atrasado"
       ? "text-red-600"
       : data.status === "Urgente"
-      ? "text-amber-700"
-      : "text-emerald-700"
+        ? "text-amber-700"
+        : "text-emerald-700"
 
   // El odontólogo solo consulta el detalle: no puede cambiar el estado del
   // trabajo, así que ocultamos las acciones de transición del laboratorio.
   const transition = dentistView ? null : transitionFor(data.estado)
+  const transitionPago = transitionPagoFor(data.estado);
   const isPending = mutation.isPending
 
   const handleConfirm = () => {
@@ -191,25 +247,32 @@ export default function WorkPagePage({
     })
   }
 
+  const hangleMarcarPagado = async () => {
+    if (!transitionPago) return null;
+    toast.promise(marcarPagado.mutateAsync(transitionPago.target), {
+      loading: transitionPago.toastLoading,
+      success: transitionPago.toastSuccess,
+      error: (e: Error) => e.message || "Error",
+    })
+  }
+
   return (
     <div className="min-h-screen bg-[#F5F7FA] py-10 px-4 md:px-8">
       <div className="max-w-6xl mx-auto space-y-6">
-        {dentistView && (
-          <button
-            type="button"
-            onClick={() => router.back()}
-            className="
-              inline-flex items-center gap-2
-              px-4 py-2 rounded-xl
-              bg-white border border-gray-200
-              text-[#1C4880] font-semibold
-              hover:bg-blue-50 transition shadow-sm
-            "
-          >
-            <FiArrowLeft className="w-5 h-5" />
-            Volver
-          </button>
-        )}
+        <button
+          type="button"
+          onClick={() => router.back()}
+          className="
+            inline-flex items-center gap-2
+            px-4 py-2 rounded-xl
+            bg-white border border-gray-200
+            text-[#1C4880] font-semibold
+            hover:bg-blue-50 transition shadow-sm
+          "
+        >
+          <FiArrowLeft className="w-5 h-5" />
+          Volver
+        </button>
 
         {/* Header */}
         <div className="bg-white rounded-3xl border border-gray-200 shadow-sm overflow-hidden">
@@ -227,7 +290,7 @@ export default function WorkPagePage({
                   </span>
                 </div>
 
-                <h1 className="text-4xl font-bold text-[#1C4880] mt-2">
+                <h1 className="text-4xl font-bold text-[#1C4880] mt-2 text-nowrap">
                   Detalle de trabajo
                 </h1>
 
@@ -236,7 +299,7 @@ export default function WorkPagePage({
                 </p>
               </div>
 
-              <div
+              {data.estado !== "PENDIENTE_PAGO" ? <div
                 className={`flex items-center gap-3 px-4 py-3 rounded-2xl border ${statusStyles}`}
               >
                 <FiAlertTriangle className={`w-6 h-6 ${statusIconColor}`} />
@@ -248,7 +311,33 @@ export default function WorkPagePage({
 
                   <p className="text-lg font-bold">{data.status}</p>
                 </div>
-              </div>
+              </div> : (esAdmin ? <div>
+                <button
+                  onClick={hangleMarcarPagado}
+                  disabled={marcarPagado.isPending}
+                  className={`flex flex-col items-center justify-center px-10 py-4 ${marcarPagado.isPending ? 'bg-gray-500' : 'bg-[#1C4880] cursor-pointer'} text-white rounded-xl font-semibold text-lg hover:opacity-90 transition disabled:opacity-60`}
+                >
+                  <p>{marcarPagado.isPending ? "Confirmando pago…" : "Marcar como pagado"}</p>
+                  <p className="text-3xl font-bold">$ {(data.monto ?? 0).toLocaleString()}</p>
+                </button>
+              </div> : <div className="rounded-2xl bg-[#F5F9FF] border-2 border-[#7C3AED]/20 p-5 shadow-sm">
+                <div className="flex items-center gap-3">
+                  <div className="shrink-0 w-12 h-12 rounded-xl bg-[#7C3AED]/10 flex items-center justify-center">
+                    <FiBell className="w-6 h-6 text-yellow-500" /> {/* ← Ícono React */}
+                  </div>
+                  <div>
+                    <p className="text-[#0A1330] font-bold">
+                      El trabajo se iniciará una vez confirmado tu pago
+                    </p>
+                    <p className="text-[#16213E]/60 text-sm mt-0.5">
+                      Recuerda enviar el comprobante para activar la producción
+                    </p>
+                  </div>
+                  <span className="ml-auto bg-[#7C3AED] text-white text-xs font-bold px-3 py-1.5 rounded-full">
+                    Importante
+                  </span>
+                </div>
+              </div>)}
             </div>
           </div>
 
@@ -266,8 +355,8 @@ export default function WorkPagePage({
             <InfoCard
               icon={<FiBriefcase className="w-5 h-5" />}
               title="Centro médico"
-              value={data.clinic.name}
-              subtitle=""
+              value={data.centro_medico}
+              subtitle={data.direccion}
             />
 
             <InfoCard
@@ -284,14 +373,14 @@ export default function WorkPagePage({
             <InfoCard
               icon={<FiUser className="w-5 h-5" />}
               title="Enviado por"
-              value={data.sentBy?.name ?? data.sentBy?.email ?? "—"}
-              subtitle={data.sentBy?.email ? data.sentBy?.email ?? "" : ""}
+              value={data.enviado_por ?? "—"}
+              subtitle={""}
             />
           </div>
         </div>
 
         {/* Dates */}
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
+        {data.estado !== "PENDIENTE_PAGO" && <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
           <div className="bg-white rounded-3xl border border-gray-200 shadow-sm p-6">
             <div className="flex items-center gap-4">
               <div className="w-14 h-14 rounded-2xl bg-blue-100 flex items-center justify-center">
@@ -309,15 +398,13 @@ export default function WorkPagePage({
           </div>
 
           <div
-            className={`bg-white rounded-3xl border-2 shadow-sm p-6 ${
-              data.overdue ? "border-red-200" : "border-gray-200"
-            }`}
+            className={`bg-white rounded-3xl border-2 shadow-sm p-6 ${data.overdue ? "border-red-200" : "border-gray-200"
+              }`}
           >
             <div className="flex items-center gap-4">
               <div
-                className={`w-14 h-14 rounded-2xl flex items-center justify-center ${
-                  data.overdue ? "bg-red-100" : "bg-blue-100"
-                }`}
+                className={`w-14 h-14 rounded-2xl flex items-center justify-center ${data.overdue ? "bg-red-100" : "bg-blue-100"
+                  }`}
               >
                 {data.overdue ? (
                   <FiAlertTriangle className="w-7 h-7 text-red-600" />
@@ -328,17 +415,15 @@ export default function WorkPagePage({
 
               <div>
                 <p
-                  className={`text-sm font-medium ${
-                    data.overdue ? "text-red-500" : "text-gray-500"
-                  }`}
+                  className={`text-sm font-medium ${data.overdue ? "text-red-500" : "text-gray-500"
+                    }`}
                 >
                   Fecha de entrega
                 </p>
 
                 <h3
-                  className={`text-2xl font-bold mt-1 ${
-                    data.overdue ? "text-red-600" : "text-[#1C4880]"
-                  }`}
+                  className={`text-2xl font-bold mt-1 ${data.overdue ? "text-red-600" : "text-[#1C4880]"
+                    }`}
                 >
                   {data.dueDate}
                 </h3>
@@ -351,7 +436,7 @@ export default function WorkPagePage({
               </div>
             </div>
           </div>
-        </div>
+        </div>}
 
         {/* Work specification */}
         <div className="bg-white rounded-3xl border border-gray-200 shadow-sm overflow-hidden">
@@ -582,7 +667,7 @@ function PieceCard({
             Pieza dental
           </p>
 
-          <h3 className="text-xl font-bold text-[#1C4880] mt-0.5">{tooth}</h3>
+          <h3 className="text-xl font-bold text-[#1C4880] mt-0.5">{getFdiForGridIndex(Number(tooth))}</h3>
         </div>
 
         <div className="px-3 py-1.5 rounded-lg bg-blue-100 text-[#1C4880] font-semibold text-xs">

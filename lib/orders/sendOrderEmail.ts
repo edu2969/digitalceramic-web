@@ -12,6 +12,8 @@ const TYPE_LABELS: Record<string, string> = {
   CARILLA: "Carilla",
   CORONA: "Corona",
   CORONA_IMPLANTE: "Corona sobre implante",
+  CARTILEVER: "Cartilever",
+  PONTICO: "Póntico"
 };
 
 const MATERIAL_BY_TYPE: Record<string, string> = {
@@ -20,6 +22,8 @@ const MATERIAL_BY_TYPE: Record<string, string> = {
   CARILLA: "Disilicato",
   CORONA: "Disilicato",
   CORONA_IMPLANTE: "Zirconia",
+  CARTILEVER: "Zirconia",
+  PONTICO: "Disilicato"
 };
 
 async function sign(path: string | null) {
@@ -153,8 +157,8 @@ Estado: <b>PENDIENTE DE PAGO</b>
 <td><b>Nombre</b></td>
 
 <td>
-${trabajo.pacientes?.nombre}
-${trabajo.pacientes?.apellido}
+${trabajo.paciente?.nombre}
+${trabajo.paciente?.apellido}
 </td>
 
 </tr>
@@ -179,7 +183,7 @@ ${trabajo.pacientes?.apellido}
 
 <td><b>Centro</b></td>
 
-<td>${trabajo.clinica?.nombre}</td>
+<td>${trabajo.centro_medico} - ${trabajo.direccion_despacho}</td>
 
 </tr>
 

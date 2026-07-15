@@ -59,10 +59,8 @@ export type UploadFormValues = {
   yo_mismo: boolean
   fecha_envio: string
   fecha_entrega: string
-  clinica: {
-    id: string | null,
-    nombre: string | null
-  },
+  direccion: string | null;
+  centro_medico: string | null;
   piezas: PiezaConfig[]
   notes: string
   photos: File[]
@@ -158,4 +156,6 @@ export type AutocompleteOption = {
     id: string;
     label: string;
     sublabel?: string;
+    /** Dato de paso opcional (p. ej. fecha de nacimiento del paciente). */
+    fechaNacimiento?: string | null;
 };

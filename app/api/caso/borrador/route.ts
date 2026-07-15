@@ -25,7 +25,7 @@ export async function POST() {
 
     const { data: perfil, error: errorPerfil } = await supabase
       .from("profiles")
-      .select("id")
+      .select("id, centro_medico, direccion")
       .eq("user_id", user.id)
       .single();
 
@@ -43,6 +43,8 @@ export async function POST() {
       .insert({
         profile_id: perfil.id,
         estado: "BORRADOR",
+        nombre_clinica: perfil.centro_medico,
+        direccion_despacho: perfil.direccion
       })
       .select("id")
       .single();

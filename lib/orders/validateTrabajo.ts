@@ -15,37 +15,33 @@ type Params = {
 export type TrabajoCompleto = {
   id: string;
   estado: string;
-  paciente_id: string | null;
-  clinica_id: string | null;
   fecha_envio: string | null;
   fecha_entrega: string | null;
   url_superior: string | null;
   url_inferior: string | null;
   url_mordida: string | null;
   url_gingival: string | null;
+  archivo_superior: string | null;
+  archivo_inferior: string | null;
+  archivo_mordida: string | null;
+  archivo_gingival: string | null;
   notas: string | null;
   monto: number | null;
+  centro_medico: string | null;
+  direccion_despacho: string | null;
   enviado_por: string | null;
-  profile_id: string;
 
-  pacientes: {
+  paciente: {
     id: string;
     nombre: string | null;
     apellido: string | null;
     fecha_nacimiento: string | null;
   } | null;
 
-  clinica: {
-    id: string;
-    nombre: string | null;
-    direccion: string | null;
-  } | null;
-
-  profiles: {
+  profile: {
     id: string;
     nombre: string | null;
     apellido: string | null;
-    email: string | null;
   } | null;
 
   piezas: {
@@ -94,9 +90,8 @@ export async function validateTrabajo({
     .from("trabajos")
     .select(`
       *,
-      pacientes(*),
-      clinica(*),
-      profiles(*),
+      paciente:pacientes(*),
+      profile:profiles(*),
       piezas(*)
     `)
     .eq("id", trabajoId)
@@ -109,7 +104,7 @@ export async function validateTrabajo({
     };
   }
 
-  if (trabajo.profile_id !== profile.id) {
+  if (trabajo.profile?.id !== profile.id) {
     return {
       valid: false,
       errors: ["No autorizado."],
@@ -119,17 +114,8 @@ export async function validateTrabajo({
   if (trabajo.estado !== "BORRADOR")
     errors.push(`El trabajo está en estado ${trabajo.estado}.`);
 
-  if (!trabajo.pacientes)
+  if (!trabajo.paciente)
     errors.push("Debe seleccionar un paciente.");
-
-  if (!trabajo.clinica)
-    errors.push("Debe seleccionar una clínica.");
-
-  if (!trabajo.fecha_envio)
-    errors.push("Debe indicar la fecha de recepción.");
-
-  if (!trabajo.fecha_entrega)
-    errors.push("Debe indicar la fecha de entrega.");
 
   if (
     trabajo.fecha_envio &&
@@ -163,7 +149,7 @@ export async function validateTrabajo({
       errors.push(`La pieza ${pieza.numero} no tiene colores.`);
 
     if (
-      pieza.tipo === "CORONA_IMPLANTE" &&
+      pieza.tipo === "CORONA_IMPLANTE" && pieza.conexion === "ATORNILLADA" &&
       (
         pieza.tibase_cementado == null ||
         pieza.tibase_plataforma == null ||

@@ -1,12 +1,22 @@
-import UploadWizard from "@/components/Upload"
-import QueryProvider from "../../(public)/providers/QueryProvider"
+import UploadWizard from "@/components/UploadWizard";
+import QueryProvider from "../../(public)/providers/QueryProvider";
 
-export default function UploadPage() {
+type SearchParams = {
+  id?: string;
+};
+
+export default function UploadPage({
+  searchParams,
+}: {
+  searchParams: SearchParams;
+}) {
+  const trabajoId = searchParams?.id || undefined;
+
   return (
     <main className="bg-white text-[#1C4880]">
-      <QueryProvider>        
-        <UploadWizard />
+      <QueryProvider>
+        <UploadWizard trabajoId={trabajoId} />
       </QueryProvider>
     </main>
-  )
+  );
 }

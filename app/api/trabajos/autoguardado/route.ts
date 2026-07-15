@@ -1,15 +1,9 @@
 import { NextRequest, NextResponse } from "next/server";
-import { createClient } from "@supabase/supabase-js";
 import { createClient as createSessionClient } from "@/lib/supabase/server";
 
-const adminSupabase = createClient(
-    process.env.NEXT_PUBLIC_SUPABASE_URL!,
-    process.env.SUPABASE_SERVICE_ROLE_KEY!
-);
-
 type RelationOptions = {
-    table: "pacientes" | "clinica";
-    foreignKey: "paciente_id" | "clinica_id";
+    table: "pacientes";
+    foreignKey: "paciente_id";
     trabajoId: string;
     currentId: string | null;
     incomingId?: string | null;
@@ -34,36 +28,20 @@ type PieceDraftInput = {
 
 function birthDateFromAge(age: number) {
     const today = new Date();
-
     return new Date(
         today.getFullYear() - age,
         today.getMonth(),
         today.getDate()
-    )
-        .toISOString()
-        .substring(0, 10);
-}
-
-function normalizeTrabajoChanges(changes: Record<string, unknown>) {
-    const trabajoChanges = changes.trabajo;
-
-    if (!trabajoChanges || typeof trabajoChanges !== "object" || Array.isArray(trabajoChanges)) {
-        return {};
-    }
-
-    return Object.fromEntries(
-        Object.entries(trabajoChanges as Record<string, unknown>).map(([key, value]) => [
-            key === "notes" ? "notas" : key,
-            value,
-        ])
-    );
+    ).toISOString().substring(0, 10);
 }
 
 async function replaceTrabajoPiezas(
     trabajoId: string,
     piezas: Array<Record<string, unknown>>
 ) {
-    const { error: deleteError } = await adminSupabase
+    const supabase = await createSessionClient();
+    // Usar transacción para consistencia
+    const { error: deleteError } = await supabase
         .from("piezas")
         .delete()
         .eq("trabajo_id", trabajoId);
@@ -72,7 +50,7 @@ async function replaceTrabajoPiezas(
 
     if (!piezas.length) return;
 
-    const { error: insertError } = await adminSupabase
+    const { error: insertError } = await supabase
         .from("piezas")
         .insert(
             piezas.map((pieza) => ({
@@ -99,16 +77,14 @@ async function upsertRelation({
     incomingId,
     values,
 }: RelationOptions) {
-
     const data = { ...values };
-
     delete data.id;
 
     const relationId = incomingId ?? currentId;
+    const supabase = await createSessionClient();
 
     if (relationId) {
-
-        const { error } = await adminSupabase
+        const { error } = await supabase
             .from(table)
             .update(data)
             .eq("id", relationId);
@@ -116,23 +92,18 @@ async function upsertRelation({
         if (error) throw error;
 
         if (relationId !== currentId) {
-
-            const { error: trabajoError } = await adminSupabase
+            const { error: trabajoError } = await supabase
                 .from("trabajos")
-                .update({
-                    [foreignKey]: relationId,
-                })
+                .update({ [foreignKey]: relationId })
                 .eq("id", trabajoId);
 
             if (trabajoError) throw trabajoError;
-
         }
 
         return relationId;
-
     }
 
-    const { data: inserted, error } = await adminSupabase
+    const { data: inserted, error } = await supabase
         .from(table)
         .insert(data)
         .select("id")
@@ -140,11 +111,9 @@ async function upsertRelation({
 
     if (error) throw error;
 
-    const { error: trabajoError } = await adminSupabase
+    const { error: trabajoError } = await supabase
         .from("trabajos")
-        .update({
-            [foreignKey]: inserted.id,
-        })
+        .update({ [foreignKey]: inserted.id })
         .eq("id", trabajoId);
 
     if (trabajoError) throw trabajoError;
@@ -153,11 +122,9 @@ async function upsertRelation({
 }
 
 export async function POST(req: NextRequest) {
-
     try {
-
         const supabase = await createSessionClient();
-
+        
         const {
             data: { user },
         } = await supabase.auth.getUser();
@@ -182,10 +149,18 @@ export async function POST(req: NextRequest) {
             );
         }
 
-        const { id, changes } = await req.json();
+        const { id, changes, timestamp } = await req.json();
 
-        console.log("ID", id);
-        console.log("Changes", changes);
+        if (!changes || Object.keys(changes).length === 0) {
+            console.warn("No changes detected");
+            return NextResponse.json({ 
+                ok: true, 
+                message: "No changes to save",
+                timestamp: new Date().toISOString()
+            });
+        }
+
+        console.log("DETECTED CHANGES", id, changes)
 
         if (!id) {
             return NextResponse.json(
@@ -194,72 +169,66 @@ export async function POST(req: NextRequest) {
             );
         }
 
+        // Verificar que el trabajo existe y pertenece al usuario
         const { data: trabajo, error: trabajoError } = await supabase
             .from("trabajos")
             .select(`
                 id,
                 paciente_id,
-                clinica_id,
-                profile_id
+                profile_id,
+                updated_at
             `)
             .eq("id", id)
             .single();
 
         if (trabajoError || !trabajo) {
+            console.log("Error?!", trabajo, trabajoError)
             return NextResponse.json(
                 { error: "Trabajo no encontrado" },
                 { status: 404 }
             );
         }
 
-        /****************************************
-         * TRABAJO
-         ****************************************/
-
-        const rawChanges = changes as Record<string, unknown>;
-
-        const trabajoUpdates: Record<string, unknown> = {};
-        const normalizedTrabajoChanges = normalizeTrabajoChanges(rawChanges);
-
-        if (Object.keys(normalizedTrabajoChanges).length) {
-
-            const { error } = await adminSupabase
-                .from("trabajos")
-                .update(normalizedTrabajoChanges)
-                .eq("id", trabajo.id);
-
-            if (error) throw error;
-
-        }
-
-        for (const [sourceField, targetField] of [
-            ["enviado_por", "enviado_por"],
-            ["fecha_envio", "fecha_envio"],
-            ["fecha_entrega", "fecha_entrega"],
-            ["url_superior", "url_superior"],
-            ["url_inferior", "url_inferior"],
-            ["url_mordida", "url_mordida"],
-            ["url_gingival", "url_gingival"],
-            ["fileSuperior", "url_superior"],
-            ["fileInferior", "url_inferior"],
-            ["fileMordida", "url_mordida"],
-            ["fileGingival", "url_gingival"],
-            ["archivo_superior", "archivo_superior"],
-            ["archivo_inferior", "archivo_inferior"],
-            ["archivo_mordida", "archivo_mordida"],
-            ["archivo_gingival", "archivo_gingival"],
-            ["notas", "notas"],
-            ["notes", "notas"],
-        ] as const) {
-            if (rawChanges[sourceField] !== undefined) {
-                trabajoUpdates[targetField] = rawChanges[sourceField] ?? null;
+        // Verificar conflictos (opcional pero recomendado)
+        if (timestamp && trabajo.updated_at) {
+            const lastUpdate = new Date(trabajo.updated_at).getTime();
+            const clientTimestamp = new Date(timestamp).getTime();
+            if (clientTimestamp < lastUpdate) {
+                return NextResponse.json(
+                    { 
+                        error: "Conflicto de datos",
+                        serverVersion: trabajo.updated_at
+                    },
+                    { status: 409 }
+                );
             }
         }
 
-        if (Object.keys(trabajoUpdates).length) {
-            const { error } = await adminSupabase
+        // Campos permitidos para trabajo
+        const allowedTrabajoFields = new Set([
+            'enviado_por', 
+            'url_superior', 'url_inferior', 'url_mordida', 'url_gingival',
+            'archivo_superior', 'archivo_inferior', 'archivo_mordida', 'archivo_gingival',
+            'notas'
+        ]);
+
+        // Procesar cambios del trabajo
+        const trabajoUpdates: Record<string, unknown> = {};
+        
+        for (const [key, value] of Object.entries(changes)) {
+            if (allowedTrabajoFields.has(key) && value !== undefined) {
+                trabajoUpdates[key] = value;
+            }
+        }
+
+        // Actualizar trabajo si hay cambios
+        if (Object.keys(trabajoUpdates).length > 0) {
+            const { error } = await supabase
                 .from("trabajos")
-                .update(trabajoUpdates)
+                .update({
+                    ...trabajoUpdates,
+                    updated_at: new Date().toISOString()
+                })
                 .eq("id", trabajo.id);
 
             if (error) throw error;
@@ -268,122 +237,124 @@ export async function POST(req: NextRequest) {
         /****************************************
          * PACIENTE
          ****************************************/
-
         if (changes.paciente) {
-
             const paciente = { ...changes.paciente };
 
-            if (paciente.edad !== undefined) {
+            console.log("Changes paciente ----->", paciente);
+            
+            // Solo procesar si hay campos definidos
+            const hasValidData = Object.values(paciente).some(v => v !== undefined && v !== null);
+            
+            if (hasValidData) {
+                if (paciente.edad !== undefined) {
+                    paciente.fecha_nacimiento = birthDateFromAge(Number(paciente.edad));
+                    delete paciente.edad;
+                }
 
-                paciente.fecha_nacimiento = birthDateFromAge(
-                    Number(paciente.edad)
-                );
-
-                delete paciente.edad;
-
+                await upsertRelation({
+                    table: "pacientes",
+                    foreignKey: "paciente_id",
+                    trabajoId: trabajo.id,
+                    currentId: trabajo.paciente_id,
+                    incomingId: paciente.id ?? null,
+                    values: paciente,
+                });
             }
-
-            await upsertRelation({
-                table: "pacientes",
-                foreignKey: "paciente_id",
-                trabajoId: trabajo.id,
-                currentId: trabajo.paciente_id,
-                incomingId: paciente.id ?? null,
-                values: paciente,
-            });
-
-        }
-
-        /****************************************
-         * CLINICA
-         ****************************************/
-
-        if (changes.clinica) {
-
-            await upsertRelation({
-                table: "clinica",
-                foreignKey: "clinica_id",
-                trabajoId: trabajo.id,
-                currentId: trabajo.clinica_id,
-                incomingId: changes.clinica.id ?? null,
-                values: changes.clinica,
-            });
-
         }
 
         /****************************************
          * PIEZAS
          ****************************************/
-
         if (changes.piezas !== undefined) {
             const piezas = Array.isArray(changes.piezas) ? changes.piezas : [];
-            const rows = piezas.map((pieza: PieceDraftInput) => {
-                const colores = Array.isArray(pieza?.colores)
-                    ? pieza.colores
-                        .map((color) => color?.code ?? "")
-                        .filter(Boolean)
-                        .join(",")
-                    : "";
+            
+            // Solo procesar si hay piezas
+            if (piezas.length > 0) {
+                const rows = piezas.map((pieza: PieceDraftInput) => {
+                    const colores = Array.isArray(pieza?.colores)
+                        ? pieza.colores
+                            .map((color) => color?.code ?? "")
+                            .filter(Boolean)
+                            .join(",")
+                        : "";
 
-                const paletteValue = (() => {
-                    const palette = pieza?.colores?.[0]?.paletteType;
-                    if (palette === "VITA_3D") return "VITA_3D";
-                    if (palette === "OTRO") {
-                        return pieza?.colores?.[0]?.customPalette || "OTRO";
-                    }
-                    return "VITA_CLASSIC";
-                })();
+                    const paletteValue = (() => {
+                        const palette = pieza?.colores?.[0]?.paletteType;
+                        if (palette === "VITA_3D") return "VITA_3D";
+                        if (palette === "OTRO") {
+                            return pieza?.colores?.[0]?.customPalette || "OTRO";
+                        }
+                        return "VITA_CLASSIC";
+                    })();
 
-                const subTipo = pieza?.subTipo ?? null;
-                const conexion =
-                    subTipo === "ATORNILLADA"
-                        ? "ATORNILLADA"
-                        : subTipo === "CEMENTADA"
-                            ? "CEMENTADA"
-                            : pieza?.tipo === "CORONA_IMPLANTE" &&
-                                (pieza?.tiBase?.platformHeight != null ||
-                                    pieza?.tiBase?.diameter != null ||
-                                    pieza?.tiBase?.gingivalHeight != null)
-                                ? "ATORNILLADA"
-                                : "NONE";
+                    const subTipo = pieza?.subTipo ?? null;
+                    const conexion =
+                        subTipo === "ATORNILLADA" ? "ATORNILLADA"
+                        : subTipo === "CEMENTADA" ? "CEMENTADA"
+                        : pieza?.tipo === "CORONA_IMPLANTE" &&
+                          (pieza?.tiBase?.platformHeight != null ||
+                           pieza?.tiBase?.diameter != null ||
+                           pieza?.tiBase?.gingivalHeight != null) ? "ATORNILLADA"
+                        : "NONE";
 
-                return {
-                    numero: pieza?.numero ?? null,
-                    paleta: paletteValue,
-                    colores,
-                    tipo: pieza?.tipo ?? null,
-                    tibase_cementado: pieza?.tiBase?.platformHeight ?? null,
-                    tibase_plataforma: pieza?.tiBase?.diameter ?? null,
-                    tibase_gingival: pieza?.tiBase?.gingivalHeight ?? null,
-                    conexion,
-                };
-            });
+                    return {
+                        numero: pieza?.numero ?? null,
+                        paleta: paletteValue,
+                        colores,
+                        tipo: pieza?.tipo ?? null,
+                        tibase_cementado: pieza?.tiBase?.platformHeight ?? null,
+                        tibase_plataforma: pieza?.tiBase?.diameter ?? null,
+                        tibase_gingival: pieza?.tiBase?.gingivalHeight ?? null,
+                        conexion,
+                    };
+                });
 
-            await replaceTrabajoPiezas(trabajo.id, rows);
+                await replaceTrabajoPiezas(trabajo.id, rows);
+            } else {
+                // Si no hay piezas, eliminar todas
+                const { error: deleteError } = await supabase
+                    .from("piezas")
+                    .delete()
+                    .eq("trabajo_id", trabajo.id);
+                    
+                if (deleteError) throw deleteError;
+            }
+        }
+
+        // Obtener el trabajo actualizado para retornar
+        const { data: updatedTrabajo, error: fetchError } = await supabase
+            .from("trabajos")
+            .select(`
+                id,
+                paciente_id,
+                profile_id,
+                updated_at,
+                pacientes: paciente_id (*),
+                piezas (*)
+            `)
+            .eq("id", trabajo.id)
+            .single();
+
+        if (fetchError) {
+            console.error("Error fetching updated trabajo:", fetchError);
         }
 
         return NextResponse.json({
             ok: true,
+            data: updatedTrabajo || null,
+            timestamp: new Date().toISOString()
         });
 
     } catch (error) {
+        console.error("Error en autoguardado:", error);
 
-        console.error(error);
-
-        const message =
-            error instanceof Error
-                ? error.message
-                : "Error interno del servidor";
+        const message = error instanceof Error
+            ? error.message
+            : "Error interno del servidor";
 
         return NextResponse.json(
-            {
-                error: message,
-            },
-            {
-                status: 500,
-            }
+            { error: message },
+            { status: 500 }
         );
-
     }
-
 }

@@ -6,11 +6,7 @@ import { UploadFormValues } from "@/components/upload-steps/types";
 import { AutoTextarea } from "@/components/form";
 import { useAutoSaveContext } from "../form/provider/AutoSaveProvider";
 
-export default function StepAditionalInformation({
-  id
-}: {
-  id?: string;
-}) {
+export default function StepAditionalInformation() {
   const { setValue, control } = useFormContext<UploadFormValues>();
   const { saveField } = useAutoSaveContext();
 
@@ -119,10 +115,10 @@ export default function StepAditionalInformation({
       </div>
 
       <AutoTextarea
-        name="notes"
-        label="Observaciones"
+        name="notas"
+        label="Notas del trabajo"
         placeholder="Ingresa cualquier observación o nota importante sobre tu caso..."
-        rows={6}
+        rows={6}        
       />
 
     </div>
