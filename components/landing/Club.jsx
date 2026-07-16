@@ -14,7 +14,7 @@ export default function Club() {
           {/* Columna izquierda: Texto principal */}
           <div className="lg:col-span-2 space-y-3 md:space-y-4">
             <div className="text-[#F4C20D] text-xs sm:text-sm font-semibold tracking-wider">
-              PROMOCIÓN FUNDADORES • JUNIO Y JULIO
+              PROMOCIÓN FUNDADORES • JULIO Y AGOSTO
             </div>
             
             <div className="flex flex-wrap items-center gap-2">

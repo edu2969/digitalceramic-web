@@ -123,14 +123,19 @@ export async function POST(request: Request) {
             <table width="100%" cellpadding="0" cellspacing="0">
               <tr>
                 <td>
+                  <!-- Logo de la empresa -->
                   <div style="display:flex; align-items:center; gap:12px;">
-                    <div style="width:42px; height:42px; background:#7C3AED; border-radius:10px; display:flex; align-items:center; justify-content:center; font-size:20px; color:#ffffff; font-weight:bold;">
-                      DC
-                    </div>
-                    <div>
-                      <span style="font-size:18px; font-weight:700; color:#ffffff; letter-spacing:-0.5px;">Digital Ceramic</span>
-                      <span style="display:block; font-size:10px; color:rgba(255,255,255,0.5); font-weight:300;">Laboratorio Dental</span>
-                    </div>
+                    <div style="display:flex; align-items:center; gap:12px;">
+                      <img 
+                        src="${process.env.NEXT_PUBLIC_SITE_URL}/logo_02.png" 
+                        alt="Digital Ceramic" 
+                        style="height:48px; width:auto; border-radius:8px;"
+                      />
+                      <div>
+                        <span style="font-size:20px; font-weight:700; color:#ffffff; letter-spacing:-0.5px;">Digital Ceramic</span>
+                        <span style="display:block; font-size:11px; color:rgba(255,255,255,0.6); font-weight:300;">Laboratorio Dental</span>
+                      </div>
+                    </div>                    
                   </div>
                 </td>
               </tr>

@@ -14,7 +14,7 @@ type TimeParts = {
   seconds: number;
 };
 
-const TARGET_DATE = new Date("2026-07-31T23:59:59");
+const TARGET_DATE = new Date("2026-08-31T23:59:59");
 
 function getRemainingTime(): TimeParts {
   const diff = Math.max(
