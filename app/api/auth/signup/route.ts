@@ -103,6 +103,131 @@ export async function POST(request: Request) {
     `?token_hash=${encodeURIComponent(tokenHash)}` +
     `&type=signup&next=${encodeURIComponent("/panel/odontologo")}`
 
+    const html = `
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+</head>
+<body style="margin:0; padding:0; background:#EEF2F7; font-family:'Segoe UI',Arial,sans-serif;">
+
+<table width="100%" cellpadding="0" cellspacing="0" style="background:#EEF2F7; padding:40px 20px;">
+  <tr>
+    <td align="center">
+      <table width="520" cellpadding="0" cellspacing="0" style="background:#ffffff; border-radius:16px; overflow:hidden; box-shadow:0 4px 24px rgba(10,19,48,0.08);">
+        
+        <!-- HEADER -->
+        <tr>
+          <td style="background:#0A1330; padding:28px 32px;">
+            <table width="100%" cellpadding="0" cellspacing="0">
+              <tr>
+                <td>
+                  <div style="display:flex; align-items:center; gap:12px;">
+                    <div style="width:42px; height:42px; background:#7C3AED; border-radius:10px; display:flex; align-items:center; justify-content:center; font-size:20px; color:#ffffff; font-weight:bold;">
+                      DC
+                    </div>
+                    <div>
+                      <span style="font-size:18px; font-weight:700; color:#ffffff; letter-spacing:-0.5px;">Digital Ceramic</span>
+                      <span style="display:block; font-size:10px; color:rgba(255,255,255,0.5); font-weight:300;">Laboratorio Dental</span>
+                    </div>
+                  </div>
+                </td>
+              </tr>
+            </table>
+          </td>
+        </tr>
+
+        <!-- BODY -->
+        <tr>
+          <td style="padding:32px 36px;">
+
+            <!-- Título -->
+            <h1 style="font-size:22px; font-weight:700; color:#0A1330; margin:0 0 8px 0; letter-spacing:-0.5px;">
+              ¡Confirma tu cuenta! 🎉
+            </h1>
+            <p style="font-size:14px; color:#16213E; margin:0 0 24px 0; line-height:1.6;">
+              Hola <strong style="color:#0A1330;">${nombre}</strong>,
+            </p>
+
+            <!-- Mensaje principal -->
+            <div style="background:#F5F9FF; border:1px solid #D9E5F3; border-radius:10px; padding:20px 24px; margin-bottom:24px;">
+              <p style="font-size:14px; color:#16213E; margin:0 0 16px 0; line-height:1.6;">
+                Confirma tu cuenta en <strong style="color:#0A1330;">Digital Ceramic</strong> para comenzar a utilizar nuestros servicios.
+              </p>
+              <p style="font-size:13px; color:#16213E/70; margin:0; line-height:1.5;">
+                ⏱️ Este enlace expirará en <strong style="color:#0A1330;">24 horas</strong>.
+              </p>
+            </div>
+
+            <!-- Botón CTA -->
+            <table width="100%" cellpadding="0" cellspacing="0" style="margin-bottom:24px;">
+              <tr>
+                <td align="center">
+                  <a href="${confirmUrl}" style="
+                    display: inline-block;
+                    background: #7C3AED;
+                    color: #ffffff;
+                    padding: 14px 48px;
+                    border-radius: 10px;
+                    text-decoration: none;
+                    font-weight: 600;
+                    font-size: 16px;
+                    box-shadow: 0 4px 12px rgba(124, 58, 237, 0.3);
+                  ">
+                    ✅ Confirmar cuenta
+                  </a>
+                </td>
+              </tr>
+            </table>
+
+            <!-- Enlace alternativo -->
+            <div style="background:#EEF2F7; border-radius:8px; padding:14px 18px; margin-bottom:24px;">
+              <p style="font-size:12px; color:#16213E/60; margin:0 0 6px 0; font-weight:600;">
+                🔗 O copia este enlace en tu navegador:
+              </p>
+              <a href="${confirmUrl}" style="
+                display: block;
+                font-size:12px;
+                color: #7C3AED;
+                word-break: break-all;
+                text-decoration: underline;
+              ">
+                ${confirmUrl}
+              </a>
+            </div>
+
+            <!-- Aviso de seguridad -->
+            <div style="background:#FFF8E6; border-left:4px solid #F4C20D; border-radius:6px; padding:12px 16px;">
+              <p style="font-size:12px; color:#16213E/70; margin:0; line-height:1.5;">
+                🔒 <strong>¿No creaste esta cuenta?</strong> Ignora este mensaje y no se realizará ningún cambio.
+              </p>
+            </div>
+
+            <!-- Footer -->
+            <div style="text-align:center; margin-top:28px; font-size:11px; color:#999; border-top:1px solid #EEF2F7; padding-top:18px;">
+              <p style="margin:0 0 4px 0;">
+                <strong style="color:#0A1330;">Digital Ceramic</strong> · Laboratorio Dental
+              </p>
+              <p style="margin:0; color:#999; font-size:10px;">
+                Este correo fue enviado automáticamente. Por favor, no respondas a este mensaje.
+              </p>
+              <p style="margin:8px 0 0 0; color:#ccc; font-size:10px;">
+                ${new Date().getFullYear()} Digital Ceramic. Todos los derechos reservados.
+              </p>
+            </div>
+
+          </td>
+        </tr>
+      </table>
+    </td>
+  </tr>
+</table>
+
+</body>
+</html>
+`;
+
   const { error: emailError } = await resend.emails.send({
     from: process.env.RESEND_FROM!,
     to: email,
@@ -111,16 +236,7 @@ export async function POST(request: Request) {
       `Hola ${nombre},\n\n` +
       `Confirma tu cuenta visitando el siguiente enlace:\n${confirmUrl}\n\n` +
       `Si no creaste esta cuenta, ignora este mensaje.`,
-    html:
-      `<p>Hola ${nombre},</p>` +
-      `<p>Confirma tu cuenta en Digital Ceramic haciendo clic en el siguiente botón:</p>` +
-      `<p><a href="${confirmUrl}" ` +
-      `style="display:inline-block;background:#1C4880;color:#fff;` +
-      `padding:12px 24px;border-radius:12px;text-decoration:none;` +
-      `font-weight:600">Confirmar cuenta</a></p>` +
-      `<p>O copia este enlace en tu navegador:<br/>` +
-      `<a href="${confirmUrl}">${confirmUrl}</a></p>` +
-      `<p style="color:#888;font-size:12px">Si no creaste esta cuenta, ignora este mensaje.</p>`,
+    html
   })
 
   if (emailError) {
