@@ -175,56 +175,6 @@ export default function ComoFunciona() {
             </div>
           ))}
         </div>
-
-        {/* Footer */}
-        <div className="mt-16 overflow-hidden rounded-3xl border border-zinc-100 bg-white shadow-[0_10px_50px_rgba(15,23,42,.06)]">
-          <div className="flex flex-col items-center justify-center gap-6 px-6 py-8 lg:flex-row">            
-            <div className="relative">
-
-    <div
-        className="
-            absolute
-            inset-0
-            rounded-full
-            bg-linear-to-r
-            from-blue-500
-            via-violet-500
-            to-fuchsia-500
-            blur-xl
-            opacity-30
-        "
-    />
-
-<>
-  <svg width="0" height="0">
-    <defs>
-      <linearGradient id="iconGradient" x1="0%" y1="0%" x2="100%" y2="100%">
-        <stop offset="0%" stopColor="#2563EB" />
-        <stop offset="50%" stopColor="#7C3AED" />
-        <stop offset="100%" stopColor="#D946EF" />
-      </linearGradient>
-    </defs>
-  </svg>
-
-  <BiCheckShield
-    size={48}
-    style={{
-      fill: "url(#iconGradient)",
-    }}
-  />
-</>
-
-</div>
-            <div className="hidden h-12 w-px bg-zinc-200 lg:block" />
-            <p className="text-center text-lg font-medium text-zinc-800 sm:text-xl lg:text-2xl">
-              Baja la{" "}
-              <span className="bg-linear-to-r from-blue-600 via-violet-600 to-fuchsia-600 bg-clip-text font-bold text-transparent">
-                incertidumbre
-              </span>{" "}
-              del proceso.
-            </p>
-          </div>
-        </div>
       </div>
     </section>
   );
