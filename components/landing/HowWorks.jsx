@@ -1,7 +1,6 @@
 "use client";
 
 import Image from "next/image";
-import { BiCheckShield } from "react-icons/bi";
 import { FaArrowRight } from "react-icons/fa";
 
 const pasos = [
