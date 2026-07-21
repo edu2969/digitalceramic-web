@@ -1,11 +1,9 @@
 import { NextResponse } from "next/server"
 import { createClient as createSessionClient } from "@/lib/supabase/server"
 import { Estado, isEstado } from "@/lib/estado"
+import { PRECIOS } from "@/lib/calculos"
 
 export const runtime = "nodejs"
-
-const PRECIO_DESCUENTO = 59000;
-const PRECIO_NORMAL = 76700;
 
 const MONTHS_ES_LONG = [
   "Enero",
@@ -385,8 +383,8 @@ if (todosLosTrabajos && todosLosTrabajos.length > 0) {
       },
       club: {
         piezasConDescuento: cantidadPiezasHechas < 10 ? 10 - cantidadPiezasHechas : 0,
-        precioDescuento: PRECIO_DESCUENTO,
-        precioNormal: PRECIO_NORMAL
+        precioDescuento: PRECIOS.DESCUENTO,
+        precioNormal: PRECIOS.NORMAL
       }
     })
   } catch (error) {

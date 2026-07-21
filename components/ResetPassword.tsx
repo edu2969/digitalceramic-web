@@ -90,14 +90,9 @@ export default function ResetPassword() {
               height={64}
               priority
             />
-            <Image
-              src="/titulo_minimo.png"
-              alt="Digital Ceramic"
-              width={140}
-              height={10}
-              className="w-56 h-8 mt-6"
-              priority
-            />
+            <div className="mt-3 text-[#1C4880] text-2xl font-bold">
+              Digital<span className="text-[#269FD0]">Ceramic</span>
+            </div>
           </div>
 
           {checking ? (

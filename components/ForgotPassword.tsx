@@ -14,23 +14,33 @@ export default function ForgotPassword() {
   const [error, setError] = useState<string | null>(null)
 
   const handleSubmit = async (e: React.SubmitEvent<HTMLFormElement>) => {
-    e.preventDefault()
+    e.preventDefault();
 
-    setLoading(true)
-    setError(null)
+    setLoading(true);
+    setError(null);
 
-    const { error } = await supabase.auth.resetPasswordForEmail(email, {
-      redirectTo: `${window.location.origin}/api/auth/confirm?next=/reset-password`,
-    })
+    try {
+      const res = await fetch("/api/auth/forgot-password", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          email,
+        }),
+      });
 
-    setLoading(false)
+      const json = await res.json();
 
-    if (error) {
-      setError("No se pudo enviar el correo. Intenta nuevamente.")
-      return
+      if (!res.ok) {
+        setError(json.error ?? "No se pudo enviar el correo.");
+        return;
+      }
+
+      setSent(true);
+    } finally {
+      setLoading(false);
     }
-
-    setSent(true)
   }
 
   return (
@@ -60,14 +70,9 @@ export default function ForgotPassword() {
               height={64}
               priority
             />
-            <Image
-              src="/titulo_minimo.png"
-              alt="Digital Ceramic"
-              width={140}
-              height={10}
-              className="w-56 h-8 mt-6"
-              priority
-            />
+            <div className="mt-3 text-[#1C4880] text-2xl font-bold">
+              Digital<span className="text-[#269FD0]">Ceramic</span>
+            </div>
           </div>
 
           {sent ? (

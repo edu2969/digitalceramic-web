@@ -5,7 +5,7 @@
  */
 export const PRECIOS = {
     /** Precio normal por pieza */
-    NORMAL: 76700,
+    NORMAL: 71250,
     /** Precio con descuento por pieza (aplica a las primeras piezas del histórico) */
     DESCUENTO: 59000,
     /** Cantidad de primeras piezas (histórico) que van con descuento */
@@ -18,7 +18,7 @@ export const PRECIOS = {
  * @param piezasYaRealizadas - Número de piezas que ya se han trabajado anteriormente
  * @param piezasNuevas - Número de piezas nuevas a calcular
  * @param precioNormal - Precio normal por pieza (opcional, por defecto 59990)
- * @param precioDescuento - Precio con descuento por pieza (opcional, por defecto 49990)
+ * @param precioDescuento - Precio con descuento por pieza (opcional, por defecto PRECIO_DESCUENTO)
  * @param umbral - Número de piezas a partir del cual aplica descuento (opcional, por defecto 10)
  * 
  * @returns Objeto con el detalle del cálculo

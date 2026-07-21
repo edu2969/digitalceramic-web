@@ -19,7 +19,7 @@ export default function Club() {
             
             <div className="flex flex-wrap items-center gap-2">
               <p className="text-xl sm:text-2xl md:text-3xl lg:text-4xl font-bold">Membresía</p>
-              <p className="text-xl sm:text-2xl md:text-3xl lg:text-4xl font-bold text-[#F4C20D]">$0 para siempre</p>
+              <p className="text-xl sm:text-2xl md:text-3xl lg:text-4xl font-bold text-[#F4C20D]">$0</p>
             </div>
             
             <div className="text-white/40 text-xs sm:text-sm">
@@ -58,11 +58,9 @@ export default function Club() {
               key={`ruta_${index}`} 
               className="relative border-2 border-white/20 rounded-2xl p-4 sm:p-6 space-y-2 hover:border-[#F4C20D]/50 transition-all duration-300 hover:shadow-xl hover:shadow-[#F4C20D]/5"
             >
-              <div className="text-white/40 text-3xl sm:text-2xl font-medium">RUTA {index + 1}</div>
+              <div className="text-white/60 text-3xl sm:text-2xl font-medium">RUTA {index + 1}</div>
               <div className="text-white/80 text-md sm:text-sm font-medium mb-8">{elem.nombre}</div>
-              {/*<div className="line-through text-white/40 text-sm sm:text-base">${elem.antes.toLocaleString('es-CL')}</div>
-              <div className="text-xl sm:text-2xl md:text-3xl font-bold text-white">${elem.ahora.toLocaleString('es-CL')}</div>*/}
-              <div className={`absolute bottom-4 text-sm sm:text-base text-white/60'}`}>
+              <div className={`absolute bottom-4 text-sm text-white/60`}>
                 {elem.discount}
               </div>
             </div>

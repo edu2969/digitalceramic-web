@@ -60,7 +60,7 @@ export default function Login() {
           alt="Fondo"
           fill
           priority
-          className="object-cover object-center opacity-20"
+          className="object-cover object-center opacity-35"
         />
 
         <div className="absolute inset-0" />
@@ -70,7 +70,7 @@ export default function Login() {
       <div className="relative z-10 w-full max-w-md">
         <div className="bg-white/95 backdrop-blur-sm border border-[#D7E6F5] shadow-2xl rounded-3xl p-8">
           {/* Logo */}
-          <div className="flex justify-center mb-6 space-x-6">
+          <div className="flex justify-center mb-6 space-x-4">
             <Image
               src="/logo_02.png"
               alt="Digital Ceramic"
@@ -78,14 +78,9 @@ export default function Login() {
               height={64}
               priority
             />
-            <Image
-              src="/titulo_minimo.png"
-              alt="Digital Ceramic"
-              width={140}
-              height={10}
-              className="w-56 h-8 mt-6"
-              priority
-            />
+            <div className="mt-3 text-[#1C4880] text-2xl font-bold">
+              Digital<span className="text-[#269FD0]">Ceramic</span>
+            </div>
           </div>
 
           {/* Texto */}
