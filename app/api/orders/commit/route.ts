@@ -110,8 +110,7 @@ export async function POST(req: Request) {
             .insert({
                 trabajo_id: trabajoId,
                 estado: "PENDIENTE_PAGO",
-                created_at: new Date().toISOString(),
-                created_by: user.id,
+                created_at: new Date().toISOString()
             });
 
         if (historicoError) {
