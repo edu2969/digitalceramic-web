@@ -115,7 +115,7 @@ export default function StepAditionalInformation() {
       </div>
 
       <AutoTextarea
-        name="notas"
+        name="notes"
         label="Notas del trabajo"
         placeholder="Ingresa cualquier observación o nota importante sobre tu caso..."
         rows={6}        
