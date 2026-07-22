@@ -32,7 +32,7 @@ type PieceType =
 interface WorkItem {
   id: string
   patient: string
-  clinic: string
+  centroMedico: string
   createdAt: string
   dueDate: string
   pieces: number
@@ -266,7 +266,7 @@ export default function Dashboard() {
                         </p>
 
                         <p className="text-sm text-gray-500 mt-0.5">
-                          {work.clinic}
+                          {work.centroMedico}
                         </p>
                       </div>
                     </td>

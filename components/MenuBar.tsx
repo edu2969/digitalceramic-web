@@ -117,7 +117,7 @@ export default function SidebarLayout({
       {/* Sidebar */}
       <aside
         className={`
-          fixed top-0 left-0 h-screen w-72.5
+          fixed top-0 left-0 h-screen w-96
           bg-white
           border-r border-gray-200
           shadow-2xl

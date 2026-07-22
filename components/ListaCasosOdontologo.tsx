@@ -6,9 +6,10 @@ import { FiUpload } from "react-icons/fi"
 
 import { Estado, ESTADO_LABEL, ESTADO_BADGE } from "@/lib/estado"
 import { FaEdit } from "react-icons/fa"
+import { getFdiForGridIndex } from "./upload-steps/types"
 
 interface DentistWorkPiece {
-  tooth: string
+  tooth: number
   type: string
   tiBase: {
     plataforma: string
@@ -200,7 +201,7 @@ export default function DentistDashboard() {
                             className="flex flex-col gap-1"
                           >
                             <span className="px-2 py-1 rounded-lg bg-blue-50 text-[#1C4880] text-xs font-semibold w-fit">
-                              {piece.tooth} · {piece.type}
+                              {getFdiForGridIndex(piece.tooth)} · {piece.type}
                             </span>
 
                             {piece.tiBase && (

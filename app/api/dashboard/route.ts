@@ -5,11 +5,6 @@ import { Estado, isEstado } from "@/lib/estado"
 
 export const runtime = "nodejs"
 
-const supabase = createClient(
-  process.env.NEXT_PUBLIC_SUPABASE_URL!,
-  process.env.SUPABASE_SERVICE_ROLE_KEY!
-)
-
 const MONTHS_ES = [
   "Ene",
   "Feb",
@@ -58,16 +53,16 @@ type TrabajoRow = {
   fecha_entrega: string | null
   estado: string | null
   pacientes: { nombre: string | null; apellido: string | null } | null
-  clinica: { nombre: string | null } | null
+  centro_medico: string | null
   piezas: { tipo: string | null }[] | null
 }
 
 export async function GET() {
   try {
-    const sessionClient = await createSessionClient()
+    const supabase = await createSessionClient()
     const {
       data: { user },
-    } = await sessionClient.auth.getUser()
+    } = await supabase.auth.getUser()
 
     if (!user) {
       return NextResponse.json(
@@ -79,9 +74,9 @@ export async function GET() {
     const { data: trabajosData, error: trabajosError } = await supabase
       .from("trabajos")
       .select(
-        "id, fecha_envio, fecha_entrega, estado, pacientes (nombre, apellido), clinica (nombre), piezas (tipo)"
+        "id, fecha_envio, fecha_entrega, estado, pacientes (nombre, apellido), nombre_clinica, piezas (tipo)"
       )
-      .neq("estado", "BORRADOR")
+      .not("estado", "in", "(BORRADOR,PENDIENTE_PAGO,ANULADO,DEVUELTO,RECIBIDO)")
       .order("fecha_envio", { ascending: false })
 
     if (trabajosError) throw trabajosError
@@ -122,7 +117,7 @@ export async function GET() {
       return {
         id: t.id,
         patient: patientName || "-",
-        clinic: t.clinica?.nombre ?? "-",
+        centroMedico: t.centro_medico ?? "-",
         createdAt: formatDate(t.fecha_envio),
         dueDate: formatDate(t.fecha_entrega),
         pieces: piezas.length,

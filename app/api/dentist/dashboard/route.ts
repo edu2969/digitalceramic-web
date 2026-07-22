@@ -31,6 +31,8 @@ const TYPE_LABEL: Record<string, string> = {
   INLAY: "Inlay",
   ONLAY: "Onlay",
   CARILLA: "Carilla",
+  PONTICO: "Póntico",
+  CANTILEVER: "Cantilever"
 }
 
 function formatDate(iso: string | null): string {
