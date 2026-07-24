@@ -1,8 +1,9 @@
 // app/api/trabajos/confirmar/route.ts
 import { NextResponse } from "next/server";
 import { createClient as createSessionClient } from "@/lib/supabase/server";
-import { validateTrabajo } from "@/lib/orders/validateTrabajo";
+import { TrabajoCompleto, validateTrabajo } from "@/lib/orders/validateTrabajo";
 import { calcularMontoTotal } from "@/lib/calculos";
+import { sendOrdenReceptionMail } from "@/lib/orders/sendOrdenReceptionMail";
 
 export const runtime = "nodejs";
 
@@ -118,7 +119,129 @@ export async function POST(req: Request) {
         }
 
         // 5. Actualizar el objeto de validación para el email
-        validation.trabajo.estado = "PENDIENTE_PAGO";        
+        validation.trabajo.estado = "PENDIENTE_PAGO";
+
+
+        // 1. Verificar que el trabajo existe y pertenece al usuario
+                const { data: trabajo, error: trabajoError } = await supabase
+                    .from("trabajos")
+                    .select(`
+                        id, 
+                        estado, 
+                        url_superior, 
+                        url_inferior, 
+                        url_mordida, 
+                        url_gingival, 
+                        archivo_superior, 
+                        archivo_inferior, 
+                        archivo_mordida, 
+                        archivo_gingival, 
+                        notas, 
+                        enviado_por,
+                        monto,
+                        nombre_clinica, 
+                        direccion_despacho,
+                        paciente:paciente_id (
+                            id, 
+                            nombre, 
+                            apellido, 
+                            fecha_nacimiento
+                        ),
+                        profile:profile_id (
+                            id, 
+                            nombre, 
+                            apellido
+                        )
+                    `)
+                    .eq("id", trabajoId)
+                    .single();
+        
+                if (trabajoError || !trabajo) {
+                    console.log("Error", trabajoError, trabajo)
+                    return bad("Trabajo no encontrado", 404);
+                }
+        
+                // 3. Calcular fechas (si no existen)
+                const ahora = new Date();
+                const fechaEnvio = ahora.toISOString().split('T')[0];
+                const fechaEntregaCalc = new Date(ahora);
+                fechaEntregaCalc.setDate(fechaEntregaCalc.getDate() + 7);
+                const fechaEntrega = fechaEntregaCalc.toISOString().split('T')[0];                
+
+                const { data: piezas, error: errorPiezas } = await supabase
+                    .from("piezas")
+                    .select("id, trabajo_id, numero, paleta, colores, tipo, tibase_cementado, tibase_plataforma, tibase_gingival, conexion")
+                    .eq("trabajo_id", trabajo.id);
+        
+                if (!piezas || errorPiezas) {
+                    console.log("Error al obtener piezas: ", errorPiezas);
+                    return bad("Error al obtener las piezas", 500);
+                }
+        
+                const pacienteData = Array.isArray(trabajo.paciente)
+                    ? trabajo.paciente[0]
+                    : trabajo.paciente;
+        
+                const profileData = Array.isArray(trabajo.profile)
+                    ? trabajo.profile[0]
+                    : trabajo.profile;
+        
+                // ✅ Construir payload con los datos correctos
+                const payload: TrabajoCompleto = {
+                    id: trabajo.id,
+                    estado: trabajo.estado,
+                    fecha_envio: fechaEnvio || null,
+                    fecha_entrega: fechaEntrega || null,
+                    url_superior: trabajo.url_superior || null,
+                    url_inferior: trabajo.url_inferior || null,
+                    url_mordida: trabajo.url_mordida || null,
+                    url_gingival: trabajo.url_gingival || null,
+                    archivo_superior: trabajo.archivo_superior || null,
+                    archivo_inferior: trabajo.archivo_inferior || null,
+                    archivo_mordida: trabajo.archivo_mordida || null,
+                    archivo_gingival: trabajo.archivo_gingival || null,
+                    notas: trabajo.notas || null,
+                    monto: trabajo.monto || 0,
+                    enviado_por: trabajo.enviado_por || null,
+                    centro_medico: trabajo.nombre_clinica,
+                    direccion_despacho: trabajo.direccion_despacho,
+        
+                    paciente: pacienteData ? {
+                        id: pacienteData.id,
+                        nombre: pacienteData.nombre || null,
+                        apellido: pacienteData.apellido || null,
+                        fecha_nacimiento: pacienteData.fecha_nacimiento || null,
+                    } : null,
+        
+                    profile: profileData ? {
+                        id: profileData.id,
+                        nombre: profileData.nombre || null,
+                        apellido: profileData.apellido || null
+                    } : null,
+        
+                    piezas: (piezas || []).map((pieza: any) => ({
+                        id: pieza.id,
+                        numero: pieza.numero || null,
+                        tipo: pieza.tipo || null,
+                        paleta: pieza.paleta || null,
+                        colores: pieza.colores || null,
+                        tibase_cementado: pieza.tibase_cementado || null,
+                        tibase_plataforma: pieza.tibase_plataforma || null,
+                        tibase_gingival: pieza.tibase_gingival || null,
+                        conexion: pieza.conexion || null,
+                    })),
+                };
+
+        const senderEmail = user.email || "";
+        
+        try {
+            console.log("SENDER", senderEmail);
+            console.log("HTML", payload)
+            await sendOrdenReceptionMail(senderEmail, payload);
+        } catch (error) {
+            console.error("Error enviando correo:", error);
+            // No fallamos la operación si el correo falla
+        }
 
         return NextResponse.json({
             success: true,

@@ -81,6 +81,8 @@ export default function Dashboard() {
   const works = data?.works ?? []
   const stats = data?.stats
 
+  console.log("WORKS", works);
+
   const handleClickWork = (workId: string) => {
     router.push(`/caso/${workId}`)
   }

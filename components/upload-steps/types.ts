@@ -29,6 +29,9 @@ export const PIECE_TYPE_OPTIONS: { value: Exclude<PiezaType, "">; label: string 
 
 export function materialForPieceType(type: PiezaType): string {
   if (!type) return ""
+  if(type === "CANTILEVER" || type === "PONTICO") {
+    return "Zirconia / Disilicato"
+  }
   return type === "CORONA_IMPLANTE" ? "Zirconia" : "Disilicato"
 }
 

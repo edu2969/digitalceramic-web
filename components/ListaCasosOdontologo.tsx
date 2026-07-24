@@ -1,5 +1,6 @@
 "use client"
 
+import { useState } from "react"
 import { useQuery } from "@tanstack/react-query"
 import { useRouter } from "next/navigation"
 import { FiUpload } from "react-icons/fi"
@@ -7,6 +8,7 @@ import { FiUpload } from "react-icons/fi"
 import { Estado, ESTADO_LABEL, ESTADO_BADGE } from "@/lib/estado"
 import { FaEdit } from "react-icons/fa"
 import { getFdiForGridIndex } from "./upload-steps/types"
+import DatosTransferenciaModal from "./modals/DatosTransferenciaModal"
 
 interface DentistWorkPiece {
   tooth: number
@@ -40,6 +42,7 @@ async function fetchDashboard(): Promise<DentistDashboardResponse> {
 
 export default function DentistDashboard() {
   const router = useRouter()
+  const [showDatosTransferenciaModal, setShowDatosTransferenciaModal] = useState(false);
   const { data, isLoading, isError } = useQuery<DentistDashboardResponse>({
     queryKey: ["dentist-dashboard"],
     queryFn: fetchDashboard,
@@ -56,8 +59,6 @@ export default function DentistDashboard() {
 
     const result = await response.json();
 
-    console.log("RESUTL", result);
-
     if (result.ok) {
       router.push(`/nuevo-caso/${result.id}`);
     } else {
@@ -72,6 +73,17 @@ export default function DentistDashboard() {
     e.preventDefault();
     router.push(`/nuevo-caso/${id}`);
   };
+
+  const handleClickEstado = (
+    e: React.MouseEvent<HTMLButtonElement>
+  ) => {
+    e.preventDefault();    
+    setShowDatosTransferenciaModal(true);
+  }
+
+  const onClose = () => {
+    setShowDatosTransferenciaModal(false);
+  }
 
   return (
     <div className="min-h-screen bg-[#F5F7FA] p-6">
@@ -220,10 +232,16 @@ export default function DentistDashboard() {
                       <span
                         className={`inline-flex items-center space-x-4`}
                       >
-                        <span className={` px-2 py-1 rounded-lg border text-xs font-bold ${ESTADO_BADGE[work.estado]}`}>
+                        <button className={` px-2 py-1 rounded-lg border text-xs font-bold ${ESTADO_BADGE[work.estado]} ${work.estado === 'PENDIENTE_PAGO' ? 'cursor-help' : 'cursor-default'}`}
+                          onClick={(e) => {
+                            if(work.estado === "PENDIENTE_PAGO") {
+                              e.stopPropagation();
+                              handleClickEstado(e);
+                            }                            
+                          }}>
                           {ESTADO_LABEL[work.estado]}
-                        </span>
-                        {work.estado === "BORRADOR" && <button className={`inline-flex items-center bg-[#1C4880] text-white font-semibold px-2 py-1 rounded-lg border text-xs`}
+                        </button>
+                        {work.estado === "BORRADOR" && <button className={`inline-flex items-center bg-[#1C4880] text-white font-semibold px-2 py-1 rounded-lg border text-xs cursor-pointer`}
                         onClick={(e) => handleEditWork(e, work.id)}>
                           <FaEdit size={25} />&nbsp;<span>Editar</span>
                         </button>}
@@ -236,6 +254,8 @@ export default function DentistDashboard() {
           </div>
         </div>
       </div>
+
+      <DatosTransferenciaModal show={showDatosTransferenciaModal} onClose={onClose} />
     </div>
   )
 }

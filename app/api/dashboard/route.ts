@@ -53,7 +53,7 @@ type TrabajoRow = {
   fecha_entrega: string | null
   estado: string | null
   pacientes: { nombre: string | null; apellido: string | null } | null
-  centro_medico: string | null
+  nombre_clinica: string | null
   piezas: { tipo: string | null }[] | null
 }
 
@@ -117,7 +117,7 @@ export async function GET() {
       return {
         id: t.id,
         patient: patientName || "-",
-        centroMedico: t.centro_medico ?? "-",
+        centroMedico: t.nombre_clinica ?? "-",
         createdAt: formatDate(t.fecha_envio),
         dueDate: formatDate(t.fecha_entrega),
         pieces: piezas.length,
