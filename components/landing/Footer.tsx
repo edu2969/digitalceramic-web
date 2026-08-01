@@ -6,6 +6,7 @@ import { MdEmail } from "react-icons/md";
 import { useRouter } from "next/navigation";
 import { useSectionNav } from "@/app/hooks/useSectionNav";
 import { useEffect, useState } from "react";
+import { segoePR } from '@/app/fonts'
 
 export default function Footer() {
   const [scrolled, setScrolled] = useState(false);
@@ -30,13 +31,27 @@ export default function Footer() {
     <div className="w-full grid grid-cols-2 sm:grid-cols-3 md:grid-cols-2 xl:grid-cols-5 gap-6 mb-4 px-6">
       <div className="col-span-2 sm:col-span-3 md:col-span-2 md:border-r-2 md:border-white/10">
         <div className="text-left">
-          <div className="flex items-center">
-            <Image src="/logo_02.png" width={509} height={507} className="w-16 h-auto" alt="logo footer 2"/>
-            <div className="ml-4">
-              <p className="font-bold text-2xl sm:text-3xl">DigitalCeramic</p>
-              <p className="text-[#1F9CE7]">ODONTOLOGÍA DIGITAL</p>
-            </div>
-          </div>
+          <button className="flex items-center gap-2 md:gap-3 shrink-0" onClick={handleGoToInicio}>
+              <div className="relative w-14 h-14 md:w-16 md:h-16 transition-all duration-300 shrink-0">
+                  <Image
+                      src="/logo_02.png"
+                      alt="Digital Ceramic"
+                      fill
+                      priority
+                      sizes="64px"
+                      className="object-contain"
+                  />
+              </div>
+              <div className="min-w-0">
+                  <div className={`hidden sm:flex text-xl md:text-2xl font-bold transition-all duration-300 ${scrolled ? 'opacity-100' : 'opacity-100'}`}>
+                      <span className="text-white">Digital</span>
+                      <span className="text-[#1D98EC]">Ceramic</span>
+                  </div>
+                  <div className={`hidden sm:flex ${segoePR.className} text-white text-[11px] sm:text-sm whitespace-nowrap`}>
+                      simplemente odontología digital
+                  </div>
+              </div>
+          </button>
         </div>
       </div>
       <div className="md:border-r-2 md:border-white/10">
