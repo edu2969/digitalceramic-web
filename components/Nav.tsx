@@ -36,7 +36,7 @@ export default function Nav() {
             <section id="inicio" className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
                 <div className="flex items-center justify-between h-16 md:h-20 transition-all duration-300">
                     {/* Logo */}
-                    <Link href="/#inicio" className="flex items-center gap-2 md:gap-3 shrink-0" onClick={handleNavClick}>
+                    <button className="flex items-center gap-2 md:gap-3 shrink-0" onClick={handleGoToInicio}>
                         <div className="relative w-14 h-14 md:w-16 md:h-16 transition-all duration-300 shrink-0">
                             <Image
                                 src="/logo_02.png"
@@ -56,7 +56,7 @@ export default function Nav() {
                                 simplemente odontología digital
                             </div>
                         </div>
-                    </Link>
+                    </button>
 
                     {/* Menú Desktop */}
                     <nav className="hidden lg:flex items-center gap-1 xl:gap-2">
