@@ -49,7 +49,7 @@ export default function Hero() {
       Entra en la era digital de forma simple y rentable.
     </p>
     <p>
-      Bos dental de primer nivel, escáner intraoral, soporte técnico especializado, diseño CAD/CAM
+      Box dental de primer nivel, escáner intraoral, soporte técnico especializado, diseño CAD/CAM
       y coronas digitales de alta precisión. Todo lo que necesitas para ofrecer una experiencia 100% digital a tus pacientes.
     </p>    
     <p className="mt-2 text-sm md:text-base text-gray-100 max-w-xl">

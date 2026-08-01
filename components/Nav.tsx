@@ -47,12 +47,12 @@ export default function Nav() {
                                 className="object-contain"
                             />
                         </div>
-                        <div className="min-w-0">
-                            <div className={`hidden sm:flex text-xl md:text-2xl font-bold transition-all duration-300 ${scrolled ? 'opacity-100' : 'opacity-100'}`}>
+                        <div className="min-w-0 text-left">
+                            <div className={`sm:flex text-xl md:text-2xl font-bold transition-all duration-300 ${scrolled ? 'opacity-100' : 'opacity-100'}`}>
                                 <span className="text-white">Digital</span>
                                 <span className="text-[#1D98EC]">Ceramic</span>
                             </div>
-                            <div className={`hidden sm:flex ${segoePR.className} text-white text-[11px] sm:text-sm whitespace-nowrap`}>
+                            <div className={`sm:flex ${segoePR.className} text-white text-[11px] sm:text-sm whitespace-nowrap`}>
                                 simplemente odontología digital
                             </div>
                         </div>
