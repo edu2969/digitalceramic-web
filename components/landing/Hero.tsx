@@ -7,7 +7,7 @@ export default function Hero() {
   const router = useRouter();
   return (
     <section
-  className="relative mt-20 md:mt-24 flex items-center overflow-hidden bg-[#000A13] text-white z-0 min-h-[500px] md:h-[calc(100vh/2)]"
+  className="relative mt-20 md:mt-24 flex items-center overflow-hidden bg-[#000A13] text-white z-0 min-h-125 md:h-[50vh]"
 >
   {/* Contenedor de la imagen - desktop: mitad derecha, móvil: fondo completo */}
   <div className="absolute inset-0 md:inset-y-0 md:left-1/2 md:right-0">
@@ -37,20 +37,26 @@ export default function Hero() {
 
   {/* Contenido textual */}
   <div className="relative z-20 w-full px-6 md:ml-12 md:max-w-1/2 text-left py-8">
-    <div className="flex text-3xl md:text-5xl font-bold">
-      <p>Digital</p>
-      <p className="text-[#1F9CE7] ml-2">Ceramic</p>
+    <div className="flex flex-wrap text-3xl md:text-5xl font-bold space-x-2">
+      <p>Odontología</p>
+      <p className="text-[#1F9CE7]">Digital</p>      
+      <p>a tu <span className="text-[#1F9CE7]">alcance</span></p>      
     </div>
+
+    <div className="h-0.5 w-24 bg-[#1F9CE7] my-4"></div>
     
-    <p className="mt-4 text-lg md:text-2xl font-bold leading-tight">
-      Coronas digitales de alta precisión,&nbsp;
-      <span className="text-[#1F9CE7]">hasta 30% más baratas</span> - sin invertir en escáner
+    <p>
+      Entra en la era digital de forma simple y rentable.
     </p>
-    
+    <p>
+      Bos dental de primer nivel, escáner intraoral, soporte técnico especializado, diseño CAD/CAM
+      y coronas digitales de alta precisión. Todo lo que necesitas para ofrecer una experiencia 100% digital a tus pacientes.
+    </p>    
     <p className="mt-2 text-sm md:text-base text-gray-100 max-w-xl">
-      Escaneo intraoral, diseño CAD/CAM y fabricación con flujo 100% digital. Únete al Club Digital Ceramic y fija precios protegidos desde tu primera corona.
+      Descubre los beneficios exclusivos de
+      <br/>
+      <span className="text-[#1F9CE7]">DigitalCeramic Pro.</span>
     </p>
-    
     <div className="mt-6 md:mt-8 flex gap-4 flex-wrap">
       <button
         className="flex bg-linear-to-b from-[#7C31CF] to-[#731BD1] px-8 md:px-10 py-3 md:py-4 rounded-lg font-semibold hover:opacity-90 transition-opacity"
@@ -65,17 +71,13 @@ export default function Hero() {
           });
         }}
       >
-        <p className="text-base md:text-lg">Ver beneficios del club</p>
-      </button>
-      
-      <button className="flex font-bold bg-[#22B35E] px-6 md:px-8 py-3 md:py-4 rounded-lg hover:opacity-90 transition-opacity gap-3 items-center">
-        <span>Escribenos por WhatsApp</span>
+        <p className="text-base md:text-lg">Crear mi cuenta gratuita</p>
       </button>
     </div>
   </div>
 
   {/* Línea decorativa inferior */}
-  <div className="absolute bottom-0 left-0 right-0 h-[2px] bg-linear-to-r from-[#1F9CE7]/20 via-[#1F9CE7]/50 to-transparent" />
+  <div className="absolute bottom-0 left-0 right-0 h-0.5 bg-linear-to-r from-[#1F9CE7]/20 via-[#1F9CE7]/50 to-transparent" />
 </section>
   );
 }

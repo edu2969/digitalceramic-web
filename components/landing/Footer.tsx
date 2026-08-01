@@ -4,9 +4,28 @@ import Image from "next/image";
 import { BsFillGeoAltFill } from "react-icons/bs";
 import { MdEmail } from "react-icons/md";
 import { useRouter } from "next/navigation";
+import { useSectionNav } from "@/app/hooks/useSectionNav";
+import { useEffect, useState } from "react";
 
 export default function Footer() {
+  const [scrolled, setScrolled] = useState(false);
   const router = useRouter();
+  const { goToInicio, scrollToSection } = useSectionNav();
+
+    useEffect(() => {
+        const onScroll = () => setScrolled(window.scrollY > 9);
+        window.addEventListener("scroll", onScroll);
+        return () => window.removeEventListener("scroll", onScroll);
+    }, []);
+
+    const handleGoToInicio = () => {
+        goToInicio();
+    };
+
+    const handleScrollToSection = (id: string) => {
+        scrollToSection(id);
+    };
+
   return (<footer className="bg-linear-to-br from-[#031529] to-[#020E29] text-white py-4 text-left">
     <div className="w-full grid grid-cols-2 sm:grid-cols-3 md:grid-cols-2 xl:grid-cols-5 gap-6 mb-4 px-6">
       <div className="col-span-2 sm:col-span-3 md:col-span-2 md:border-r-2 md:border-white/10">
@@ -22,11 +41,11 @@ export default function Footer() {
       </div>
       <div className="md:border-r-2 md:border-white/10">
         <p className="font-semibold text-md">Enlaces rápidos</p>
-        <div className="w-fit text-xs border-b border-transparent hover:border-[#1F9CE7] cursor-pointer" onClick={() => { router.push('/') }}>Inicio</div>
-        <div className="w-fit text-xs border-b border-transparent hover:border-[#1F9CE7] cursor-pointer" onClick={() => { router.push('/') }}>Club de Beneficios</div>
-        <div className="w-fit text-xs border-b border-transparent hover:border-[#1F9CE7] cursor-pointer" onClick={() => { router.push('/') }}>Servicios</div>
-        <div className="w-fit text-xs border-b border-transparent hover:border-[#1F9CE7] cursor-pointer" onClick={() => { router.push('/') }}>Casos clínicos</div>
-        <div className="w-fit text-xs border-b border-transparent hover:border-[#1F9CE7] cursor-pointer" onClick={() => { router.push('/contact') }}>Contacto</div>
+        <div className="w-fit text-xs border-b border-transparent hover:border-[#1F9CE7] cursor-pointer" onClick={handleGoToInicio}>Inicio</div>
+        <div className="w-fit text-xs border-b border-transparent hover:border-[#1F9CE7] cursor-pointer" onClick={() => handleScrollToSection('club')}>Club de Beneficios</div>
+        <div className="w-fit text-xs border-b border-transparent hover:border-[#1F9CE7] cursor-pointer" onClick={() => handleScrollToSection('servicios')}>Servicios</div>
+        <div className="w-fit text-xs border-b border-transparent hover:border-[#1F9CE7] cursor-pointer" onClick={() => { router.push('/somos') }}>Quienes somos</div>
+        <div className="w-fit text-xs border-b border-transparent hover:border-[#1F9CE7] cursor-pointer" onClick={() => { router.push('/contacto') }}>Contacto</div>
       </div>
       <div className="md:border-r-2 md:border-white/10">
         <p className="font-semibold text-md">Contáctenos</p>

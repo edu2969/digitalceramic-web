@@ -48,13 +48,13 @@ function ExplosiveDigit({
   if (!isChanging) {
     return (
       <span className="inline-block min-w-[0.5em] text-center relative">
-        <span className="block">{digit}</span>
+        <span className="block text-4xl">{digit}</span>
       </span>
     );
   }
 
   return (
-    <div className="inline-block min-w-[0.5em] text-center relative">
+    <div className="inline-block min-w-[0.5em] text-center relative text-4xl">
       <AnimatePresence mode="wait">
         <motion.span
           key={digit}
@@ -78,7 +78,7 @@ function ExplosiveDigit({
             filter: "blur(8px)"
           }}
           transition={{
-            duration: 0.5,
+            duration: 0.2,
             delay: index * 0.04,
             ease: [0.34, 1.56, 0.64, 1],
           }}
@@ -128,7 +128,7 @@ function AnimatedNumber({
   const currentDigits = display.split("");
 
   return (
-    <div className={`relative overflow-hidden h-[1.2em] ${className}`}>
+    <div className={`relative overflow-hidden min-w-12 ${className}`}>
       <div className="flex justify-center items-center h-full gap-[0.02em]">
         {currentDigits.map((digit, index) => {
           const isChanging = changingDigits[index] || false;
@@ -175,49 +175,35 @@ function TimeCard({
       }}
     >
       {/* Efecto de resplandor de fondo */}
-      <div className="absolute -inset-4 bg-linear-to-r from-yellow-500/5 via-transparent to-yellow-500/5 rounded-3xl blur-2xl group-hover:from-yellow-500/10 group-hover:to-yellow-500/10 transition-all duration-700" />
+      <div className="absolute transition-all duration-700" />
 
       <div
         className={`
           relative
-          rounded-lg
+          rounded-xl
           border-2
-          ${urgency 
-            ? 'border-yellow-400/30 hover:border-yellow-400/60' 
-            : 'border-white/15 hover:border-white/30'
-          }
-          bg-linear-to-br 
-          ${urgency 
-            ? 'from-yellow-500/10 to-yellow-500/5' 
-            : 'from-white/5 to-white/10'
-          }
-          backdrop-blur-xl
-          px-1
-          py-2
-          shadow-2xl
-          hover:shadow-[0_20px_70px_-15px_rgba(234,179,8,0.3)]
-          hover:scale-105
+          border-[#1F2035]/10
+          px-2
+          py-3
+          shadow-sm
           transition-all
           duration-500
           flex
           justify-center
+          items-center
           overflow-hidden
+          h-16
         `}
       >
-        {/* Efecto de brillo deslizante */}
-        <div className="absolute inset-0 bg-linear-to-r from-transparent via-white/5 to-transparent -translate-x-full group-hover:translate-x-full transition-transform duration-1000" />
-
+        
         <AnimatedNumber
           value={value}
           pad={pad}
-          className={`text-3xl md:text-lg font-black tabular-nums leading-none ${
+          className={`text-4xl md:text-lg leading-none ${
             className ?? "text-white"
           }`}
           urgency={urgency}
-        />
-        
-        {/* Borde con gradiente animado */}
-        <div className={`absolute inset-0 rounded-2xl bg-linear-to-r from-transparent via-${urgency ? 'yellow-400/20' : 'white/10'} to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500`} />
+        />        
       </div>
 
       <span
@@ -226,11 +212,8 @@ function TimeCard({
           text-xs
           uppercase 
           font-bold 
-          ${urgency ? 'text-yellow-400/90' : 'text-white/70'}
-          transition-all 
+          text-[#4812D0] 
           duration-300 
-          group-hover:tracking-[0.4em]
-          group-hover:text-white
         `}
       >
         {label}

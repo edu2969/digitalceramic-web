@@ -90,7 +90,7 @@ export default function Contact() {
 
       <div className="max-w-5xl mx-auto">
 
-        <div className="text-center mb-12">
+        {/*<div className="text-center mb-12">
           <h2 className="text-4xl font-bold text-[#1C4880] mt-8">
             Preguntas Frecuentes
           </h2>
@@ -100,9 +100,9 @@ export default function Contact() {
             Si aún tienes dudas, encontrarás un formulario de contacto al final
             de esta página.
           </p>
-        </div>
+        </div>*/}
 
-        <div className="space-y-4">
+        {/*<div className="space-y-4">
 
           {faqs.map((faq, index) => {
 
@@ -150,9 +150,9 @@ export default function Contact() {
             );
           })}
 
-        </div>
+        </div>*/}
 
-        <div className="mt-16 rounded-2xl bg-[#1C4880] px-10 py-10 text-center text-white shadow-xl">
+        {/*<div className="mt-16 rounded-2xl bg-[#1C4880] px-10 py-10 text-center text-white shadow-xl">
 
           <h3 className="text-3xl font-bold">
             ¿No encontraste la respuesta que buscabas?
@@ -164,7 +164,7 @@ export default function Contact() {
             para encontrar la mejor solución para tu caso.
           </p>
 
-        </div>
+        </div>*/}
 
         <div className="mt-12 max-w-xl mx-auto rounded-2xl bg-white p-8 shadow-xl">
 

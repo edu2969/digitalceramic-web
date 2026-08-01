@@ -1,5 +1,4 @@
 import { NextResponse } from "next/server"
-import { createClient } from "@supabase/supabase-js"
 import { createClient as createSessionClient } from "@/lib/supabase/server"
 import { Estado, isEstado } from "@/lib/estado"
 

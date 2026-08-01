@@ -29,6 +29,6 @@
     ".next/types/**/*.ts",
     ".next/dev/types/**/*.ts",
     "**/*.mts", 
-    "app/api/upload-case/route.ts", "components/Nav.jsx"  ],
+    "app/api/upload-case/route.ts", "taylwind.config.js"  ],
   "exclude": ["node_modules"]
 }

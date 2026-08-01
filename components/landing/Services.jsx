@@ -15,9 +15,9 @@ export default function Services() {
       <div>
         <div className="w-full grid grid-cols-2 sm:grid-cols-3 md:col-span-3 gap-4">
           <div className="text-center col-span-2 sm:col-span-3">
-            <h2 className="text-2xl sm:text-3xl font-bold">SOLUCIONES DIGITALES</h2>
+            <h2 className="text-2xl sm:text-3xl">NUESTROS <b>SERVICIOS</b> DIGITALES</h2>
             <p className="text-base sm:text-lg">
-              Todo lo que necesitas para trabajar digital
+              Todo lo que necesitas para trabajar de forma digital
             </p>
           </div>
         </div>
