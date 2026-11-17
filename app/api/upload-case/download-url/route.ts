@@ -1,13 +1,13 @@
 import { NextResponse } from "next/server";
 import { createClient } from "@supabase/supabase-js";
 import { createClient as createSessionClient } from "@/lib/supabase/server";
+import { getStorageObjectPath } from "@/lib/orders/storagePath";
 
 export const runtime = "nodejs";
 
 type DownloadUrlRequest = {
   path?: string;
-  bucket?: string;
-  ttlSeconds?: number;
+  trabajoId?: string;
 };
 
 export async function POST(req: Request) {
@@ -27,12 +27,35 @@ export async function POST(req: Request) {
     return NextResponse.json({ error: "Body inválido" }, { status: 400 });
   }
 
-  const bucket = body.bucket ?? process.env.SUPABASE_BUCKET;
+  const bucket = process.env.SUPABASE_BUCKET;
   const path = body.path?.trim();
-  const ttlSeconds = body.ttlSeconds ?? 60 * 60 * 24 * 7;
 
-  if (!bucket || !path) {
+  if (!bucket || !path || !body.trabajoId) {
     return NextResponse.json({ error: "Faltan datos para firmar la descarga" }, { status: 400 });
+  }
+  if (!path.startsWith("orders/")) {
+    return NextResponse.json({ error: "Ruta de archivo inválida" }, { status: 400 });
+  }
+
+  const { data: trabajo, error: trabajoError } = await sessionClient
+    .from("trabajos")
+    .select("url_superior, url_inferior, url_mordida, url_gingival")
+    .eq("id", body.trabajoId)
+    .maybeSingle();
+
+  if (trabajoError) {
+    console.error("[upload-case/download-url] error consultando trabajo:", trabajoError);
+    return NextResponse.json({ error: "No se pudo validar el trabajo" }, { status: 500 });
+  }
+  if (!trabajo) {
+    return NextResponse.json({ error: "Trabajo no encontrado" }, { status: 404 });
+  }
+
+  const authorizedPaths = Object.values(trabajo)
+    .map((value) => getStorageObjectPath(value, bucket))
+    .filter((value): value is string => value !== null);
+  if (!authorizedPaths.includes(path)) {
+    return NextResponse.json({ error: "No autorizado para descargar este archivo" }, { status: 403 });
   }
 
   const supabaseAdmin = createClient(
@@ -42,7 +65,7 @@ export async function POST(req: Request) {
 
   const { data, error } = await supabaseAdmin.storage
     .from(bucket)
-    .createSignedUrl(path, ttlSeconds);
+    .createSignedUrl(path, 60 * 60);
 
   if (error || !data?.signedUrl) {
     return NextResponse.json(

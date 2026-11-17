@@ -368,25 +368,10 @@ function FileSlot({ slot }: { slot: Slot }) {
         xhr.send(next)
       })
 
-      // Obtener URL de descarga
-      const downloadRes = await fetch("/api/upload-case/download-url", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          path: target.path,
-          bucket: signed.bucket,
-        }),
-      })
-
-      const downloadJson = await downloadRes.json().catch(() => ({})) as { signedUrl?: string }
-      if (!downloadRes.ok || !downloadJson.signedUrl) {
-        throw new Error("No se pudo obtener la URL de descarga")
-      }
-
       complete()
       setValue(slot.name, next, { shouldDirty: true, shouldValidate: true })
-      setValue(SLOT_TO_FORM_URL_FIELD[slot.name], downloadJson.signedUrl, { shouldDirty: true, shouldValidate: true })
-      saveField(SLOT_TO_URL_FIELD[slot.name], downloadJson.signedUrl)
+      setValue(SLOT_TO_FORM_URL_FIELD[slot.name], target.path, { shouldDirty: true, shouldValidate: true })
+      saveField(SLOT_TO_URL_FIELD[slot.name], target.path)
       saveField(SLOT_TO_PATH_FIELD[slot.name], next.name)
 
       setValue(

@@ -7,7 +7,7 @@ import { createClient as createSessionClient } from "@/lib/supabase/server";
 export const runtime = "nodejs";
 
 const TRABAJO_MONTO_DEFAULT = 79990;
-const DOWNLOAD_URL_TTL_SECONDS = 60 * 60 * 24 * 7;
+const DOWNLOAD_URL_TTL_SECONDS = 60 * 60;
 
 const supabase = createClient(
   process.env.NEXT_PUBLIC_SUPABASE_URL!,
@@ -295,10 +295,10 @@ export async function POST(req: Request) {
       fecha_entrega: patientInfo.deliveryDate,
       monto: TRABAJO_MONTO_DEFAULT,
       notas: notes,
-      url_superior: upSuperior,
-      url_inferior: upInferior,
-      url_mordida: upMordida,
-      url_gingival: upGingival,
+      url_superior: paths.fileSuperior,
+      url_inferior: paths.fileInferior,
+      url_mordida: paths.fileMordida,
+      url_gingival: paths.fileGingival,
     };
 
     let trabajoIdFinal: string;

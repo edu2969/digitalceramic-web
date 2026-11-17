@@ -1,10 +1,11 @@
 import { Resend } from "resend";
 import type { TrabajoCompleto } from "./validateTrabajo";
 import { createClient as createSessionClient } from "@/lib/supabase/server"
+import { getStorageObjectPath } from "./storagePath"
 
 const resend = new Resend(process.env.RESEND_APIKEY);
 
-const DOWNLOAD_URL_TTL_SECONDS = 60 * 60 * 24 * 7;
+const DOWNLOAD_URL_TTL_SECONDS = 60 * 60;
 
 const TYPE_LABELS: Record<string, string> = {
   INLAY: "Inlay",
@@ -28,12 +29,15 @@ const MATERIAL_BY_TYPE: Record<string, string> = {
 
 async function sign(path: string | null) {
   if (!path) return null;
+  const bucket = process.env.SUPABASE_BUCKET
+  const objectPath = bucket ? getStorageObjectPath(path, bucket) : null
+  if (!bucket || !objectPath) return null
 
   const supabase = await createSessionClient();
 
   const { data, error } = await supabase.storage
-    .from(process.env.SUPABASE_BUCKET!)
-    .createSignedUrl(path, DOWNLOAD_URL_TTL_SECONDS);
+    .from(bucket)
+    .createSignedUrl(objectPath, DOWNLOAD_URL_TTL_SECONDS);
 
   if (error || !data) {
     return null;

@@ -1,9 +1,17 @@
 import { NextResponse } from "next/server"
+import { createClient } from "@supabase/supabase-js"
 import { createClient as createSessionClient } from "@/lib/supabase/server"
 import { Estado, isEstado } from "@/lib/estado"
 import { PRECIOS } from "@/lib/calculos"
+import { getStorageObjectPath } from "@/lib/orders/storagePath"
 
 export const runtime = "nodejs"
+
+const supabaseAdmin = createClient(
+  process.env.NEXT_PUBLIC_SUPABASE_URL!,
+  process.env.SUPABASE_SERVICE_ROLE_KEY!
+)
+const DOWNLOAD_URL_TTL_SECONDS = 60 * 60
 
 const MONTHS_ES_LONG = [
   "Enero",
@@ -280,12 +288,32 @@ export async function GET(
       }
     })
 
-    const files = [
-      { name: "Superior", href: trabajo.url_superior, path: trabajo.archivo_superior },
-      { name: "Inferior", href: trabajo.url_inferior, path: trabajo.archivo_inferior },
-      { name: "Mordida", href: trabajo.url_mordida, path: trabajo.archivo_mordida },
-      { name: "Gingival", href: trabajo.url_gingival, path: trabajo.archivo_gingival },
-    ].filter((f): f is { name: string; href: string; path: string | null } => !!f.href)
+    const bucket = process.env.SUPABASE_BUCKET
+    const storedFiles = [
+      { name: "Superior", value: trabajo.url_superior },
+      { name: "Inferior", value: trabajo.url_inferior },
+      { name: "Mordida", value: trabajo.url_mordida },
+      { name: "Gingival", value: trabajo.url_gingival },
+    ].filter((file) => file.value)
+    if (storedFiles.length > 0 && !bucket) {
+      throw new Error("SUPABASE_BUCKET no está configurado")
+    }
+
+    const files = await Promise.all(
+      storedFiles.map(async ({ name, value }) => {
+        if (!bucket) throw new Error("SUPABASE_BUCKET no está configurado")
+        const path = getStorageObjectPath(value, bucket)
+        if (!path) throw new Error(`Ruta de archivo inválida: ${name}`)
+
+        const { data, error } = await supabaseAdmin.storage
+          .from(bucket)
+          .createSignedUrl(path, DOWNLOAD_URL_TTL_SECONDS)
+        if (error || !data?.signedUrl) {
+          throw error ?? new Error(`No se pudo firmar el archivo ${name}`)
+        }
+        return { name, href: data.signedUrl }
+      })
+    )
 
     const profileName = [
       trabajo.profiles?.nombre,
@@ -307,24 +335,30 @@ export async function GET(
 
     const { data: perfilOdontologo, error: errorPerfilOdontologo } = await supabase
     .from("profiles")
-    .select("id, user_id")
+    .select("id, user_role")
     .eq("user_id", user.id)
-    .single();
+    .maybeSingle();
 
-    if(!perfilOdontologo || errorPerfilOdontologo) {
+    if(errorPerfilOdontologo) {
       console.log("[GET] trabajos/byId", id, perfilOdontologo, errorPerfilOdontologo);
       return NextResponse.json({ ok: false, error: "No se obtuvo el perfil del odontologo"}, { status: 400 })
     }
 
-    const { data: todosLosTrabajos, error: errorTodosLosTrabajos } = await supabase
+    const { data: todosLosTrabajos, error: errorTodosLosTrabajos } = perfilOdontologo?.user_role === "ODONTOLOGO"
+      ? await supabase
     .from("trabajos")
     .select("id")
     .eq("profile_id", perfilOdontologo.id)
-    .neq("id", trabajo.id);
+    .neq("id", trabajo.id)
+      : { data: [], error: null };
 
 let cantidadPiezasHechas = 0;
 
-if (todosLosTrabajos && todosLosTrabajos.length > 0) {
+if (errorTodosLosTrabajos) {
+    throw errorTodosLosTrabajos
+}
+
+if (todosLosTrabajos.length > 0) {
     const { count, error: errorPiezasHechas } = await supabase
         .from("piezas")
         .select("*", { count: 'exact', head: true })
@@ -369,10 +403,10 @@ if (todosLosTrabajos && todosLosTrabajos.length > 0) {
         fecha_entrega: trabajo.fecha_entrega ?? null,
         enviado_por: trabajo.enviado_por ?? null,
         urls: {
-          superior: trabajo.url_superior ?? null,
-          inferior: trabajo.url_inferior ?? null,
-          mordida: trabajo.url_mordida ?? null,
-          gingival: trabajo.url_gingival ?? null,
+          superior: bucket ? getStorageObjectPath(trabajo.url_superior, bucket) : null,
+          inferior: bucket ? getStorageObjectPath(trabajo.url_inferior, bucket) : null,
+          mordida: bucket ? getStorageObjectPath(trabajo.url_mordida, bucket) : null,
+          gingival: bucket ? getStorageObjectPath(trabajo.url_gingival, bucket) : null,
         },
         archivos: {
           superior: trabajo.archivo_superior ?? null,

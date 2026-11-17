@@ -26,6 +26,7 @@ CREATE TABLE public.trabajos (
   monto numeric,
   notas text,
   created_at timestamp with time zone NOT NULL DEFAULT now(),
+  -- These columns store private storage object paths, not expiring signed URLs.
   url_superior text,
   url_inferior text,
   url_mordida text,
